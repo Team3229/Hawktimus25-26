@@ -4,14 +4,16 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class shooterSubsystem extends SubsystemBase {
     public static void flywheelShooter() {
-        //shoot
+        //spin to shoot
 
-        //manual shoot
+        //shoot function
 
-        //passing from neutral shoot (from left and right)
+        //pass from neutral zone
     }
 
     public static void shooterArm() {
-        //angle adjust to hub
+        //auto angle for the hub
+
+        //manual angle control
     }
 }

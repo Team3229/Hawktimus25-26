@@ -15,7 +15,6 @@ import static edu.wpi.first.units.Units.Milliseconds;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -46,7 +45,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.hawklibraries.utilities.Alliance;
 import frc.hawklibraries.utilities.Alliance.AllianceColor;
-import frc.robot.constants.ReefPositions;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.utilities.LimelightHelpers.PoseEstimate;
 
@@ -72,6 +70,8 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
  * drive modes such as field-relative and robot-relative control.
  */
 public class DriveSubsystem extends SubsystemBase {
+
+	//auto align chassis angle with hub
 
 	public static final LinearVelocity MAX_VELOCITY = MetersPerSecond.of(5.0);
 
@@ -128,7 +128,7 @@ public class DriveSubsystem extends SubsystemBase {
 		new Constraints(TRANS_MAX_VEL.in(MetersPerSecond), TRANS_MAX_ACCEL.in(MetersPerSecondPerSecond))
     );
 
-    private ProfiledPIDController RotationPID = new ProfiledPIDController(
+    private ProfiledPIDController rotationPID = new ProfiledPIDController(
 		ROTATION_CONSTANTS.kP,
 		ROTATION_CONSTANTS.kI,
 		ROTATION_CONSTANTS.kD,
@@ -176,13 +176,14 @@ public class DriveSubsystem extends SubsystemBase {
 			e.printStackTrace();
 		}
 		
-		resetOdometry(new Pose2d(2, 4, swerveDrive.getYaw()));00
+		resetOdometry(new Pose2d(2, 4, swerveDrive.getYaw()));
 
 
 		if (RobotBase.isSimulation()) {
 			swerveDrive.field.setRobotPose(new Pose2d(2, 4, new Rotation2d()));
 		}
 //hello!
+//hi
 		swerveDrive.setHeadingCorrection(false);
 		swerveDrive.setCosineCompensator(RobotBase.isReal());
 		swerveDrive.setAngularVelocityCompensation(
@@ -207,10 +208,6 @@ public class DriveSubsystem extends SubsystemBase {
 		SmartDashboard.putData("XPID", xTranslationPID);
 		SmartDashboard.putData("YPID", yTranslationPID);
 		SmartDashboard.putData("RPID", rotationPID);
-
-		for (ReefPositions reef : ReefPositions.values()) {
-			swerveDrive.field.getObject(reef.name()).setPose(reef.getPosition());
-		}
 
 		PathPlannerLogging.setLogActivePathCallback((poses) -> {
 			swerveDrive.field.getObject("Trajectory").setPoses(poses);
@@ -240,12 +237,7 @@ public class DriveSubsystem extends SubsystemBase {
 	 */
 	public void setupPathPlanner() {
 
-		NamedCommands.registerCommand("DriveToLeft",
-			driveToReef(true).withTimeout(1)
-		);
-		NamedCommands.registerCommand("DriveToRight",
-			driveToReef(false).withTimeout(1)
-		);
+
 
 		RobotConfig config;
 
@@ -458,34 +450,6 @@ public class DriveSubsystem extends SubsystemBase {
 
 	public void addVisionReading(Pose2d pose, Time timestamp) {
 		swerveDrive.addVisionMeasurement(pose, timestamp.in(Milliseconds));
-	}
-
-    public Command driveToReef(boolean leftSide) {
-        return 
-
-		runOnce(
-			() -> SmartDashboard.putBoolean("Done Lining Up", false)
-		).andThen(
-		driveToPose(
-			() -> coralZones.findCoralZone(leftSide, getPose())
-		))
-		.andThen(
-			() -> {
-				SmartDashboard.putBoolean("Done Lining Up", true);
-			}
-		);
-    }
-
-	public Command driveToAlgaeZone() {
-		return driveToPose(() -> {
-			return algaeZones.findAlgaeZone(getPose());
-		});
-	}
-
-	public Command driveToPlayerStation() {
-		return driveToPose(() -> {
-			return coralStationPathing.getTargetStation(getPose());
-		});
 	}
 
 	public SwerveInputStream getInputStream(
