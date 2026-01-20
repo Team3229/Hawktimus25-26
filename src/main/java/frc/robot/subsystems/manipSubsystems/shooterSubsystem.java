@@ -24,17 +24,15 @@ public class shooterSubsystem extends SubsystemBase {
     private SparkMaxConfig RSMotorConfig;
 
     private static final Current CURRENT_LIMIT = Amps.of(80);
-    private static final boolean INVERTED = false;
+    private static final boolean INVERTED = true;
 
     public void flywheelShooter() {
-
-        // initializes motor
+        // initializes motors
         leftShooter = new SparkMax(LS_CAN_ID, MotorType.kBrushless);
        
-       
         LSMotorConfig = new SparkMaxConfig();
-        LSMotorConfig.smartCurrentLimit((int) CURRENT_LIMIT.in(Amps));
         
+        LSMotorConfig.smartCurrentLimit((int) CURRENT_LIMIT.in(Amps));
         LSMotorConfig.inverted(!INVERTED);
         LSMotorConfig.idleMode(IdleMode.kBrake);
        
