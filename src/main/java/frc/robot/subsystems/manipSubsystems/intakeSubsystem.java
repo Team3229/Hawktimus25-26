@@ -34,48 +34,4 @@ public class intakeSubsystem extends SubsystemBase {
         // intake push function
 
     }
-
-    private static final int index_CAN_ID = -3;
-    private SparkMax indexMotor;
-    private SparkMaxConfig indexMotorConfig;
-
-    private static final Current CURRENT_LIMIT = Amps.of(80);
-    private static final boolean INVERTED = true;
-
-    private static final double indexSpeed = 0.1;
-
-    public void indexSubsystem() {
-        // initializes motor
-        indexMotor = new SparkMax(index_CAN_ID, MotorType.kBrushless);
-
-        indexMotorConfig = new SparkMaxConfig();
-
-        indexMotorConfig.smartCurrentLimit((int) CURRENT_LIMIT.in(Amps));
-        indexMotorConfig.inverted(!INVERTED);
-        indexMotorConfig.idleMode(IdleMode.kBrake);
-
-        indexMotor.configure(
-            indexMotorConfig,
-            ResetMode.kNoResetSafeParameters,
-            PersistMode.kNoPersistParameters);
-    }
-
-    public Command index() {
-        return new Command() {
-            @Override
-            public void initialize() {
-                System.out.println("Indexing");
-            }
-
-            @Override
-            public void execute() {
-                indexMotor.set(indexSpeed);
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                indexMotor.stopMotor();
-            }
-        };
-    }
 }
