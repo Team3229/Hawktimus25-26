@@ -1,7 +1,24 @@
 package frc.robot.subsystems.manipSubsystems;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
+
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkMaxConfig;
+
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterArmSubsystem extends SubsystemBase {
 
@@ -13,8 +30,9 @@ public class ShooterArmSubsystem extends SubsystemBase {
     private static final int CAN_ID = -1; // Change
     private static final double POSITION_CONVERSION_FACTOR = 2 * Math.PI;
 
-    // Change angle
+    // Change angle(s)
     public static final Angle EXAMPLE_ANGLE = Degrees.of(64);
+    public static final Angle HOME_POSITION = Degrees.of(-90);
 
     private static final double kP = 2.5;
     private static final double kI = 0;
@@ -108,6 +126,6 @@ public class ShooterArmSubsystem extends SubsystemBase {
 
     // example for later
     public double alignToHub(double example) {
-        return example
+        return example;
     }
 }
