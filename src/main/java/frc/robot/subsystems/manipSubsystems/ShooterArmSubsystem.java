@@ -34,7 +34,7 @@ public class ShooterArmSubsystem extends SubsystemBase {
     public static final Angle EXAMPLE_ANGLE = Degrees.of(64);
     public static final Angle HOME_POSITION = Degrees.of(-90);
 
-    private static final double kP = 2.5;
+    private static final double kP = 0;
     private static final double kI = 0;
     private static final double kD = 0;
 

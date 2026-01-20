@@ -14,16 +14,19 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static edu.wpi.first.units.Units.Amps;
 
 public class indexSubsystem extends SubsystemBase {
+    //change ID
     private static final int index_CAN_ID = -3;
     private static SparkMax indexMotor;
     private static SparkMaxConfig indexMotorConfig;
 
+    //change current limit
     private static final Current CURRENT_LIMIT = Amps.of(80);
     private static final boolean INVERTED = true;
 
+    //change indexSpeed
     private static final double indexSpeed = 0.1;
 
-    public static void indexSubsystem() {
+    public indexSubsystem() {
         // initializes motor
         indexMotor = new SparkMax(index_CAN_ID, MotorType.kBrushless);
 

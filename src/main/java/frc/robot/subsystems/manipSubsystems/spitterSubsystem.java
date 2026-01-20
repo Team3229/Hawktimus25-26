@@ -15,18 +15,21 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class spitterSubsystem extends SubsystemBase {
 
+    //change can ID
     private static final int LS_CAN_ID = 0;
     private static SparkMax leftSpitter;
     private static SparkMaxConfig LSMotorConfig;
 
+    //change can ID
     private static final int RS_CAN_ID = -4;
     private SparkMax rightSpitter;
     private SparkMaxConfig RSMotorConfig;
 
+    //change amp limit
     private static final Current CURRENT_LIMIT = Amps.of(80);
     private static final boolean INVERTED = true;
 
-    public void flywheelShooter() {
+    public void spitters() {
         // initializes motors
         leftSpitter = new SparkMax(LS_CAN_ID, MotorType.kBrushless);
 
