@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static edu.wpi.first.units.Units.Amps;
 
-public class indexSubsystem extends SubsystemBase {
+public class IndexSubsystem extends SubsystemBase {
     //change ID
     private static final int index_CAN_ID = -3;
     private static SparkMax indexMotor;
@@ -26,7 +26,10 @@ public class indexSubsystem extends SubsystemBase {
     //change indexSpeed
     private static final double indexSpeed = 0.1;
 
-    public indexSubsystem() {
+    public final int forwards = 1;
+    public final int reverse = -1;
+
+    public IndexSubsystem() {
         // initializes motor
         indexMotor = new SparkMax(index_CAN_ID, MotorType.kBrushless);
 
@@ -42,7 +45,7 @@ public class indexSubsystem extends SubsystemBase {
             PersistMode.kNoPersistParameters);
     }
 
-    public Command index() {
+    public Command index(int speed) {
         return new Command() {
             @Override
             public void initialize() {
@@ -51,7 +54,7 @@ public class indexSubsystem extends SubsystemBase {
 
             @Override
             public void execute() {
-                indexMotor.set(indexSpeed);
+                indexMotor.set(indexSpeed * speed);
             }
 
             @Override

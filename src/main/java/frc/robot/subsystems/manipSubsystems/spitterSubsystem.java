@@ -13,7 +13,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class spitterSubsystem extends SubsystemBase {
+public class SpitterSubsystem extends SubsystemBase {
 
     //change can ID
     private static final int LS_CAN_ID = 0;
@@ -29,7 +29,7 @@ public class spitterSubsystem extends SubsystemBase {
     private static final Current CURRENT_LIMIT = Amps.of(80);
     private static final boolean INVERTED = true;
 
-    public void spitters() {
+    public SpitterSubsystem() {
         // initializes motors
         leftSpitter = new SparkMax(LS_CAN_ID, MotorType.kBrushless);
 
