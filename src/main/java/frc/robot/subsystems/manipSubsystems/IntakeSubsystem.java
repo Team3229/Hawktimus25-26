@@ -91,10 +91,10 @@ public class IntakeSubsystem extends SubsystemBase {
         rodMotorConfig = new TalonFXConfiguration();
 
         feedForward = new ArmFeedforward(
-                0, // TODO: change this
-                0, // TODO: change this
-                0, // TODO: change this
-                0 // TODO: change this
+            0, // TODO: change this
+            0, // TODO: change this
+            0, // TODO: change this
+            0 // TODO: change this
         );
 
         rodMotorConfig.Slot0.kP = (rP);
@@ -142,7 +142,7 @@ public class IntakeSubsystem extends SubsystemBase {
      */
     public Command intake() {
         return Commands.runOnce(
-                () -> rodMotor.set(CW_SPEED) // TODO: Check direction
+            () -> rodMotor.set(CW_SPEED) // TODO: Check direction
         );
     }
 
@@ -152,7 +152,7 @@ public class IntakeSubsystem extends SubsystemBase {
      */
     public Command extake() {
         return Commands.runOnce(
-                () -> rodMotor.set(CCW_SPEED) // TODO: Check direction
+            () -> rodMotor.set(CCW_SPEED) // TODO: Check direction
         );
     }
 
@@ -171,7 +171,9 @@ public class IntakeSubsystem extends SubsystemBase {
      * @return Command to pull arm back
      */
     public Command agitateFuel() {
-        return rotateTo(HOME_ANGLE);
+        return rotateTo(HOME_ANGLE)
+        .andThen(new WaitCommand(0.5))
+        .andThen(rotateTo(COLLECTION_POINT)); //TODO: Should work but will need a controlled test
     }
     
     public StatusSignal<Current> getDraw() {

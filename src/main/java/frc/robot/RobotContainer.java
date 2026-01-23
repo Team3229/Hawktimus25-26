@@ -77,7 +77,7 @@ public class RobotContainer {
 	}
 
 	public void autoInit() {
-		driveSubsystem.zeroGyroWithAlliance();
+		driveSubsystem.zeroGyro();
 	}
 
 	private void configDriveControls() {
