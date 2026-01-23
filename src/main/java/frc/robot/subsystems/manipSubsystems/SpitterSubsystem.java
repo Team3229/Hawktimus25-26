@@ -16,10 +16,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class SpitterSubsystem extends SubsystemBase {
 
-    // change PID (if needed)
-    // private static double kP = 0;
-    // private static double kI = 0;
-    // private static double kD = 0;
+    //change PID (if needed)
+    private static double kP = 0;
+    private static double kI = 0;
+    private static double kD = 0;
 
     // change can ID
     private static final int LS_CAN_ID = 0;
@@ -37,9 +37,9 @@ public class SpitterSubsystem extends SubsystemBase {
     public SpitterSubsystem() {
         // initializes motors
         leftSpitter = new TalonFX(LS_CAN_ID, "Placeholder"); // placeholder name for the canbus
-        // LSMotorConfig.Slot0.kP = (kP);
-        // LSMotorConfig.Slot0.kI = (kI);
-        // LSMotorConfig.Slot0.kD = (kD);
+        LSMotorConfig.Slot0.kP = (kP);
+        LSMotorConfig.Slot0.kI = (kI);
+        LSMotorConfig.Slot0.kD = (kD);
         LSMotorConfig = new TalonFXConfiguration()
             .withMotorOutput(
                 new MotorOutputConfigs()
@@ -54,9 +54,9 @@ public class SpitterSubsystem extends SubsystemBase {
 
 
         rightSpitter = new TalonFX(RS_CAN_ID, "Placeholder"); // placeholder name for the canbus
-        // RSMotorConfig.Slot0.kP = (kP);
-        // RSMotorConfig.Slot0.kI = (kI);
-        // RSMotorConfig.Slot0.kD = (kD);
+        RSMotorConfig.Slot0.kP = (kP);
+        RSMotorConfig.Slot0.kI = (kI);
+        RSMotorConfig.Slot0.kD = (kD);
         RSMotorConfig = new TalonFXConfiguration()
             .withMotorOutput(
                 new MotorOutputConfigs()
