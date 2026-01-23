@@ -21,6 +21,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.manipSubsystems.IntakeSubsystem;
 
 public class IntakeSubsystem extends SubsystemBase {
@@ -63,36 +64,40 @@ public class IntakeSubsystem extends SubsystemBase {
         rodMotorConfig = new SparkMaxConfig();
 
         feedForward = new ArmFeedforward(
-                0, // TODO: change this
-                0, // TODO: change this
-                0, // TODO: change this
-                0 // TODO: change this
+            0, // TODO: change this
+            0, // TODO: change this
+            0, // TODO: change this
+            0 // TODO: change this
         );
 
         pidController = new ProfiledPIDController(
-                kP,
-                kI,
-                kD,
-                new Constraints(
-                        MAX_VELOCITY.in(RadiansPerSecond),
-                        MAX_ACCELERATION.in(RadiansPerSecondPerSecond)));
+            kP,
+            kI,
+            kD,
+            new Constraints(
+                MAX_VELOCITY.in(RadiansPerSecond),
+                MAX_ACCELERATION.in(RadiansPerSecondPerSecond)
+            )
+        );
 
         pidController.setTolerance(
-                POSITION_TOLERANCE.in(Radians),
-                VELOCITY_TOLERANCE.in(RadiansPerSecond));
+            POSITION_TOLERANCE.in(Radians),
+            VELOCITY_TOLERANCE.in(RadiansPerSecond)
+        );
 
         setSetpoint(HOME_ANGLE);
         pidController.reset(getPosition().in(Radians));
 
         armMotorConfig.absoluteEncoder
-                .positionConversionFactor(POSITION_CONVERSION_FACTOR)
-                .velocityConversionFactor(POSITION_CONVERSION_FACTOR)
-                .zeroCentered(true);
+            .positionConversionFactor(POSITION_CONVERSION_FACTOR)
+            .velocityConversionFactor(POSITION_CONVERSION_FACTOR)
+            .zeroCentered(true);
 
         armMotor.configure(
-                armMotorConfig,
-                ResetMode.kNoResetSafeParameters,
-                PersistMode.kNoPersistParameters);
+            armMotorConfig,
+            ResetMode.kNoResetSafeParameters,
+            PersistMode.kNoPersistParameters
+        );
     }
 
     public static Angle getPosition() {
@@ -105,8 +110,9 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public Command rotateTo(Angle setpoint) {
         return runOnce(
-                () -> setSetpoint(setpoint)).until(
-                        () -> atGoal());
+            () -> setSetpoint(setpoint)).until(
+                () -> atGoal()
+            );
     }
 
     /**
@@ -116,7 +122,7 @@ public class IntakeSubsystem extends SubsystemBase {
      */
     public Command intake() {
         return Commands.runOnce(
-                () -> rodMotor.set(CW_SPEED) // TODO: Check direction
+            () -> rodMotor.set(CW_SPEED) // TODO: Check direction
         );
     }
 
@@ -126,7 +132,7 @@ public class IntakeSubsystem extends SubsystemBase {
      */
     public Command extake() {
         return Commands.runOnce(
-                () -> rodMotor.set(CCW_SPEED) // TODO: Check direction
+            () -> rodMotor.set(CCW_SPEED) // TODO: Check direction
         );
     }
 
@@ -145,13 +151,15 @@ public class IntakeSubsystem extends SubsystemBase {
      * @return Command to pull arm back
      */
     public Command agitateFuel() {
-        return rotateTo(HOME_ANGLE);
+        return rotateTo(HOME_ANGLE)
+        .andThen(new WaitCommand(0.5))
+        .andThen(rotateTo(COLLECTION_POINT)); //TODO: Should work but will need a controlled test
     }
     
     public double getDraw() {
         return rodMotor.getOutputCurrent();
     }
-    //
+    
     private static void setSetpoint(Angle setpoint) {
         pidController.setGoal(setpoint.in(Radians));
     }
@@ -163,10 +171,12 @@ public class IntakeSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         armMotor.setVoltage(
-                pidController.calculate(getPosition().in(Radians)) +
-                        feedForward.calculate(
-                                pidController.getSetpoint().position,
-                                pidController.getSetpoint().velocity));
+            pidController.calculate(getPosition().in(Radians)) +
+                feedForward.calculate(
+                    pidController.getSetpoint().position,
+                    pidController.getSetpoint().velocity
+                )
+        );
     }
 
 }
