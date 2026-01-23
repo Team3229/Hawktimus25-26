@@ -2,10 +2,7 @@ package frc.robot.subsystems.manipSubsystems;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
-
+import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.StatusSignal;
@@ -22,6 +19,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
@@ -58,11 +56,11 @@ public class IntakeSubsystem extends SubsystemBase {
     private static final double CW_SPEED = 0; // TODO: change this
     private static final double CCW_SPEED = 0; // TODO: change this
 
-    private static final AngularVelocity MAX_VELOCITY = RadiansPerSecond.of(0); // TODO: change this
-    private static final AngularAcceleration MAX_ACCELERATION = RadiansPerSecondPerSecond.of(0); // TODO: change this
+    private static final AngularVelocity MAX_VELOCITY = DegreesPerSecond.of(0); // TODO: change this
+    private static final AngularAcceleration MAX_ACCELERATION = DegreesPerSecondPerSecond.of(0); // TODO: change this
 
     private static final Angle POSITION_TOLERANCE = Degrees.of(0); // TODO: change this
-    private static final AngularVelocity VELOCITY_TOLERANCE = RadiansPerSecond.of(0); // TODO: change this
+    private static final AngularVelocity VELOCITY_TOLERANCE = DegreesPerSecond.of(0); // TODO: change this
 
     public IntakeSubsystem() {
 
@@ -106,18 +104,18 @@ public class IntakeSubsystem extends SubsystemBase {
             aI,
             aD,
             new Constraints(
-                MAX_VELOCITY.in(RadiansPerSecond),
-                MAX_ACCELERATION.in(RadiansPerSecondPerSecond)
+                MAX_VELOCITY.in(DegreesPerSecond),
+                MAX_ACCELERATION.in(DegreesPerSecondPerSecond)
             )
         );
 
         armPIDController.setTolerance(
-            POSITION_TOLERANCE.in(Radians),
-            VELOCITY_TOLERANCE.in(RadiansPerSecond)
+            POSITION_TOLERANCE.in(Degrees),
+            VELOCITY_TOLERANCE.in(DegreesPerSecond)
         );
 
         setSetpoint(HOME_ANGLE);
-            armPIDController.reset(getPosition().in(Radians)
+            armPIDController.reset(getPosition().in(Degrees)
         );
     }
 
