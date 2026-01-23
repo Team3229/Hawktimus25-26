@@ -10,7 +10,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import static edu.wpi.first.units.Units.Amps;
 
 public class IndexSubsystem extends SubsystemBase {
@@ -29,6 +29,9 @@ public class IndexSubsystem extends SubsystemBase {
     public final int forwards = 1;
     public final int reverse = -1;
 
+    //elasitc variable
+   public static boolean indexing = false;
+    
     public IndexSubsystem() {
         // initializes motor
         indexMotor = new SparkMax(index_CAN_ID, MotorType.kBrushless);
@@ -42,7 +45,10 @@ public class IndexSubsystem extends SubsystemBase {
         indexMotor.configure(
             indexMotorConfig,
             ResetMode.kNoResetSafeParameters,
-            PersistMode.kNoPersistParameters);
+            PersistMode.kNoPersistParameters
+        );
+        
+        SmartDashboard.putBoolean("Is Indexing", indexing);
     }
 
     public Command index(int speed) {
@@ -55,11 +61,13 @@ public class IndexSubsystem extends SubsystemBase {
             @Override
             public void execute() {
                 indexMotor.set(indexSpeed * speed);
+                indexing = true;
             }
 
             @Override
             public void end(boolean interrupted) {
                 indexMotor.stopMotor();
+                indexing = false;
             }
         };
     }

@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.manipSubsystems.IntakeSubsystem;
-
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class IntakeSubsystem extends SubsystemBase {
 
     private static SparkMax armMotor;
@@ -51,6 +51,9 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private static final Angle POSITION_TOLERANCE = Degrees.of(0); // TODO: change this
     private static final AngularVelocity VELOCITY_TOLERANCE = RadiansPerSecond.of(0); // TODO: change this
+   
+   //variable for elastic
+    public static boolean intaking = false;
 
     public IntakeSubsystem() {
 
@@ -93,6 +96,8 @@ public class IntakeSubsystem extends SubsystemBase {
                 armMotorConfig,
                 ResetMode.kNoResetSafeParameters,
                 PersistMode.kNoPersistParameters);
+
+        SmartDashboard.putBoolean("Intaking", intaking);
     }
 
     public static Angle getPosition() {
@@ -115,9 +120,8 @@ public class IntakeSubsystem extends SubsystemBase {
      * @return Command to spin rod
      */
     public Command intake() {
-        return Commands.runOnce(
-                () -> rodMotor.set(CW_SPEED) // TODO: Check direction
-        );
+        return Commands.runOnce(() -> rodMotor.set(CW_SPEED)) // TODO: Check direction()-> intaking  true;
+        .andThen(Commands.runOnce(() -> intaking = true));
     }
 
     /**
@@ -168,5 +172,7 @@ public class IntakeSubsystem extends SubsystemBase {
                                 pidController.getSetpoint().position,
                                 pidController.getSetpoint().velocity));
     }
+    
+    SmartDashboard.putBoolean("Intaking", intaking);
 
 }
