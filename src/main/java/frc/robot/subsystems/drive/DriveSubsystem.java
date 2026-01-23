@@ -371,4 +371,15 @@ public class DriveSubsystem extends SubsystemBase {
 		return new SwerveInputStream(swerveDrive, x, y, rot);
 	}
 
+	/*
+	 * Returns the angle from the robot to the hub (in Angle radians)
+	 */
+	public double angleFromHub(Pose2d robotPos, Pose2d hubPos) {
+		return Math.atan2(hubPos.getY() - robotPos.getY(), hubPos.getX() - robotPos.getX());
+	}
+
+	public double distanceFromHub(Pose2d robotPos, Pose2d hubPos) {
+		return Math.sqrt(Math.pow(hubPos.getX() - robotPos.getX(), 2) + Math.pow(hubPos.getY() - robotPos.getY(), 2));
+	}
+
 }
