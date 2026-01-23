@@ -1,12 +1,11 @@
 package frc.robot.subsystems.manipSubsystems;
 
-import com.revrobotics.PersistMode;
-import com.revrobotics.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
-
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -14,14 +13,19 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static edu.wpi.first.units.Units.Amps;
 
 public class IndexSubsystem extends SubsystemBase {
+    private static TalonFX indexMotor;
+    private static TalonFXConfiguration indexMotorConfig;
+    
+    private static double kP = 0;
+    private static double kI = 0;
+    private static double kD = 0;
+
     //change ID
     private static final int index_CAN_ID = -3;
-    private static SparkMax indexMotor;
-    private static SparkMaxConfig indexMotorConfig;
+
 
     //change current limit
     private static final Current CURRENT_LIMIT = Amps.of(80);
-    private static final boolean INVERTED = true;
 
     //change indexSpeed
     private static final double indexSpeed = 0.1;
@@ -31,20 +35,22 @@ public class IndexSubsystem extends SubsystemBase {
 
     public IndexSubsystem() {
         // initializes motor
-        indexMotor = new SparkMax(index_CAN_ID, MotorType.kBrushless);
-
-        indexMotorConfig = new SparkMaxConfig();
-
-        indexMotorConfig.smartCurrentLimit((int) CURRENT_LIMIT.in(Amps));
-        indexMotorConfig.inverted(!INVERTED);
-        indexMotorConfig.idleMode(IdleMode.kBrake);
-
-        indexMotor.configure(
-            indexMotorConfig,
-            ResetMode.kNoResetSafeParameters,
-            PersistMode.kNoPersistParameters);
+        indexMotor = new TalonFX(index_CAN_ID, "Placeholder"); // placeholder name for the canbus
+        indexMotorConfig.Slot0.kP = (kP);
+        indexMotorConfig.Slot0.kI = (kI);
+        indexMotorConfig.Slot0.kD = (kD);
+        indexMotorConfig = new TalonFXConfiguration()
+            .withMotorOutput(
+                new MotorOutputConfigs()
+                        .withNeutralMode(NeutralModeValue.Brake)
+            )
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(CURRENT_LIMIT)
+                    .withStatorCurrentLimitEnable(true)
+            );
+        indexMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     }
-
     public Command index(int speed) {
         return new Command() {
             @Override

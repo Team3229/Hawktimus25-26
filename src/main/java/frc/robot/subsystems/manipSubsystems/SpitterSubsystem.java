@@ -2,12 +2,13 @@ package frc.robot.subsystems.manipSubsystems;
 
 import static edu.wpi.first.units.Units.Amps;
 
-import com.revrobotics.PersistMode;
-import com.revrobotics.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,47 +16,58 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class SpitterSubsystem extends SubsystemBase {
 
-    //change can ID
+    //change PID (if needed)
+    private static double kP = 0;
+    private static double kI = 0;
+    private static double kD = 0;
+
+    // change can ID
     private static final int LS_CAN_ID = 0;
-    private static SparkMax leftSpitter;
-    private static SparkMaxConfig LSMotorConfig;
+    private static TalonFX leftSpitter;
+    private static TalonFXConfiguration LSMotorConfig;
 
-    //change can ID
+    // change can ID
     private static final int RS_CAN_ID = -4;
-    private SparkMax rightSpitter;
-    private SparkMaxConfig RSMotorConfig;
+    private TalonFX rightSpitter;
+    private TalonFXConfiguration RSMotorConfig;
 
-    //change amp limit
+    // change amp limit
     private static final Current CURRENT_LIMIT = Amps.of(80);
-    private static final boolean INVERTED = true;
 
     public SpitterSubsystem() {
         // initializes motors
-        leftSpitter = new SparkMax(LS_CAN_ID, MotorType.kBrushless);
+        leftSpitter = new TalonFX(LS_CAN_ID, "Placeholder"); // placeholder name for the canbus
+        LSMotorConfig.Slot0.kP = (kP);
+        LSMotorConfig.Slot0.kI = (kI);
+        LSMotorConfig.Slot0.kD = (kD);
+        LSMotorConfig = new TalonFXConfiguration()
+            .withMotorOutput(
+                new MotorOutputConfigs()
+                        .withNeutralMode(NeutralModeValue.Brake)
+            )
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(CURRENT_LIMIT)
+                    .withStatorCurrentLimitEnable(true)
+            );
+        LSMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
-        LSMotorConfig = new SparkMaxConfig();
 
-        LSMotorConfig.smartCurrentLimit((int) CURRENT_LIMIT.in(Amps));
-        LSMotorConfig.inverted(!INVERTED);
-        LSMotorConfig.idleMode(IdleMode.kBrake);
-
-        leftSpitter.configure(
-                LSMotorConfig,
-                ResetMode.kNoResetSafeParameters,
-                PersistMode.kNoPersistParameters);
-
-        rightSpitter = new SparkMax(RS_CAN_ID, MotorType.kBrushless);
-
-        RSMotorConfig = new SparkMaxConfig();
-        RSMotorConfig.smartCurrentLimit((int) CURRENT_LIMIT.in(Amps));
-
-        RSMotorConfig.inverted(INVERTED);
-        RSMotorConfig.idleMode(IdleMode.kBrake);
-
-        rightSpitter.configure(
-                RSMotorConfig,
-                ResetMode.kNoResetSafeParameters,
-                PersistMode.kNoPersistParameters);
+        rightSpitter = new TalonFX(RS_CAN_ID, "Placeholder"); // placeholder name for the canbus
+        RSMotorConfig.Slot0.kP = (kP);
+        RSMotorConfig.Slot0.kI = (kI);
+        RSMotorConfig.Slot0.kD = (kD);
+        RSMotorConfig = new TalonFXConfiguration()
+            .withMotorOutput(
+                new MotorOutputConfigs()
+                    .withNeutralMode(NeutralModeValue.Brake)
+            )
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(CURRENT_LIMIT)
+                    .withStatorCurrentLimitEnable(true)
+            );
+        RSMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     }
 
     public Command spit(double speed) {
