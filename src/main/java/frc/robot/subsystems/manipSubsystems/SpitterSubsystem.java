@@ -2,15 +2,15 @@ package frc.robot.subsystems.manipSubsystems;
 
 import static edu.wpi.first.units.Units.Amps;
 
-import com.revrobotics.PersistMode;
-import com.revrobotics.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 
 import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -23,13 +23,13 @@ public class SpitterSubsystem extends SubsystemBase {
 
     // change can ID
     private static final int LS_CAN_ID = 0;
-    private static SparkMax leftSpitter;
-    private static SparkMaxConfig LSMotorConfig;
+    private static TalonFX leftSpitter;
+    private static TalonFXConfiguration LSMotorConfig;
 
-    //change can ID
+    // change can ID
     private static final int RS_CAN_ID = -4;
-    private SparkMax rightSpitter;
-    private SparkMaxConfig RSMotorConfig;
+    private TalonFX rightSpitter;
+    private TalonFXConfiguration RSMotorConfig;
 
     // change can ID
     private static final int LF_CAN_ID = -10;
@@ -43,11 +43,6 @@ public class SpitterSubsystem extends SubsystemBase {
 
     // change amp limit
     private static final Current CURRENT_LIMIT = Amps.of(80);
-    private static final boolean INVERTED = true;
-
-    public static boolean Shooter_Ready = false;
-
-    
 
     public SpitterSubsystem() {
         // initializes shooting motors
@@ -130,13 +125,6 @@ public class SpitterSubsystem extends SubsystemBase {
             public void execute() {
                 rightSpitter.set(speed);
                 leftSpitter.set(speed);
-
-                if(Math.abs(speed - leftSpitter.get()) <= SPEED_TOLERANCE) {
-                    Shooter_Ready = true;
-                } else{
-                    Shooter_Ready = false;
-                }
-
             }
 
             @Override
