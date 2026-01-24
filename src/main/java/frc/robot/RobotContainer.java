@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.jar.Attributes.Name;
 import java.util.stream.Collectors;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -27,6 +28,7 @@ import frc.robot.inputs.ButtonBoard;
 import frc.robot.inputs.FlightStick;
 import frc.robot.subsystems.VisualizerSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import swervelib.SwerveInputStream;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
@@ -35,6 +37,8 @@ public class RobotContainer {
 	FlightStick driverController;
 	ButtonBoard buttonBoard;
 	DriveSubsystem driveSubsystem;
+	ManipSubsystem manipSubsystem;
+	
 
 	VisualizerSubsystem visualizerSubsystem;
 
@@ -49,6 +53,8 @@ public class RobotContainer {
 			"swerve",
 			TelemetryVerbosity.HIGH
 		);
+
+		manipSubsystem = new ManipSubsystem();
 
 		// visualizerSubsystem = new VisualizerSubsystem(
 		// 	() -> coralSubsystem.getElevatorPose().in(Meters),
@@ -81,6 +87,11 @@ public class RobotContainer {
 	}
 
 	private void configDriveControls() {
+
+		NamedCommands.registerCommand("ArmDown", manipSubsystem.extendStorage());
+		NamedCommands.registerCommand("Intake", manipSubsystem.intake());
+		NamedCommands.registerCommand("WheelSpinUp", manipSubsystem.spinUp());
+		NamedCommands.registerCommand("Shoot", manipSubsystem.shoot());
 
 		SwerveInputStream driveAngularVelocity = driveSubsystem.getInputStream(
 			() -> -driverController.a_Y(),
