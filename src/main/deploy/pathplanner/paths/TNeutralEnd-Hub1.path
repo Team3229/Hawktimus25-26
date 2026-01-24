@@ -3,32 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.4727349397590364,
-        "y": 1.3741024096385548
+        "x": 7.516,
+        "y": 5.3353975903614455
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.48366265060241,
-        "y": 1.9040963855421684
+        "x": 8.516,
+        "y": 5.3353975903614455
       },
       "isLocked": false,
-      "linkedName": "S3"
+      "linkedName": "TopNeutralEnd"
     },
     {
       "anchor": {
-        "x": 2.4892409638554214,
-        "y": 2.7892409638554216
+        "x": 2.424,
+        "y": 5.488
       },
       "prevControl": {
-        "x": 2.7304319191648547,
-        "y": 2.723461612407395
+        "x": 1.424,
+        "y": 5.488
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Hub3"
+      "linkedName": "Hub1"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.45,
+      "rotationDegrees": 45.0
+    },
+    {
+      "waypointRelativePos": 0.6,
+      "rotationDegrees": 45.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -42,13 +51,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -145.0
+    "rotation": 145.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -90.0
   },
   "useDefaultConstraints": true
 }

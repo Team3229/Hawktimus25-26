@@ -14,7 +14,7 @@ public class ManipSubsystem extends SubsystemBase {
     ShooterArmSubsystem shooterArmSubsystem;
     SpitterSubsystem spitterSubsystem;
 
-    public void manipSubsystems() {
+    public ManipSubsystem() {
         intakeSubsystem = new IntakeSubsystem();
         indexSubsystem = new IndexSubsystem();
         shooterArmSubsystem = new ShooterArmSubsystem();
