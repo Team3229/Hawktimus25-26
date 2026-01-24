@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.035626506024096,
-        "y": 6.976542168676962
+        "x": 2.713619642775763,
+        "y": 6.2005965180610785
       },
       "isLocked": false,
       "linkedName": "S1"
     },
     {
       "anchor": {
-        "x": 0.479,
-        "y": 6.9964096385564805
+        "x": 2.424,
+        "y": 5.488
       },
       "prevControl": {
-        "x": 0.7612409638554213,
-        "y": 6.998397590363709
+        "x": 2.6862650602409635,
+        "y": 5.5699578313253015
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Depot Grab Start"
+      "linkedName": "Hub1"
     }
   ],
   "rotationTargets": [],
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 145.0
   },
   "reversed": false,
   "folder": null,
