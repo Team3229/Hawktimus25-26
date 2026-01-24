@@ -16,7 +16,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class SpitterSubsystem extends SubsystemBase {
 
-    //change can ID
+    //change PID (if needed)
+    private static double kP = 0.0;
+    private static double kI = 0.0;
+    private static double kD = 0.0;
+
+    // change can ID
     private static final int LS_CAN_ID = 0;
     private static SparkMax leftSpitter;
     private static SparkMaxConfig LSMotorConfig;
@@ -26,7 +31,17 @@ public class SpitterSubsystem extends SubsystemBase {
     private SparkMax rightSpitter;
     private SparkMaxConfig RSMotorConfig;
 
-    //change amp limit
+    // change can ID
+    private static final int LF_CAN_ID = -10;
+    private static TalonFX leftFeeder;
+    private static TalonFXConfiguration LFMotorConfig;
+
+    // change can ID
+    private static final int RF_CAN_ID = 48;
+    private TalonFX rightFeeder;
+    private TalonFXConfiguration RFMotorConfig;
+
+    // change amp limit
     private static final Current CURRENT_LIMIT = Amps.of(80);
     private static final boolean INVERTED = true;
 
@@ -35,35 +50,73 @@ public class SpitterSubsystem extends SubsystemBase {
     
 
     public SpitterSubsystem() {
-        // initializes motors
-        leftSpitter = new SparkMax(LS_CAN_ID, MotorType.kBrushless);
+        // initializes shooting motors
+        leftSpitter = new TalonFX(LS_CAN_ID, "Placeholder"); // placeholder name for the canbus
+        LSMotorConfig.Slot0.kP = (kP);
+        LSMotorConfig.Slot0.kI = (kI);
+        LSMotorConfig.Slot0.kD = (kD);
+        LSMotorConfig = new TalonFXConfiguration()
+            .withMotorOutput(
+                new MotorOutputConfigs()
+                        .withNeutralMode(NeutralModeValue.Brake)
+            )
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(CURRENT_LIMIT)
+                    .withStatorCurrentLimitEnable(true)
+            );
+        LSMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        leftSpitter.getConfigurator().apply(LSMotorConfig);
 
-        LSMotorConfig = new SparkMaxConfig();
+        rightSpitter = new TalonFX(RS_CAN_ID, "Placeholder"); // placeholder name for the canbus
+        RSMotorConfig.Slot0.kP = (kP);
+        RSMotorConfig.Slot0.kI = (kI);
+        RSMotorConfig.Slot0.kD = (kD);
+        RSMotorConfig = new TalonFXConfiguration()
+            .withMotorOutput(
+                new MotorOutputConfigs()
+                    .withNeutralMode(NeutralModeValue.Brake)
+            )
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(CURRENT_LIMIT)
+                    .withStatorCurrentLimitEnable(true)
+            );
+        RSMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        rightSpitter.getConfigurator().apply(RSMotorConfig);
 
-        SmartDashboard.putBoolean("Shooter Ready", );
-        SmartDashboard.putBoolean("Shooting", indexing);
+    
+        // initializes feeding motors
+        leftFeeder= new TalonFX(LF_CAN_ID, "Placeholder"); // placeholder name for the canbus
+        LFMotorConfig = new TalonFXConfiguration()
+            .withMotorOutput(
+                new MotorOutputConfigs()
+                        .withNeutralMode(NeutralModeValue.Brake)
+            )
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(CURRENT_LIMIT)
+                    .withStatorCurrentLimitEnable(true)
+            );
+        LFMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        leftFeeder.getConfigurator().apply(LFMotorConfig);
 
-        LSMotorConfig.smartCurrentLimit((int) CURRENT_LIMIT.in(Amps));
-        LSMotorConfig.inverted(!INVERTED);
-        LSMotorConfig.idleMode(IdleMode.kBrake);
 
-        leftSpitter.configure(
-                LSMotorConfig,
-                ResetMode.kNoResetSafeParameters,
-                PersistMode.kNoPersistParameters);
+        // initializes feeding motors
+        rightFeeder = new TalonFX(RF_CAN_ID, "Placeholder"); // placeholder name for the canbus
+        RFMotorConfig = new TalonFXConfiguration()
+            .withMotorOutput(
+                new MotorOutputConfigs()
+                        .withNeutralMode(NeutralModeValue.Brake)
+            )
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(CURRENT_LIMIT)
+                    .withStatorCurrentLimitEnable(true)
+            );
+        RFMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        rightFeeder.getConfigurator().apply(RSMotorConfig);
 
-        rightSpitter = new SparkMax(RS_CAN_ID, MotorType.kBrushless);
-
-        RSMotorConfig = new SparkMaxConfig();
-        RSMotorConfig.smartCurrentLimit((int) CURRENT_LIMIT.in(Amps));
-
-        RSMotorConfig.inverted(INVERTED);
-        RSMotorConfig.idleMode(IdleMode.kBrake);
-
-        rightSpitter.configure(
-                RSMotorConfig,
-                ResetMode.kNoResetSafeParameters,
-                PersistMode.kNoPersistParameters);
     }
 
     public Command spit(double speed) {

@@ -34,21 +34,23 @@ public class IndexSubsystem extends SubsystemBase {
     
     public IndexSubsystem() {
         // initializes motor
-        indexMotor = new SparkMax(index_CAN_ID, MotorType.kBrushless);
+        indexMotor = new TalonFX(index_CAN_ID, "Placeholder"); // placeholder name for the canbus
+        indexMotorConfig.Slot0.kP = (kP);
+        indexMotorConfig.Slot0.kI = (kI);
+        indexMotorConfig.Slot0.kD = (kD);
+        indexMotorConfig = new TalonFXConfiguration()
+            .withMotorOutput(
+                new MotorOutputConfigs()
+                        .withNeutralMode(NeutralModeValue.Brake)
+            )
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(CURRENT_LIMIT)
+                    .withStatorCurrentLimitEnable(true)
+            );
+        indexMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        indexMotor.getConfigurator().apply(indexMotorConfig);
 
-        indexMotorConfig = new SparkMaxConfig();
-
-        indexMotorConfig.smartCurrentLimit((int) CURRENT_LIMIT.in(Amps));
-        indexMotorConfig.inverted(!INVERTED);
-        indexMotorConfig.idleMode(IdleMode.kBrake);
-
-        indexMotor.configure(
-            indexMotorConfig,
-            ResetMode.kNoResetSafeParameters,
-            PersistMode.kNoPersistParameters
-        );
-        
-        SmartDashboard.putBoolean("Is Indexing", indexing);
     }
 
     public Command index(int speed) {
