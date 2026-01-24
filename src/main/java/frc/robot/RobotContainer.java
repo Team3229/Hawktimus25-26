@@ -87,7 +87,7 @@ public class RobotContainer {
 
 		NamedCommands.registerCommand("Intake", manipSubsystem.intake());
 		NamedCommands.registerCommand("ArmOut", manipSubsystem.extendStorage());
-		NamedCommands.registerCommand("WheelSpeedUp", manipSubsystem.spinUp());
+		NamedCommands.registerCommand("WheelSpinUp", manipSubsystem.spinUp());
 		NamedCommands.registerCommand("Shoot", manipSubsystem.shoot());
 
 		SwerveInputStream driveAngularVelocity = driveSubsystem.getInputStream(
