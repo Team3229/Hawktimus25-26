@@ -17,6 +17,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -45,6 +46,8 @@ public class ShooterArmSubsystem extends SubsystemBase {
     private static final AngularVelocity VELOCITY_TOLERANCE = RadiansPerSecond.of(0.1);
 
     public ShooterArmSubsystem() {
+
+
 
         armMotor = new SparkMax(CAN_ID, MotorType.kBrushless);
 
