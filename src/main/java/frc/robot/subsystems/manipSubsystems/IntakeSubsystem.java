@@ -40,7 +40,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private static final int ARM_CAN_ID = 9; // TODO: change this
     private static final int ROD_CAN_ID = 8; // TODO: change this
-    private static final double POSITION_CONVERSION_FACTOR = 2 * Math.PI;
+    // private static final double POSITION_CONVERSION_FACTOR = 2 * Math.PI;
 
     public static final Angle HOME_ANGLE = Degrees.of(345); // TODO: change this
     public static final Angle COLLECTION_POINT = Degrees.of(270); // TODO: change this
@@ -64,18 +64,6 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public IntakeSubsystem() {
 
-        CANcoderConfiguration armCanCoderConfig = new CANcoderConfiguration();
-        armCanCoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0; //TODO: Change
-        armCanCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-        armCanCoderConfig.MagnetSensor.MagnetOffset = 0.0;
-        armCanMotor.getConfigurator().apply(armCanCoderConfig);
-
-        TalonFXConfiguration armMotorConfig = new TalonFXConfiguration();
-        armMotorConfig.Feedback.FeedbackRemoteSensorID = armCanMotor.getDeviceID();
-        armMotorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.SyncCANcoder;
-        armMotorConfig.Feedback.SensorToMechanismRatio = 0.0; //TODO: Change
-        armMotorConfig.Feedback.RotorToSensorRatio = 0.0; //TODO: Change
-
         armMotor.getConfigurator().apply(armMotorConfig);
 
         armCanMotor= new CANcoder(ARM_CAN_ID);
@@ -86,7 +74,19 @@ public class IntakeSubsystem extends SubsystemBase {
 
         armMotorConfig = new TalonFXConfiguration();
 
+        armCanCoderConfig = new CANcoderConfiguration();
+
         rodMotorConfig = new TalonFXConfiguration();
+
+        armCanCoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0; //TODO: Change
+        armCanCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+        armCanCoderConfig.MagnetSensor.MagnetOffset = 0.0;
+        armCanMotor.getConfigurator().apply(armCanCoderConfig);
+
+        armMotorConfig.Feedback.FeedbackRemoteSensorID = armCanMotor.getDeviceID();
+        armMotorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.SyncCANcoder;
+        armMotorConfig.Feedback.SensorToMechanismRatio = 0.0; //TODO: Change
+        armMotorConfig.Feedback.RotorToSensorRatio = 0.0; //TODO: Change
 
         feedForward = new ArmFeedforward(
             0, // TODO: change this
