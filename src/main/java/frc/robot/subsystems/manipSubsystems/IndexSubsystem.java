@@ -50,6 +50,8 @@ public class IndexSubsystem extends SubsystemBase {
                     .withStatorCurrentLimitEnable(true)
             );
         indexMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        indexMotor.getConfigurator().apply(indexMotorConfig);
+
     }
     public Command index(int speed) {
         return new Command() {
