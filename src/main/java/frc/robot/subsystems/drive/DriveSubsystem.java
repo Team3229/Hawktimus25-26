@@ -460,4 +460,33 @@ public class DriveSubsystem extends SubsystemBase {
 		return new SwerveInputStream(swerveDrive, x, y, rot);
 	}
 
+	// Placeholder
+	public Pose2d getHubPose() {
+		return new Pose2d();
+	}
+
+	/*
+	 * Returns the angle from the robot to the hub (in radians)
+	 */
+	public double angleFromHub() {
+		return Math.atan2(getHubPose().getY() - getPose().getY(), getHubPose().getX() - getPose().getX());
+	}
+
+	/*
+	 * Returns the distance from the robot to the hub 
+	 */
+	public double distanceFromHub() {
+		return Math.sqrt(Math.pow(getHubPose().getX() - getPose().getX(), 2) + Math.pow(getHubPose().getY() - getPose().getY(), 2));
+	}
+
+	// Should this be a Command or void since the driveToPose is a Command???
+    public void alignToHub() {
+        driveToPose(() -> {
+            return new Pose2d(
+				getPose().getX(),
+				getPose().getY(),
+				getPose().getRotation().plus(new Rotation2d(angleFromHub()))
+			);
+        });
+    }
 }
