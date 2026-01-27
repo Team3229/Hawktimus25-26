@@ -38,8 +38,8 @@ public class IntakeSubsystem extends SubsystemBase {
     private static ArmFeedforward feedForward;
     private static ProfiledPIDController armPIDController;
 
-    private static final int ARM_CAN_ID = 9; // TODO: change this
-    private static final int ROD_CAN_ID = 8; // TODO: change this
+    private static final int ARM_CAN_ID = -9; // TODO: change this
+    private static final int ROD_CAN_ID = -8; // TODO: change this
     // private static final double POSITION_CONVERSION_FACTOR = 2 * Math.PI;
 
     public static final Angle HOME_ANGLE = Degrees.of(345); // TODO: change this
