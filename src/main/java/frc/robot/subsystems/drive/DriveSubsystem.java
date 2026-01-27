@@ -29,6 +29,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.measure.Angle;
@@ -460,9 +461,9 @@ public class DriveSubsystem extends SubsystemBase {
 		return new SwerveInputStream(swerveDrive, x, y, rot);
 	}
 
-	// Placeholder
-	public Pose2d getHubPose() {
-		return new Pose2d();
+	// Might be the right dimensions
+	public Translation2d getHubPose() {
+		return new Translation2d(4.034663d, 4.611624d);
 	}
 
 	/*
