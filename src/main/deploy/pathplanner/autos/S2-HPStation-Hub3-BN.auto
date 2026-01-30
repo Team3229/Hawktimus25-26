@@ -5,13 +5,44 @@
     "data": {
       "commands": [
         {
+          "type": "path",
+          "data": {
+            "pathName": "S2-HPStation"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ArmOut"
+          }
+        },
+        {
           "type": "parallel",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "S2-Hub2"
+                  "pathName": "HPStationGrab"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "HPStation-Hub3"
                 }
               },
               {
@@ -30,22 +61,9 @@
           }
         },
         {
-          "type": "sequential",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Hub2-TN"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "ArmOut"
-                }
-              }
-            ]
+            "pathName": "Hub3-BNeutral"
           }
         },
         {
@@ -55,7 +73,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "TNeutral Grab"
+                  "pathName": "BNeutral Grab"
                 }
               },
               {
