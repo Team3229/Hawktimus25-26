@@ -28,13 +28,15 @@ import frc.robot.inputs.FlightStick;
 import frc.robot.subsystems.VisualizerSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
+import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
 import swervelib.SwerveInputStream;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 public class RobotContainer {
 
 	FlightStick driverController;
-	ButtonBoard buttonBoard;
+	FlightStick manipController;
+	// ButtonBoard buttonBoard;
 	DriveSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
 
@@ -46,7 +48,9 @@ public class RobotContainer {
 	public RobotContainer() {
 
 		driverController = new FlightStick(0);
-		buttonBoard = new ButtonBoard(1);
+		manipController = new FlightStick(1);
+
+		// buttonBoard = new ButtonBoard(1);
 		driveSubsystem = new DriveSubsystem(
 			"swerve",
 			TelemetryVerbosity.HIGH
@@ -134,8 +138,14 @@ public class RobotContainer {
 	}
 
 	private void configManipControls() {
-
 		
+		manipController.b_Trigger().onTrue(
+			manipSubsystem.shoot()
+		);
+		
+		manipController.b_3().onTrue(
+			manipSubsystem.spinUp()
+		);
 	}
 
 	public void initTelemetery() {

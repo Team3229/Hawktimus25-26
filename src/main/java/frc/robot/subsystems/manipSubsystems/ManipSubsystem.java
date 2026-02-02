@@ -37,9 +37,9 @@ public class ManipSubsystem extends SubsystemBase {
     }
 
     public Command shoot() {
-        return runOnce(() -> spitterSubsystem.feed())
-        .andThen(indexSubsystem.index(indexSubsystem.forwards))
-        .andThen(intakeSubsystem.agitateFuel());
+        return runOnce(() -> spitterSubsystem.feed());
+        // .andThen(indexSubsystem.index(indexSubsystem.forwards))
+        // .andThen(intakeSubsystem.agitateFuel());
 
     }
 
