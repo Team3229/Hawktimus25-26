@@ -14,7 +14,7 @@ public class ManipSubsystem extends SubsystemBase {
     ShooterArmSubsystem shooterArmSubsystem;
     SpitterSubsystem spitterSubsystem;
 
-    public void manipSubsystems() {
+    public ManipSubsystem() {
         intakeSubsystem = new IntakeSubsystem();
         indexSubsystem = new IndexSubsystem();
         shooterArmSubsystem = new ShooterArmSubsystem();
@@ -37,8 +37,10 @@ public class ManipSubsystem extends SubsystemBase {
     }
 
     public Command shoot() {
-        return runOnce(() -> indexSubsystem.index(indexSubsystem.forwards))
+        return runOnce(() -> spitterSubsystem.feed())
+        .andThen(indexSubsystem.index(indexSubsystem.forwards))
         .andThen(intakeSubsystem.agitateFuel());
+
     }
 
     public Command extake() {
