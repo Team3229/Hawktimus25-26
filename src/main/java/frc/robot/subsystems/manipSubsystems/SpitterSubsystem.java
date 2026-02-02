@@ -17,29 +17,29 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class SpitterSubsystem extends SubsystemBase {
 
     //change PID (if needed)
-    private static double kP = 0.0;
+    private static double kP = 1;
     private static double kI = 0.0;
     private static double kD = 0.0;
 
     // change can ID
-    private static final int LS_CAN_ID = 0;
+    private static final int LS_CAN_ID = 18;
     private static TalonFX leftSpitter;
     private static TalonFXConfiguration LSMotorConfig;
 
     // change can ID
-    private static final int RS_CAN_ID = -4;
-    private TalonFX rightSpitter;
-    private TalonFXConfiguration RSMotorConfig;
+    // private static final int RS_CAN_ID = -4;
+    // private TalonFX rightSpitter;
+    // private TalonFXConfiguration RSMotorConfig;
 
     // change can ID
-    private static final int LF_CAN_ID = -10;
+    private static final int LF_CAN_ID = 17;
     private static TalonFX leftFeeder;
     private static TalonFXConfiguration LFMotorConfig;
 
     // change can ID
-    private static final int RF_CAN_ID = 48;
-    private TalonFX rightFeeder;
-    private TalonFXConfiguration RFMotorConfig;
+    // private static final int RF_CAN_ID = 51;
+    // private TalonFX rightFeeder;
+    // private TalonFXConfiguration RFMotorConfig;
 
     // change amp limit
     private static final Current CURRENT_LIMIT = Amps.of(80);
@@ -47,9 +47,6 @@ public class SpitterSubsystem extends SubsystemBase {
     public SpitterSubsystem() {
         // initializes shooting motors
         leftSpitter = new TalonFX(LS_CAN_ID, "Placeholder"); // placeholder name for the canbus
-        LSMotorConfig.Slot0.kP = (kP);
-        LSMotorConfig.Slot0.kI = (kI);
-        LSMotorConfig.Slot0.kD = (kD);
         LSMotorConfig = new TalonFXConfiguration()
             .withMotorOutput(
                 new MotorOutputConfigs()
@@ -60,25 +57,28 @@ public class SpitterSubsystem extends SubsystemBase {
                     .withStatorCurrentLimit(CURRENT_LIMIT)
                     .withStatorCurrentLimitEnable(true)
             );
+        LSMotorConfig.Slot0.kP = (kP);
+        LSMotorConfig.Slot0.kI = (kI);
+        LSMotorConfig.Slot0.kD = (kD);
         LSMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         leftSpitter.getConfigurator().apply(LSMotorConfig);
 
-        rightSpitter = new TalonFX(RS_CAN_ID, "Placeholder"); // placeholder name for the canbus
-        RSMotorConfig.Slot0.kP = (kP);
-        RSMotorConfig.Slot0.kI = (kI);
-        RSMotorConfig.Slot0.kD = (kD);
-        RSMotorConfig = new TalonFXConfiguration()
-            .withMotorOutput(
-                new MotorOutputConfigs()
-                    .withNeutralMode(NeutralModeValue.Brake)
-            )
-            .withCurrentLimits(
-                new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(CURRENT_LIMIT)
-                    .withStatorCurrentLimitEnable(true)
-            );
-        RSMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-        rightSpitter.getConfigurator().apply(RSMotorConfig);
+        // rightSpitter = new TalonFX(RS_CAN_ID, "Placeholder"); // placeholder name for the canbus
+        // RSMotorConfig = new TalonFXConfiguration()
+        //     .withMotorOutput(
+        //         new MotorOutputConfigs()
+        //             .withNeutralMode(NeutralModeValue.Brake)
+        //     )
+        //     .withCurrentLimits(
+        //         new CurrentLimitsConfigs()
+        //             .withStatorCurrentLimit(CURRENT_LIMIT)
+        //             .withStatorCurrentLimitEnable(true)
+        //     );
+        // RSMotorConfig.Slot0.kP = (kP);
+        // RSMotorConfig.Slot0.kI = (kI);
+        // RSMotorConfig.Slot0.kD = (kD);
+        // RSMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        // rightSpitter.getConfigurator().apply(RSMotorConfig);
 
     
         // initializes feeding motors
@@ -93,24 +93,28 @@ public class SpitterSubsystem extends SubsystemBase {
                     .withStatorCurrentLimit(CURRENT_LIMIT)
                     .withStatorCurrentLimitEnable(true)
             );
+        LFMotorConfig.Slot0.kP = (kP);
+        LFMotorConfig.Slot0.kI = (kI);
+        LFMotorConfig.Slot0.kD = (kD);
         LFMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         leftFeeder.getConfigurator().apply(LFMotorConfig);
 
-
-        // initializes feeding motors
-        rightFeeder = new TalonFX(RF_CAN_ID, "Placeholder"); // placeholder name for the canbus
-        RFMotorConfig = new TalonFXConfiguration()
-            .withMotorOutput(
-                new MotorOutputConfigs()
-                        .withNeutralMode(NeutralModeValue.Brake)
-            )
-            .withCurrentLimits(
-                new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(CURRENT_LIMIT)
-                    .withStatorCurrentLimitEnable(true)
-            );
-        RFMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-        rightFeeder.getConfigurator().apply(RSMotorConfig);
+        // rightFeeder = new TalonFX(RF_CAN_ID, "Placeholder"); // placeholder name for the canbus
+        // RFMotorConfig = new TalonFXConfiguration()
+        //     .withMotorOutput(
+        //         new MotorOutputConfigs()
+        //                 .withNeutralMode(NeutralModeValue.Brake)
+        //     )
+        //     .withCurrentLimits(
+        //         new CurrentLimitsConfigs()
+        //             .withStatorCurrentLimit(CURRENT_LIMIT)
+        //             .withStatorCurrentLimitEnable(true)
+        //     );
+        // RFMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        // RFMotorConfig.Slot0.kP = (kP);
+        // RFMotorConfig.Slot0.kI = (kI);
+        // RFMotorConfig.Slot0.kD = (kD);
+        // rightFeeder.getConfigurator().apply(RSMotorConfig);
 
     }
 
@@ -123,14 +127,35 @@ public class SpitterSubsystem extends SubsystemBase {
 
             @Override
             public void execute() {
-                rightSpitter.set(speed);
+                // rightSpitter.set(speed);
                 leftSpitter.set(speed);
             }
 
             @Override
             public void end(boolean interrupted) {
-                rightSpitter.stopMotor();
+                // rightSpitter.stopMotor();
                 leftSpitter.stopMotor();
+            }
+        };
+    }
+
+    public Command feed() {
+        return new Command() {
+            @Override
+            public void initialize() {
+                System.out.println("Feeding");
+            }
+
+            @Override
+            public void execute() {
+                // rightFeeder.set(1);
+                leftFeeder.set(1);
+            }
+
+            @Override
+            public void end(boolean interrupted) {
+                // rightFeeder.stopMotor();
+                leftFeeder.stopMotor();
             }
         };
     }

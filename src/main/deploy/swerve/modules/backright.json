@@ -5,18 +5,18 @@
   },
   "absoluteEncoderOffset": 309.462890625,
   "drive": {
-    "type": "sparkmax_neo",
-    "id": 17,
+    "type": "talonfx",
+    "id": null,
     "canbus": null
   },
   "angle": {
-    "type": "sparkmax_neo",
-    "id": 16,
+    "type": "talonfx",
+    "id": null,
     "canbus": null
   },
   "encoder": {
     "type": "cancoder",
-    "id": 19,
+    "id": null,
     "canbus": null
   },
   "inverted": {

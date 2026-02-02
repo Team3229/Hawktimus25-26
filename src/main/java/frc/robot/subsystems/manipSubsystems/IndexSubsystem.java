@@ -21,7 +21,7 @@ public class IndexSubsystem extends SubsystemBase {
     private static double kD = 0;
 
     //change ID
-    private static final int index_CAN_ID = -3;
+    private static final int index_CAN_ID = 50;
 
 
     //change current limit
@@ -36,9 +36,6 @@ public class IndexSubsystem extends SubsystemBase {
     public IndexSubsystem() {
         // initializes motor
         indexMotor = new TalonFX(index_CAN_ID, "Placeholder"); // placeholder name for the canbus
-        indexMotorConfig.Slot0.kP = (kP);
-        indexMotorConfig.Slot0.kI = (kI);
-        indexMotorConfig.Slot0.kD = (kD);
         indexMotorConfig = new TalonFXConfiguration()
             .withMotorOutput(
                 new MotorOutputConfigs()
@@ -49,6 +46,9 @@ public class IndexSubsystem extends SubsystemBase {
                     .withStatorCurrentLimit(CURRENT_LIMIT)
                     .withStatorCurrentLimitEnable(true)
             );
+        indexMotorConfig.Slot0.kP = (kP);
+        indexMotorConfig.Slot0.kI = (kI);
+        indexMotorConfig.Slot0.kD = (kD);
         indexMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         indexMotor.getConfigurator().apply(indexMotorConfig);
 

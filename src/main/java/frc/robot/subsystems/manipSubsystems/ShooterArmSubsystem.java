@@ -47,8 +47,6 @@ public class ShooterArmSubsystem extends SubsystemBase {
 
     public ShooterArmSubsystem() {
 
-
-
         armMotor = new SparkMax(CAN_ID, MotorType.kBrushless);
 
         armMotorConfig = new SparkMaxConfig();
