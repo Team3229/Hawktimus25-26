@@ -28,7 +28,6 @@ import frc.robot.inputs.FlightStick;
 import frc.robot.subsystems.VisualizerSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
-import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
 import swervelib.SwerveInputStream;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
@@ -36,7 +35,7 @@ public class RobotContainer {
 
 	FlightStick driverController;
 	FlightStick manipController;
-	// ButtonBoard buttonBoard;
+	ButtonBoard buttonBoard;
 	DriveSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
 
@@ -49,6 +48,7 @@ public class RobotContainer {
 
 		driverController = new FlightStick(0);
 		manipController = new FlightStick(1);
+		buttonBoard = new ButtonBoard(2);
 
 		// buttonBoard = new ButtonBoard(1);
 		driveSubsystem = new DriveSubsystem(
@@ -74,6 +74,7 @@ public class RobotContainer {
 
 		configDriveControls();
 		configManipControls();
+		configButtonControls();
 
 	}
 
@@ -112,8 +113,6 @@ public class RobotContainer {
 			)
 		);
 
-
-
 		driverController.b_10().onTrue(
 			driveSubsystem.zeroGyroWithLimelight()
 		);
@@ -126,12 +125,10 @@ public class RobotContainer {
 			driveSubsystem.zeroGyroWithLimelight()
 		);
 
-
-
 		driverController.b_Hazard().onTrue(
-				Commands.runOnce(() -> {
-					driveSubsystem.getCurrentCommand().cancel();
-					// cancels ALL DRIVING on driver controller
+			Commands.runOnce(() -> {
+				driveSubsystem.getCurrentCommand().cancel();
+				// cancels ALL DRIVING on driver controller
 			})
 		);
 
@@ -145,6 +142,40 @@ public class RobotContainer {
 		
 		manipController.b_3().onTrue(
 			manipSubsystem.spinUp()
+		);
+
+		manipController.b_Hazard().onTrue(
+			manipSubsystem.intake()
+		);
+	
+		manipController.b_5().onTrue(
+			manipSubsystem.extendStorage()
+
+		);
+		manipController.b_4().onTrue(
+			manipSubsystem.manualShoot()
+		);
+	}
+
+	private void configButtonControls() {
+		buttonBoard.b_1().onTrue(
+			manipSubsystem.shoot()
+		);
+
+		buttonBoard.b_2().onTrue(
+			manipSubsystem.spinUp()
+		);
+
+		buttonBoard.b_3().onTrue(
+			manipSubsystem.intake()
+		);
+
+		buttonBoard.b_4().onTrue(
+			manipSubsystem.extendStorage()
+		);
+
+		buttonBoard.b_5().onTrue(
+			manipSubsystem.manualShoot()
 		);
 	}
 
