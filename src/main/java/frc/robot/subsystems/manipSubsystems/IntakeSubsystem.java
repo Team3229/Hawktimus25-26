@@ -118,15 +118,24 @@ public class IntakeSubsystem extends SubsystemBase {
             armPIDController.reset(getPosition().in(Degrees)
         );
     }
-
+    /** Gets the angle in degrees of the arm from the CAN
+     * 
+     * @return The degree of the arm
+    */
     public static Angle getPosition() {
         return Degrees.of(armCanMotor.getAbsolutePosition().getValueAsDouble());
     }
-
+    /**Gets the angular velocity of the arm from the CAN
+     * 
+     * @return The velocity of the arm
+    */
     public static AngularVelocity getVelocity() {
         return DegreesPerSecond.of(armCanMotor.getAbsolutePosition().getValueAsDouble());
     }
-
+    /**Command that rotates the arm to a setpoint
+     * 
+     * @return Command to rotate arm
+     */
     public Command rotateTo(Angle setpoint) {
         return runOnce(
             () -> setSetpoint(setpoint)).until(
@@ -173,7 +182,7 @@ public class IntakeSubsystem extends SubsystemBase {
         .andThen(new WaitCommand(0.5))
         .andThen(rotateTo(COLLECTION_POINT)); //TODO: Should work but will need a controlled test
     }
-    
+   
     public StatusSignal<Current> getDraw() {
         return rodMotor.getMotorStallCurrent();
     }

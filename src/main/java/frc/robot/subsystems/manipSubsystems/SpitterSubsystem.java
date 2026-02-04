@@ -113,7 +113,10 @@ public class SpitterSubsystem extends SubsystemBase {
         rightFeeder.getConfigurator().apply(RSMotorConfig);
 
     }
-
+    /**runs the spit command 
+     * 
+     * @return prints Spitting then sets the RS and the LS speed(changes based on distance) then stops
+     */
     public Command spit(double speed) {
         return new Command() {
             @Override
