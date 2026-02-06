@@ -101,9 +101,18 @@ public class DriveSubsystem extends SubsystemBase {
 			0.0,
 			0.0
 		);
-	/**
-	 * Estaablishes PID for X axis
-	 */
+
+	private static final Distance TRANS_ERR_TOL = Meters.of(0.025);
+	private static final LinearVelocity TRANS_VEL_TOL = MetersPerSecond.of(0.1);
+	private static final Angle ROT_ERR_TOL = Degrees.of(0.5);
+	private static final AngularVelocity ROT_VEL_TOL = DegreesPerSecond.of(0.5);
+
+	private static final LinearVelocity TRANS_MAX_VEL = MetersPerSecond.of(1);
+	private static final LinearAcceleration TRANS_MAX_ACCEL = MetersPerSecondPerSecond.of(2);
+
+	private static final AngularVelocity ROT_MAX_VEL = DegreesPerSecond.of(720);
+	private static final AngularAcceleration ROT_MAX_ACCEL = DegreesPerSecondPerSecond.of(720);
+
     private ProfiledPIDController xTranslationPID = new ProfiledPIDController(
         TRANSLATION_CONSTANTS.kP,
         TRANSLATION_CONSTANTS.kI,
@@ -168,8 +177,12 @@ public class DriveSubsystem extends SubsystemBase {
 			e.printStackTrace();
 		}
 
-		resetOdometry(new Pose2d(2, 4, swerveDrive.getYaw()));
-			
+		if (RobotBase.isSimulation()) {
+			swerveDrive.field.setRobotPose(new Pose2d(2, 4, new Rotation2d()));
+		}
+
+		swerveDrive.setHeadingCorrection(false);
+		swerveDrive.setCosineCompensator(RobotBase.isReal());
 		swerveDrive.setAngularVelocityCompensation(
 			true,
 			true,
@@ -189,37 +202,48 @@ public class DriveSubsystem extends SubsystemBase {
 	}
 
 	public void setupPathPlanner() {
-		RobotConfig config;
 
+		RobotConfig config;
+		
 		try {
 			config = RobotConfig.fromGUISettings();
 
-            final boolean enableFeedforward = true;
+			final boolean enableFeedforward = true;
 
-            AutoBuilder.configure(
-                () -> swerveDrive.getPose(),
-                this::resetOdometry,
-                () -> swerveDrive.getRobotVelocity(),
-                (speedsRobotRelative, moduleFeedForwards) -> {
-					if (enableFeedforward) {
-						swerveDrive.drive(
-							speedsRobotRelative,
-							swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
-							moduleFeedForwards.linearForces()
-						);
-					} else {
-						swerveDrive.setChassisSpeeds(speedsRobotRelative);
-					}
-				},
-				new PPHolonomicDriveController(
-					PP_TRANS,
-					PP_ROT
-				),
-				config,
-				() -> Alliance.getAlliance() == AllianceColor.Red,
-				this
-            );
-			PathfindingCommand.warmupCommand().schedule();
+			// Configure AutoBuilder last
+		AutoBuilder.configure(
+			() -> {
+				if (RobotBase.isSimulation()) {
+					return swerveDrive.field.getRobotPose();
+				} else {
+					return swerveDrive.getPose();
+				}
+			},
+			// Robot pose supplier
+			this::resetOdometry,
+			// Method to reset odometry (will be called if your auto has a starting pose)
+			() -> swerveDrive.getRobotVelocity(),
+			// ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+			(speedsRobotRelative, moduleFeedForwards) -> {
+				if (enableFeedforward) {
+					swerveDrive.drive(
+						speedsRobotRelative,
+						swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
+						moduleFeedForwards.linearForces());
+				} else {
+					swerveDrive.setChassisSpeeds(speedsRobotRelative);
+				}
+			},
+			new PPHolonomicDriveController(
+				PP_TRANS,
+				PP_ROT
+			),
+			config,
+			() -> {
+				return Alliance.getAlliance() == AllianceColor.Red;
+			},
+			this);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -236,12 +260,14 @@ public class DriveSubsystem extends SubsystemBase {
 		swerveDrive.resetOdometry(new Pose2d(getPose().getX(), getPose().getY(), yaw));
 	}
 
-	public Pigeon2 getIMU() {
-		return ((Pigeon2) swerveDrive.getGyro().getIMU());
-	}
-
-	public Rotation2d getIMUYaw() {
-		return getIMU().getRotation2d();
+	/**
+	 * Returns a Command that centers the modules of the SwerveDrive subsystem.
+	 *
+	 * @return a Command that centers the modules of the SwerveDrive subsystem
+	 */
+	public Command centerModulesCommand() {
+		return run(() -> Arrays.asList(swerveDrive.getModules())
+				.forEach(it -> it.setAngle(0.0)));
 	}
 
 	public AngularVelocity getIMUYawRate() {
@@ -338,7 +364,6 @@ public class DriveSubsystem extends SubsystemBase {
 	 * Zeros the gyro with the lime light based on 2d april tags
 	 */
 	public Command zeroGyroWithLimelight() {
-
 		return runOnce(
 			() -> {
 				Rotation2d mt1 = new Rotation2d();

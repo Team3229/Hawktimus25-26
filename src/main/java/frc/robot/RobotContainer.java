@@ -81,6 +81,7 @@ public class RobotContainer {
 	public void teleopInit() {
 
 		System.out.println("TELEOP INIT");
+		driveSubsystem.zeroGyroWithAlliance();
 		
 	}
 
