@@ -80,6 +80,7 @@ public class RobotContainer {
 	public void teleopInit() {
 
 		System.out.println("TELEOP INIT");
+		driveSubsystem.zeroGyroWithAlliance();
 		
 	}
 
@@ -111,8 +112,6 @@ public class RobotContainer {
 				driveAngularVelocity
 			)
 		);
-
-
 
 		driverController.b_10().onTrue(
 			driveSubsystem.zeroGyroWithLimelight()

@@ -103,7 +103,7 @@ public class DriveSubsystem extends SubsystemBase {
 			0.0
 		);
 
-	private static final Distance TRANS_ERR_TOL = Meters.of(0.25);
+	private static final Distance TRANS_ERR_TOL = Meters.of(0.025);
 	private static final LinearVelocity TRANS_VEL_TOL = MetersPerSecond.of(0.1);
 	private static final Angle ROT_ERR_TOL = Degrees.of(0.5);
 	private static final AngularVelocity ROT_VEL_TOL = DegreesPerSecond.of(0.5);
@@ -182,8 +182,7 @@ public class DriveSubsystem extends SubsystemBase {
 		if (RobotBase.isSimulation()) {
 			swerveDrive.field.setRobotPose(new Pose2d(2, 4, new Rotation2d()));
 		}
-//hello!
-//hi
+
 		swerveDrive.setHeadingCorrection(false);
 		swerveDrive.setCosineCompensator(RobotBase.isReal());
 		swerveDrive.setAngularVelocityCompensation(
@@ -237,48 +236,46 @@ public class DriveSubsystem extends SubsystemBase {
 	 */
 	public void setupPathPlanner() {
 
-
-
 		RobotConfig config;
-
+		
 		try {
 			config = RobotConfig.fromGUISettings();
 
 			final boolean enableFeedforward = true;
 
 			// Configure AutoBuilder last
-			AutoBuilder.configure(
-					() -> {
-						if (RobotBase.isSimulation()) {
-							return swerveDrive.field.getRobotPose();
-						} else {
-							return swerveDrive.getPose();
-						}
-					},
-					// Robot pose supplier
-					this::resetOdometry,
-					// Method to reset odometry (will be called if your auto has a starting pose)
-					() -> swerveDrive.getRobotVelocity(),
-					// ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-					(speedsRobotRelative, moduleFeedForwards) -> {
-						if (enableFeedforward) {
-							swerveDrive.drive(
-									speedsRobotRelative,
-									swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
-									moduleFeedForwards.linearForces());
-						} else {
-							swerveDrive.setChassisSpeeds(speedsRobotRelative);
-						}
-					},
-					new PPHolonomicDriveController(
-						PP_TRANS,
-						PP_ROT
-					),
-					config,
-					() -> {
-						return Alliance.getAlliance() == AllianceColor.Red;
-					},
-					this);
+		AutoBuilder.configure(
+			() -> {
+				if (RobotBase.isSimulation()) {
+					return swerveDrive.field.getRobotPose();
+				} else {
+					return swerveDrive.getPose();
+				}
+			},
+			// Robot pose supplier
+			this::resetOdometry,
+			// Method to reset odometry (will be called if your auto has a starting pose)
+			() -> swerveDrive.getRobotVelocity(),
+			// ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+			(speedsRobotRelative, moduleFeedForwards) -> {
+				if (enableFeedforward) {
+					swerveDrive.drive(
+						speedsRobotRelative,
+						swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
+						moduleFeedForwards.linearForces());
+				} else {
+					swerveDrive.setChassisSpeeds(speedsRobotRelative);
+				}
+			},
+			new PPHolonomicDriveController(
+				PP_TRANS,
+				PP_ROT
+			),
+			config,
+			() -> {
+				return Alliance.getAlliance() == AllianceColor.Red;
+			},
+			this);
 
 		} catch (Exception e) {
 			// Handle exception as needed
@@ -301,38 +298,6 @@ public class DriveSubsystem extends SubsystemBase {
 		// event markers.
 		return new PathPlannerAuto(pathName);
 	}
-
-	/**
-	 * Use PID control to go to a point on the field.
-	 *
-	 * @param pose Target {@link Pose2d} to go to.
-	 * @return PID command
-	 */
-	public Command driveToPose(Supplier<Pose2d> pose) {
-
-		return
-			runOnce(
-				() -> {
-					xTranslationPID.reset(getPose().getX(), swerveDrive.getFieldVelocity().vxMetersPerSecond);
-					yTranslationPID.reset(getPose().getY(), swerveDrive.getFieldVelocity().vyMetersPerSecond);
-					rotationPID.reset(getPose().getRotation().getRadians(), swerveDrive.getFieldVelocity().omegaRadiansPerSecond);
-				}
-			).andThen(
-				driveFieldOriented(
-					() -> {
-						return new ChassisSpeeds(
-							xTranslationPID.calculate(getPose().getX(), pose.get().getX()),
-							yTranslationPID.calculate(getPose().getY(), pose.get().getY()),
-							rotationPID.calculate(getPose().getRotation().getRadians(), pose.get().getRotation().getRadians())
-						);
-					}
-				)
-			)
-			.ignoringDisable(false)
-			.until(
-				() -> xTranslationPID.atGoal() && yTranslationPID.atGoal() && rotationPID.atGoal()
-			);
-    }
 
 	/**
 	 * Returns a Command that centers the modules of the SwerveDrive subsystem.
@@ -417,20 +382,16 @@ public class DriveSubsystem extends SubsystemBase {
 	}
 
 	public Command zeroGyroWithLimelight() {
-
-		System.out.println("register lm");
-
 		return runOnce(
 			() -> {
+				Rotation2d mt1 = new Rotation2d();
+				mt1 = VisionSubsystem.getMT1Rotation();
 
-				System.out.println("trying lm before");
-
-				Rotation2d mt1 = VisionSubsystem.getMT1Rotation();
-
-				System.out.println("trying lm after");
-
+				if (Alliance.getAlliance() == AllianceColor.Red) {
+					mt1.rotateBy(new Rotation2d(Math.PI));
+				}
+				
 				if (mt1 != null) {
-					System.out.println("lm not null");
 					swerveDrive.setGyro(new Rotation3d(mt1));
 				}
 			}
