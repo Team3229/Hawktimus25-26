@@ -1,13 +1,8 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
@@ -15,20 +10,18 @@ import static edu.wpi.first.units.Units.Milliseconds;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
+
+import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.PathPlannerLogging;
-
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.measure.Angle;
@@ -43,14 +36,14 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import frc.hawklibraries.utilities.Alliance;
 import frc.hawklibraries.utilities.Alliance.AllianceColor;	
 import frc.robot.subsystems.VisionSubsystem;
-import frc.robot.utilities.LimelightHelpers.PoseEstimate;
+import frc.robot.utilities.LimelightHelpers;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -61,21 +54,26 @@ import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
-/**
- * The SwerveDrivetrain class represents a swerve drive subsystem for a robot
- * using YAGSL.It provides methods to control the robot's movement, including
- * driving to specific poses, following trajectories, and handling various
- * driving commands.This class integrates with PathPlanner for autonomous path
- * planning and execution. It also supports telemetry, odometry, and various
- * drive modes such as field-relative and robot-relative control.
- */
 public class DriveSubsystem extends SubsystemBase {
+    
+    public static final LinearVelocity MAX_VELOCITY = MetersPerSecond.of(5.0);
+    
+    private static final Distance TRANS_ERR_TOL = Meters.of(0.025); //TODO: Test this with a setpoint
+	private static final LinearVelocity TRANS_VEL_TOL = MetersPerSecond.of(0.1);
+	private static final Angle ROT_ERR_TOL = Degrees.of(0.5);
+	private static final AngularVelocity ROT_VEL_TOL = DegreesPerSecond.of(0.5);
 
-	//auto align chassis angle with hub
+	private static final LinearVelocity TRANS_MAX_VEL = MetersPerSecond.of(3); //TODO: Was 1
+	private static final LinearAcceleration TRANS_MAX_ACCEL = MetersPerSecondPerSecond.of(2);
 
-	public static final LinearVelocity MAX_VELOCITY = MetersPerSecond.of(5.0);
+	private static final AngularVelocity ROT_MAX_VEL = DegreesPerSecond.of(540); // TODO: We multiplied these by 0.75
+	private static final AngularAcceleration ROT_MAX_ACCEL = DegreesPerSecondPerSecond.of(540);
 
-	private static final PIDConstants TRANSLATION_CONSTANTS =
+    private static final Pose2d startingBluePose = new Pose2d(2, 4, new Rotation2d(0));
+    private static final Pose2d startingRedPose = new Pose2d(2, 4, new Rotation2d(Math.PI));
+
+	// Standard PID
+    private static final PIDConstants TRANSLATION_CONSTANTS =
 		new PIDConstants(
 			5.5,
 			0.2,
@@ -89,6 +87,7 @@ public class DriveSubsystem extends SubsystemBase {
 			0.0
 		);
 
+    // Pathplanner PID
 	private static final PIDConstants PP_TRANS = 
 		new PIDConstants(
 			5.2,
@@ -120,7 +119,9 @@ public class DriveSubsystem extends SubsystemBase {
         TRANSLATION_CONSTANTS.kD,
 		new Constraints(TRANS_MAX_VEL.in(MetersPerSecond), TRANS_MAX_ACCEL.in(MetersPerSecondPerSecond))
     );
-
+	/**
+	 * Establishes the PID for the y axis
+	 */
 	private ProfiledPIDController yTranslationPID = new ProfiledPIDController(
         TRANSLATION_CONSTANTS.kP,
         TRANSLATION_CONSTANTS.kI,
@@ -128,6 +129,9 @@ public class DriveSubsystem extends SubsystemBase {
 		new Constraints(TRANS_MAX_VEL.in(MetersPerSecond), TRANS_MAX_ACCEL.in(MetersPerSecondPerSecond))
     );
 
+	/**
+ 	* Establishing PID for the rotational axis
+ 	*/
     private ProfiledPIDController rotationPID = new ProfiledPIDController(
 		ROTATION_CONSTANTS.kP,
 		ROTATION_CONSTANTS.kI,
@@ -135,12 +139,12 @@ public class DriveSubsystem extends SubsystemBase {
 		new Constraints(ROT_MAX_VEL.in(RadiansPerSecond), ROT_MAX_ACCEL.in(RadiansPerSecondPerSecond))
 	);
 
-	/**
+    /**
 	 * Swerve drive object.
 	 */
-	private SwerveDrive swerveDrive;
+    private SwerveDrive swerveDrive;
 
-	/**
+    /**
 	 * Initialize {@link SwerveDrive}
 	 *
 	 * @param parser             The parser to create the swerve drive.
@@ -149,35 +153,29 @@ public class DriveSubsystem extends SubsystemBase {
 	 * @param verbosity          The verbosity level for telemetry.
 	 */
 	public DriveSubsystem(
-			String path,
-			TelemetryVerbosity verbosity) {
-
+		String path,
+		TelemetryVerbosity verbosity
+	) {
 		super();
-
-		SmartDashboard.putBoolean("Done Lining Up", false);
-
+		
 		rotationPID.enableContinuousInput(0, 2 * Math.PI);
 
 		xTranslationPID.setTolerance(TRANS_ERR_TOL.in(Meters), TRANS_VEL_TOL.in(MetersPerSecond));
 		yTranslationPID.setTolerance(TRANS_ERR_TOL.in(Meters), TRANS_VEL_TOL.in(MetersPerSecond));
 		rotationPID.setTolerance(ROT_ERR_TOL.in(Radians), ROT_VEL_TOL.in(RadiansPerSecond));
-
-		// Configure the Telemetry before creating the SwerveDrive to avoid unnecessary
-		// objects being created.
+		
 		SwerveDriveTelemetry.verbosity = verbosity;
 
-		try {
+		try { 
 			swerveDrive = new SwerveParser(
-					new File(Filesystem.getDeployDirectory(), path))
-					.createSwerveDrive(
-							MAX_VELOCITY.in(MetersPerSecond),
-							new Pose2d(2, 4, new Rotation2d()));
+				new File(Filesystem.getDeployDirectory(), path))
+				.createSwerveDrive(
+					MAX_VELOCITY.in(MetersPerSecond),
+					new Pose2d(2, 4, new Rotation2d())// sets the position to the bottom right (paper view)
+				);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		resetOdometry(new Pose2d(2, 4, swerveDrive.getYaw()));
-
 
 		if (RobotBase.isSimulation()) {
 			swerveDrive.field.setRobotPose(new Pose2d(2, 4, new Rotation2d()));
@@ -186,54 +184,23 @@ public class DriveSubsystem extends SubsystemBase {
 		swerveDrive.setHeadingCorrection(false);
 		swerveDrive.setCosineCompensator(RobotBase.isReal());
 		swerveDrive.setAngularVelocityCompensation(
-				true,
-				true,
-				0.1);
-		swerveDrive.setModuleEncoderAutoSynchronize(
-				false,
-				1);
-
+			true,
+			true,
+			0.1 //TODO: we need to change this later
+		);
+		
+		swerveDrive.chassisVelocityCorrection = false; //does nothing set to true and test later
+		swerveDrive.autonomousChassisVelocityCorrection = false; //does nothing currently set to true and test later
+		
 		swerveDrive.useExternalFeedbackSensor();
 
-		swerveDrive.setAutoCenteringModules(false);
-
-		if (RobotBase.isSimulation()) {
-			swerveDrive.getMapleSimDrive().get().config.bumperLengthX = Inch.of(33.954922);
-			swerveDrive.getMapleSimDrive().get().config.bumperWidthY = Inch.of(33.954922);
-		}
-
-		setupPathPlanner();
-
+		setupPathPlanner();  
+		
 		SmartDashboard.putData("XPID", xTranslationPID);
 		SmartDashboard.putData("YPID", yTranslationPID);
-		SmartDashboard.putData("RPID", rotationPID);
-
-		PathPlannerLogging.setLogActivePathCallback((poses) -> {
-			swerveDrive.field.getObject("Trajectory").setPoses(poses);
-        });
+		SmartDashboard.putData("RPID", rotationPID);      
 	}
 
-	@Override
-	public void periodic() {
-		PoseEstimate estimate = VisionSubsystem.getMT2Pose(getPose().getRotation(), swerveDrive.getRobotVelocity().omegaRadiansPerSecond);
-
-		if (estimate != null) {
-			swerveDrive.addVisionMeasurement(estimate.pose, estimate.timestampSeconds);
-		}
-
-		SmartDashboard.putNumber("X-Pos-Err", xTranslationPID.getPositionError());
-		SmartDashboard.putNumber("Y-Pos-Err", yTranslationPID.getPositionError());
-		SmartDashboard.putNumber("Z-Pos-Err", rotationPID.getPositionError());
-
-		SmartDashboard.putNumber("X-Vel-Err", xTranslationPID.getVelocityError());
-		SmartDashboard.putNumber("Y-Vel-Err", yTranslationPID.getVelocityError());
-		SmartDashboard.putNumber("Z-Vel-Err", rotationPID.getVelocityError());
-
-	}
-
-	/**
-	 * Setup AutoBuilder for PathPlanner.
-	 */
 	public void setupPathPlanner() {
 
 		RobotConfig config;
@@ -278,25 +245,19 @@ public class DriveSubsystem extends SubsystemBase {
 			this);
 
 		} catch (Exception e) {
-			// Handle exception as needed
 			e.printStackTrace();
 		}
-
-		// Preload PathPlanner Path finding
-		// IF USING CUSTOM PATHFINDER ADD BEFORE THIS LINE
-		PathfindingCommand.warmupCommand().schedule();
 	}
 
-	/**
-	 * Get the path follower with events.
-	 *
-	 * @param pathName PathPlanner path name.
-	 * @return {@link AutoBuilder#followPath(PathPlannerPath)} path command.
-	 */
-	public Command getAutonomousCommand(String pathName) {
-		// Create a path following command using AutoBuilder. This will also trigger
-		// event markers.
-		return new PathPlannerAuto(pathName);
+		@Override
+	public void periodic() {
+		
+		updateOdometry();
+
+	}
+	public void setIMUYaw(Rotation2d yaw) {
+		getIMU().setYaw(yaw.getMeasure());
+		swerveDrive.resetOdometry(new Pose2d(getPose().getX(), getPose().getY(), yaw));
 	}
 
 	/**
@@ -309,35 +270,60 @@ public class DriveSubsystem extends SubsystemBase {
 				.forEach(it -> it.setAngle(0.0)));
 	}
 
+	public AngularVelocity getIMUYawRate() {
+		return getIMU().getAngularVelocityZWorld().getValue();
+	}
+
 	/**
-	 * Drive the robot given a chassis field oriented velocity.
-	 *
-	 * @param velocity Velocity according to the field.
+	* Updates the drivetrain odometry object to the robot's current position on the
+	* field.
+	* 
+	* @return The new updated pose of the robot.
+	*/
+	public void updateOdometry() {
+
+		for (String side : new String[] {"LIMELIGHT1", "LIMELIGHT2"}) { //TODO: Name the limelights
+
+			LimelightHelpers.SetRobotOrientation("limelight-" + side, getIMUYaw().getDegrees(), getIMUYawRate().in(DegreesPerSecond), 0, 0, 0, 0);
+			LimelightHelpers.PoseEstimate estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-" + side);
+
+			if (estimate != null && estimate.tagCount > 0) {
+				double tagID = LimelightHelpers.getFiducialID("limelight-" + side);
+			}
+		}
+  	}
+
+
+    /**
+	 * Resets odometry to the given pose. Gyro angle and module positions do not
+	 * need to be reset when calling this
+	 * method. However, if either gyro angle or module position is reset, this must
+	 * be called in order for odometry to
+	 * keep working..
+	 * @param initialHolonomicPose The pose to set the odometry to
 	 */
+	public void resetOdometry(Pose2d pose) {
+		if(Alliance.getAlliance() == AllianceColor.Red) {
+            if (pose == null) {
+                swerveDrive.resetOdometry(startingRedPose);
+                return;
+            }
+        } else {
+            if (pose == null) {
+				swerveDrive.resetOdometry(startingBluePose);
+				return;
+			}
+        }
+        swerveDrive.resetOdometry(pose);
+    }
+
 	public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
 		return run(() -> {
 			swerveDrive.driveFieldOriented(velocity.get());
 		}).ignoringDisable(false);
 	}
 
-	/**
-	 * Resets odometry to the given pose. Gyro angle and module positions do not
-	 * need to be reset when calling this
-	 * method. However, if either gyro angle or module position is reset, this must
-	 * be called in order for odometry to
-	 * keep working.
-	 *
-	 * @param initialHolonomicPose The pose to set the odometry to
-	 */
-	public void resetOdometry(Pose2d pose) {
-		if (pose == null) {
-			swerveDrive.resetOdometry(new Pose2d(2, 4, new Rotation2d()));
-			return;
-		}
-		swerveDrive.resetOdometry(pose);
-	}
-
-	/**
+		/**
 	 * Gets the current pose (position and rotation) of the robot, as reported by
 	 * odometry.
 	 *
@@ -349,15 +335,6 @@ public class DriveSubsystem extends SubsystemBase {
 		}
 		return swerveDrive.getPose();
 	}
-
-	/**
-	 * Resets the gyro angle to zero and resets odometry to the same position, but
-	 * facing toward 0.
-	 */
-	public void zeroGyro() {
-		swerveDrive.zeroGyro();
-	}
-
 	/**
 	 * This will zero (calibrate) the robot to assume the current position is facing
 	 * forward
@@ -365,14 +342,16 @@ public class DriveSubsystem extends SubsystemBase {
 	 * If red alliance rotate the robot 180 after the drivebase zero command
 	 */
 	public void zeroGyroWithAlliance() {
-
 		if (Alliance.getAlliance() == AllianceColor.Red) {
-			zeroGyro();
-			// Set the pose 180 degrees
-			resetOdometry(new Pose2d(getPose().getTranslation(), Rotation2d.fromDegrees(180)));
+			setIMUYaw(new Rotation2d(Math.PI));
 		} else {
 			zeroGyro();
 		}
+	}
+
+	public void zeroGyro() {
+		getIMU().setYaw(0);
+		swerveDrive.resetOdometry(new Pose2d(getPose().getX(), getPose().getY(), new Rotation2d()));
 	}
 
 	public Command zeroGyroWithAllianceCommand() {
@@ -381,6 +360,9 @@ public class DriveSubsystem extends SubsystemBase {
 		);
 	}
 
+	/**
+	 * Zeros the gyro with the lime light based on 2d april tags
+	 */
 	public Command zeroGyroWithLimelight() {
 		return runOnce(
 			() -> {
@@ -402,13 +384,6 @@ public class DriveSubsystem extends SubsystemBase {
 		swerveDrive.field.getObject("Trajectory").setPoses(trajectory);
 	}
 
-	/**
-	 * Lock the swerve drive to prevent it from moving.
-	 */
-	public void lock() {
-		swerveDrive.lockPose();
-	}
-
 	public void addVisionReading(Pose2d pose, Time timestamp) {
 		swerveDrive.addVisionMeasurement(pose, timestamp.in(Milliseconds));
 	}
@@ -419,6 +394,17 @@ public class DriveSubsystem extends SubsystemBase {
 		DoubleSupplier rot
 	) {
 		return new SwerveInputStream(swerveDrive, x, y, rot);
+	}
+
+	/*
+	 * Returns the angle from the robot to the hub (in Angle radians)
+	 */
+	public double angleFromHub(Pose2d robotPos, Pose2d hubPos) {
+		return Math.atan2(hubPos.getY() - robotPos.getY(), hubPos.getX() - robotPos.getX());
+	}
+
+	public double distanceFromHub(Pose2d robotPos, Pose2d hubPos) {
+		return Math.sqrt(Math.pow(hubPos.getX() - robotPos.getX(), 2) + Math.pow(hubPos.getY() - robotPos.getY(), 2));
 	}
 
 }

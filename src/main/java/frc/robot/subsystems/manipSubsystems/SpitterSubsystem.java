@@ -118,7 +118,7 @@ public class SpitterSubsystem extends SubsystemBase {
 
     }
 
-    public Command spit(double speed) {
+    public Command spinUp(double speed) {
         return new Command() {
             @Override
             public void initialize() {
@@ -138,6 +138,7 @@ public class SpitterSubsystem extends SubsystemBase {
             }
         };
     }
+
 
     public Command feed() {
         return new Command() {
