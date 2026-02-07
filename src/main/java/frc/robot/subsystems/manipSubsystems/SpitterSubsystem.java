@@ -27,13 +27,14 @@ public class SpitterSubsystem extends SubsystemBase {
     private static double requestedVelocity = 1;
 
     //change PID (if needed)
-    private static double kP = 0.3;
-    private static double kI = 0.0;
-    private static double kD = 0.0;
+    private static double kP = 1;
+    private static double kI = 0;
+    private static double kD = 0.1;
+    //add F on 2/7/2026
 
 
     // change can ID
-    private static final int LS_CAN_ID = 17;
+    private static final int LS_CAN_ID = 10;
     private static TalonFX leftSpitter;
     private static TalonFXConfiguration LSMotorConfig;
 
@@ -43,7 +44,7 @@ public class SpitterSubsystem extends SubsystemBase {
     private TalonFXConfiguration RSMotorConfig;
 
     // change can ID
-    private static final int LF_CAN_ID = 18;
+    private static final int LF_CAN_ID = 11;
     private static TalonFX leftFeeder;
     private static TalonFXConfiguration LFMotorConfig;
 
@@ -71,7 +72,7 @@ public class SpitterSubsystem extends SubsystemBase {
         LSMotorConfig.Slot0.kP = (kP);
         LSMotorConfig.Slot0.kI = (kI);
         LSMotorConfig.Slot0.kD = (kD);
-        LSMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        LSMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         leftSpitter.getConfigurator().apply(LSMotorConfig);
 
         // rightSpitter = new TalonFX(RS_CAN_ID, "Placeholder"); // placeholder name for the canbus
@@ -107,7 +108,7 @@ public class SpitterSubsystem extends SubsystemBase {
         LFMotorConfig.Slot0.kP = (kP);
         LFMotorConfig.Slot0.kI = (kI);
         LFMotorConfig.Slot0.kD = (kD);
-        LFMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        LFMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         leftFeeder.getConfigurator().apply(LFMotorConfig);
 
         // rightFeeder = new TalonFX(RF_CAN_ID, "rio"); // placeholder name for the canbus

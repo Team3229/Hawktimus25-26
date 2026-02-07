@@ -140,7 +140,7 @@ public class RobotContainer {
 	private void configManipControls() {
 		
 		manipController.b_Trigger().onTrue(
-			spitterSubsystem.shoot(0.3)
+			spitterSubsystem.shoot(0.5)
 		);
 		
 		manipController.b_Trigger().onFalse(
@@ -148,7 +148,7 @@ public class RobotContainer {
 		);
 		
 		manipController.b_3().onTrue(
-			spitterSubsystem.spinUp(0.3)
+			spitterSubsystem.spinUp(0.67)
 		);
 
 		manipController.b_3().onFalse(
