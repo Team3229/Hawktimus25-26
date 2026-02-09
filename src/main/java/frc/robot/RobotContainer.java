@@ -38,7 +38,7 @@ public class RobotContainer {
 	FlightStick manipController;
 	ButtonBoard buttonBoard;
 	DriveSubsystem driveSubsystem;
-	ManipSubsystem manipSubsystem;
+	// ManipSubsystem manipSubsystem;
 	SpitterSubsystem spitterSubsystem;
 
 	VisualizerSubsystem visualizerSubsystem;
@@ -57,7 +57,7 @@ public class RobotContainer {
 			"swerve",
 			TelemetryVerbosity.HIGH
 		);
-		manipSubsystem = new ManipSubsystem();
+		// manipSubsystem = new ManipSubsystem();
 		spitterSubsystem = new SpitterSubsystem();
 
 		// visualizerSubsystem = new VisualizerSubsystem(
@@ -93,10 +93,10 @@ public class RobotContainer {
 
 	private void configDriveControls() {
 
-		NamedCommands.registerCommand("Intake", manipSubsystem.intake());
-		NamedCommands.registerCommand("ArmOut", manipSubsystem.extendStorage());
-		NamedCommands.registerCommand("WheelSpinUp", manipSubsystem.spinUp());
-		NamedCommands.registerCommand("Shoot", manipSubsystem.shoot());
+		// NamedCommands.registerCommand("Intake", manipSubsystem.intake());
+		// NamedCommands.registerCommand("ArmOut", manipSubsystem.extendStorage());
+		// NamedCommands.registerCommand("WheelSpinUp", manipSubsystem.spinUp());
+		// NamedCommands.registerCommand("Shoot", manipSubsystem.shoot());
 
 		SwerveInputStream driveAngularVelocity = driveSubsystem.getInputStream(
 			() -> -driverController.a_Y(),
@@ -140,11 +140,11 @@ public class RobotContainer {
 	private void configManipControls() {
 		
 		manipController.b_Trigger().onTrue(
-			spitterSubsystem.shoot(0.5)
+			spitterSubsystem.shoot(50)
 		);
 		
 		manipController.b_Trigger().onFalse(
-			spitterSubsystem.shoot(0.0)
+			spitterSubsystem.shoot(0)
 		);
 		
 		manipController.b_3().onTrue(
@@ -155,38 +155,38 @@ public class RobotContainer {
 			spitterSubsystem.spinUp(0)
 		);
 
-		manipController.b_Hazard().onTrue(
-			manipSubsystem.intake()
-		);
+		// manipController.b_Hazard().onTrue(
+		// 	manipSubsystem.intake()
+		// );
 	
-		manipController.b_5().onTrue(
-			manipSubsystem.extendStorage()
-		);
-		manipController.b_4().onTrue(
-			manipSubsystem.manualShoot()
-		);
+		// manipController.b_5().onTrue(
+		// 	manipSubsystem.extendStorage()
+		// );
+		// manipController.b_4().onTrue(
+		// 	manipSubsystem.manualShoot()
+		// );
 	}
 
 	private void configButtonControls() {
-		buttonBoard.b_1().onTrue(
-			manipSubsystem.shoot()
-		);
+		// buttonBoard.b_1().onTrue(
+		// 	manipSubsystem.shoot()
+		// );
 
-		buttonBoard.b_2().onTrue(
-			manipSubsystem.spinUp()
-		);
+		// buttonBoard.b_2().onTrue(
+		// 	manipSubsystem.spinUp()
+		// );
 
-		buttonBoard.b_3().onTrue(
-			manipSubsystem.intake()
-		);
+		// buttonBoard.b_3().onTrue(
+		// 	manipSubsystem.intake()
+		// );
 
-		buttonBoard.b_4().onTrue(
-			manipSubsystem.extendStorage()
-		);
+		// buttonBoard.b_4().onTrue(
+		// 	manipSubsystem.extendStorage()
+		// );
 
-		buttonBoard.b_5().onTrue(
-			manipSubsystem.manualShoot()
-		);
+		// buttonBoard.b_5().onTrue(
+		// 	manipSubsystem.manualShoot()
+		// );
 	}
 
 	public void initTelemetery() {

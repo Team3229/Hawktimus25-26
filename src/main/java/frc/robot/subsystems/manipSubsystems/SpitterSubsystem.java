@@ -25,32 +25,31 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class SpitterSubsystem extends SubsystemBase {
 
-    private double currentSetpoint = 0;
-    private static double requestedVelocity = 1;
+    private double requestedVelocity = 1;
 
     // change PID (if needed)
-    private static double kP = 0.1;
-    private static double kI = 0;
-    private static double kD = 0;
-    private static double kV = 0.12;
+    private static final double kP = 0.1;
+    private static final double kI = 0;
+    private static final double kD = 0;
+    private static final double kV = 0.12;
     // private static double kS = 0;
 
-    private static double fP = 0.1;
-    private static double fI = 0;
-    private static double fD = 0;
-    private static double fV = 0.12;
+    private static final double fP = 0.1;
+    private static final double fI = 0;
+    private static final double fD = 0;
+    private static final double fV = 0.12;
 
     private static final int LS_CAN_ID = 10;
-    private static TalonFX leftSpitter;
-    private static TalonFXConfiguration LSMotorConfig;
+    private TalonFX leftSpitter;
+    private TalonFXConfiguration LSMotorConfig;
 
     private static final int RS_CAN_ID = 8;
     private TalonFX rightSpitter;
     private TalonFXConfiguration RSMotorConfig;
 
     private static final int Feeder_CAN_ID = 7;
-    private static TalonFX feeder;
-    private static TalonFXConfiguration feederMotorConfig;
+    private TalonFX feeder;
+    private TalonFXConfiguration feederMotorConfig;
 
     // private static final int RF_CAN_ID = 51;
     // private TalonFX rightFeeder;
@@ -83,13 +82,14 @@ public class SpitterSubsystem extends SubsystemBase {
         LSMotorConfig.Slot0.kI = (kI);
         LSMotorConfig.Slot0.kD = (kD);
         LSMotorConfig.Slot0.kV = (kV);
+        
         // LSMotorConfig.Slot0.kS = (kS);
         LSMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         leftSpitter.getConfigurator().apply(LSMotorConfig);
 
         
         
-        rightSpitter = new TalonFX(RS_CAN_ID, CANBus.roboRIO()); 
+        rightSpitter = new TalonFX(RS_CAN_ID, CANBus.roboRIO("")); 
         RSMotorConfig = new TalonFXConfiguration()
             .withMotorOutput(
                 new MotorOutputConfigs()
@@ -169,6 +169,7 @@ public class SpitterSubsystem extends SubsystemBase {
                 leftSpitter.setControl(new VelocityVoltage(rps).withSlot(0));
                 rightSpitter.setControl(new VelocityVoltage(rps).withSlot(0));
                 System.out.println("raaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaahhhhhhh");
+                requestedVelocity = rps;
             }
 
             @Override
