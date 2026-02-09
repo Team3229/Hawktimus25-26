@@ -3,6 +3,7 @@ package frc.robot.subsystems.manipSubsystems;
 import static edu.wpi.first.units.Units.Amps;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -39,7 +40,7 @@ public class SpitterSubsystem extends SubsystemBase {
     private static double fD = 0;
     private static double fV = 0.12;
 
-    private static final int LS_CAN_ID = 0;
+    private static final int LS_CAN_ID = 10;
     private static TalonFX leftSpitter;
     private static TalonFXConfiguration LSMotorConfig;
 
@@ -56,11 +57,11 @@ public class SpitterSubsystem extends SubsystemBase {
     // private TalonFXConfiguration RFMotorConfig;
 
     // change amp limit
-    private static final Current CURRENT_LIMIT = Amps.of(80);
+    private static final Current CURRENT_LIMIT = Amps.of(40);
 
     public SpitterSubsystem() {
         // initializes shooting motors
-        leftSpitter = new TalonFX(LS_CAN_ID, "rio"); // placeholder name for the canbus
+        leftSpitter = new TalonFX(LS_CAN_ID, CANBus.roboRIO()); // placeholder name for the canbus
         LSMotorConfig = new TalonFXConfiguration()
             .withMotorOutput(
                 new MotorOutputConfigs()
@@ -88,7 +89,7 @@ public class SpitterSubsystem extends SubsystemBase {
 
         
         
-        rightSpitter = new TalonFX(RS_CAN_ID, "rio"); 
+        rightSpitter = new TalonFX(RS_CAN_ID, CANBus.roboRIO()); 
         RSMotorConfig = new TalonFXConfiguration()
             .withMotorOutput(
                 new MotorOutputConfigs()
@@ -117,10 +118,8 @@ public class SpitterSubsystem extends SubsystemBase {
 
 
 
-
-        
         // initializes feeding motors
-        feeder = new TalonFX(Feeder_CAN_ID, "rio"); 
+        feeder = new TalonFX(Feeder_CAN_ID, CANBus.roboRIO()); 
         feederMotorConfig = new TalonFXConfiguration()
             .withMotorOutput(
                 new MotorOutputConfigs()
