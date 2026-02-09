@@ -148,7 +148,7 @@ public class RobotContainer {
 		);
 		
 		manipController.b_3().onTrue(
-			spitterSubsystem.spinUp(0.67)
+			spitterSubsystem.spinUp(50)
 		);
 
 		manipController.b_3().onFalse(
@@ -161,7 +161,6 @@ public class RobotContainer {
 	
 		manipController.b_5().onTrue(
 			manipSubsystem.extendStorage()
-
 		);
 		manipController.b_4().onTrue(
 			manipSubsystem.manualShoot()
