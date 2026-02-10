@@ -28,10 +28,10 @@ public class SpitterSubsystem extends SubsystemBase {
     private double requestedVelocity = 0;
 
     // change PID (if needed)
-    private static final double kP = 0.1;
-    private static final double kI = 0;
-    private static final double kD = 0;
-    private static final double kV = 0.12;
+    private static double kP = 0.1;
+    private static double kI = 0;
+    private static double kD = 0;
+    private static double kV = 0.13;
     // private static double kS = 0;
 
     private static final double fP = 0.1;
@@ -167,17 +167,17 @@ public class SpitterSubsystem extends SubsystemBase {
     public Command spinUp(double rps) {
         Command out = new Command() {
             @Override
-            public void initialize() {
-                leftSpitter.setControl(new VelocityVoltage(rps).withSlot(0));
-                rightSpitter.setControl(new VelocityVoltage(rps).withSlot(0));
+            public void initialize() { 
 
                 System.out.println("raaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaahhhhhhh");
                 requestedVelocity = rps;
             }
 
+            // is in execute bc we need to call it every few seconds
             @Override
-            public boolean isFinished() {
-                return isReady();
+            public void execute() {
+                leftSpitter.setControl(new VelocityVoltage(rps).withSlot(0));
+                rightSpitter.setControl(new VelocityVoltage(rps).withSlot(0));
             }
 
         };
@@ -188,6 +188,8 @@ public class SpitterSubsystem extends SubsystemBase {
                 builder.addDoubleProperty("LSpitterVelocity", () -> leftSpitter.getVelocity().getValueAsDouble(), null);
                 builder.addDoubleProperty("RSpitterVelocity", () -> rightSpitter.getVelocity().getValueAsDouble(), null);
                 builder.addDoubleProperty("KickerVelocity", () -> feeder.getVelocity().getValueAsDouble(), null);
+                builder.addBooleanProperty("Ready to Shoot", () -> shooterIsReady(), null);
+                builder.addBooleanProperty("Is a Fed", () -> feederIsReady(), null);
                 
             }
         });
@@ -200,13 +202,21 @@ public class SpitterSubsystem extends SubsystemBase {
         Command out = new Command() {
             @Override
             public void initialize() {
-                feeder.setControl(new VelocityVoltage(rps).withSlot(0));
+                requestedVelocity = rps;
+                System.out.println("LITTLE WHIMSY IS REQUIRED");
             }
-
+            
             @Override
-            public boolean isFinished() {
-                return isReady();
+            public void execute() {
+                leftSpitter.setControl(new VelocityVoltage(rps).withSlot(0));
+                rightSpitter.setControl(new VelocityVoltage(rps).withSlot(0));
+                if(shooterIsReady()) {
+                    feeder.setControl(new VelocityVoltage(25).withSlot(0));
+                } else {
+                    feeder.setControl(new VelocityVoltage(0).withSlot(0));
+                }
             }
+            
         };
 
         out.addRequirements(this);
@@ -214,12 +224,26 @@ public class SpitterSubsystem extends SubsystemBase {
         return out;
     }
 
-    public boolean isReady() {
-        double deadBand = 0.025;
+    public boolean shooterIsReady() {
+        double deadBand = 2;
         double leftVelocity = leftSpitter.getVelocity().getValueAsDouble();
         double rightVelocity = rightSpitter.getVelocity().getValueAsDouble();
-
-        return Math.abs(requestedVelocity - leftVelocity) <= deadBand && Math.abs(requestedVelocity - rightVelocity) <= deadBand;
+        if(requestedVelocity == 0) {
+            return false;
+        } else {
+            return Math.abs(requestedVelocity - leftVelocity) <= deadBand 
+            && Math.abs(requestedVelocity - rightVelocity) <= deadBand;
+        }
+    }
+   
+        public boolean feederIsReady() {
+        double deadBand = 2;
+        double feederVelocity = feeder.getVelocity().getValueAsDouble();
+        if(requestedVelocity == 0) {
+            return false;
+        } else {
+            return Math.abs(requestedVelocity - feederVelocity) <= deadBand;
+        }
     }
 
 }
