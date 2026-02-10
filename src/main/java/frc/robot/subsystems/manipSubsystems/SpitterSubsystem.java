@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class SpitterSubsystem extends SubsystemBase {
 
-    private double requestedVelocity = 1;
+    private double requestedVelocity = 0;
 
     // change PID (if needed)
     private static final double kP = 0.1;
@@ -89,7 +89,7 @@ public class SpitterSubsystem extends SubsystemBase {
 
         
         
-        rightSpitter = new TalonFX(RS_CAN_ID, CANBus.roboRIO("")); 
+        rightSpitter = new TalonFX(RS_CAN_ID, CANBus.roboRIO()); 
         RSMotorConfig = new TalonFXConfiguration()
             .withMotorOutput(
                 new MotorOutputConfigs()
@@ -142,6 +142,8 @@ public class SpitterSubsystem extends SubsystemBase {
         feederMotorConfig.Slot0.kV = (fV);
         feederMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         feeder.getConfigurator().apply(feederMotorConfig);
+        // feeder.setControl(new StrictFollower(LS_CAN_ID));
+
 
         // rightFeeder = new TalonFX(RF_CAN_ID, "rio"); 
         // RFMotorConfig = new TalonFXConfiguration()
@@ -168,6 +170,7 @@ public class SpitterSubsystem extends SubsystemBase {
             public void initialize() {
                 leftSpitter.setControl(new VelocityVoltage(rps).withSlot(0));
                 rightSpitter.setControl(new VelocityVoltage(rps).withSlot(0));
+
                 System.out.println("raaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaahhhhhhh");
                 requestedVelocity = rps;
             }
