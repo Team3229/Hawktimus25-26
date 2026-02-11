@@ -2,18 +2,14 @@ package frc.robot.subsystems.manipSubsystems;
 
 import static edu.wpi.first.units.Units.Amps;
 
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.VoltageConfigs;
-import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.units.measure.Current;
@@ -32,12 +28,6 @@ public class SpitterSubsystem extends SubsystemBase {
     private static double kI = 0;
     private static double kD = 0;
     private static double kV = 0.13;
-    // private static double kS = 0;
-
-    private static final double fP = 0.1;
-    private static final double fI = 0;
-    private static final double fD = 0;
-    private static final double fV = 0.12;
 
     private static final int LS_CAN_ID = 10;
     private TalonFX leftSpitter;
@@ -51,16 +41,12 @@ public class SpitterSubsystem extends SubsystemBase {
     private TalonFX feeder;
     private TalonFXConfiguration feederMotorConfig;
 
-    // private static final int RF_CAN_ID = 51;
-    // private TalonFX rightFeeder;
-    // private TalonFXConfiguration RFMotorConfig;
-
     // change amp limit
     private static final Current CURRENT_LIMIT = Amps.of(40);
 
     public SpitterSubsystem() {
         // initializes shooting motors
-        leftSpitter = new TalonFX(LS_CAN_ID, CANBus.roboRIO()); // placeholder name for the canbus
+        leftSpitter = new TalonFX(LS_CAN_ID, CANBus.roboRIO()); 
         LSMotorConfig = new TalonFXConfiguration()
             .withMotorOutput(
                 new MotorOutputConfigs()
@@ -83,7 +69,6 @@ public class SpitterSubsystem extends SubsystemBase {
         LSMotorConfig.Slot0.kD = (kD);
         LSMotorConfig.Slot0.kV = (kV);
         
-        // LSMotorConfig.Slot0.kS = (kS);
         LSMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         leftSpitter.getConfigurator().apply(LSMotorConfig);
 
@@ -111,14 +96,12 @@ public class SpitterSubsystem extends SubsystemBase {
         RSMotorConfig.Slot0.kI = (kI);
         RSMotorConfig.Slot0.kD = (kD);
         RSMotorConfig.Slot0.kV = (kV);
-        // RSMotorConfig.Slot0.kS = (kS);
         RSMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         rightSpitter.getConfigurator().apply(RSMotorConfig);
-        // rightSpitter.setControl(new StrictFollower(LS_CAN_ID));
 
 
 
-        // initializes feeding motors
+        // initializes feeding motor
         feeder = new TalonFX(Feeder_CAN_ID, CANBus.roboRIO()); 
         feederMotorConfig = new TalonFXConfiguration()
             .withMotorOutput(
@@ -136,31 +119,12 @@ public class SpitterSubsystem extends SubsystemBase {
                     .withPeakReverseVoltage(-12)
                     .withSupplyVoltageTimeConstant(0)
             );
-        feederMotorConfig.Slot0.kP = (fP);
-        feederMotorConfig.Slot0.kI = (fI);
-        feederMotorConfig.Slot0.kD = (fD);
-        feederMotorConfig.Slot0.kV = (fV);
+        feederMotorConfig.Slot0.kP = (kP);
+        feederMotorConfig.Slot0.kI = (kI);
+        feederMotorConfig.Slot0.kD = (kD);
+        feederMotorConfig.Slot0.kV = (kV);
         feederMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         feeder.getConfigurator().apply(feederMotorConfig);
-        // feeder.setControl(new StrictFollower(LS_CAN_ID));
-
-
-        // rightFeeder = new TalonFX(RF_CAN_ID, "rio"); 
-        // RFMotorConfig = new TalonFXConfiguration()
-        // .withMotorOutput(
-        // new MotorOutputConfigs()
-        // .withNeutralMode(NeutralModeValue.Coast)
-        // )
-        // .withCurrentLimits(
-        // new CurrentLimitsConfigs()
-        // .withStatorCurrentLimit(CURRENT_LIMIT)
-        // .withStatorCurrentLimitEnable(true)
-        // );
-        // RFMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-        // RFMotorConfig.Slot0.kP = (kP);
-        // RFMotorConfig.Slot0.kI = (kI);
-        // RFMotorConfig.Slot0.kD = (kD);
-        // rightFeeder.getConfigurator().apply(RSMotorConfig);
 
     }
 
@@ -169,7 +133,6 @@ public class SpitterSubsystem extends SubsystemBase {
             @Override
             public void initialize() { 
 
-                System.out.println("raaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaahhhhhhh");
                 requestedVelocity = rps;
             }
 
@@ -178,10 +141,6 @@ public class SpitterSubsystem extends SubsystemBase {
             public void execute() {
                 leftSpitter.setControl(new VelocityVoltage(rps).withSlot(0));
                 rightSpitter.setControl(new VelocityVoltage(rps).withSlot(0));
-                System.out.println("don't cry, i am just a fish");
-                if(rightSpitter.getVelocity().getValueAsDouble() > 0) {
-                    System.out.println("error :((((((((((((((((((");
-                }
             }
 
             @Override
@@ -189,7 +148,6 @@ public class SpitterSubsystem extends SubsystemBase {
                 
                 leftSpitter.setControl(new VelocityVoltage(0).withSlot(0));
                 rightSpitter.setControl(new VelocityVoltage(0).withSlot(0));
-                System.out.println("I CAME IN LIKE A WRECKING BALLLLLLLLLLLLLLLLLLLLLLLLLL");
                 
             }
 
@@ -216,7 +174,6 @@ public class SpitterSubsystem extends SubsystemBase {
             @Override
             public void initialize() {
                 requestedVelocity = rps;
-                System.out.println("LITTLE WHIMSY IS REQUIRED");
             }
             
             @Override
