@@ -137,28 +137,30 @@ public class RobotContainer {
 
 	private void configManipControls() {
 		
-		manipController.b_Trigger().onTrue(
+		manipController.b_Trigger().whileTrue(
 			manipSubsystem.shoot()
 		);
-		
-		manipController.b_3().onTrue(
+
+		manipController.b_3().whileTrue(
 			manipSubsystem.spinUp()
 		);
 
 		manipController.b_Hazard().onTrue(
 			manipSubsystem.intake()
 		);
-	
+
 		manipController.b_5().onTrue(
 			manipSubsystem.extendStorage()
-
 		);
+
 		manipController.b_4().onTrue(
 			manipSubsystem.manualShoot()
 		);
+
 	}
 
 	private void configButtonControls() {
+
 		buttonBoard.b_1().onTrue(
 			manipSubsystem.shoot()
 		);
@@ -178,6 +180,7 @@ public class RobotContainer {
 		buttonBoard.b_5().onTrue(
 			manipSubsystem.manualShoot()
 		);
+
 	}
 
 	public void initTelemetery() {
