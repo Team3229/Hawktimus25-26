@@ -37,10 +37,9 @@ public class ManipSubsystem extends SubsystemBase {
     }
 
     public Command shoot() {
-        return(spitterSubsystem.shoot(25));
-        // .andThen(indexSubsystem.index(indexSubsystem.forwards))
-        // .andThen(intakeSubsystem.agitateFuel());
-
+        return(spitterSubsystem.shoot(25))
+        .andThen(indexSubsystem.index(indexSubsystem.forwards))
+        .andThen(intakeSubsystem.agitateFuel());
     }
 
     public Command extake() {
@@ -49,6 +48,6 @@ public class ManipSubsystem extends SubsystemBase {
     }
     //TODO: Find and change double value later
     public Command manualShoot() {
-        return runOnce(() -> spitterSubsystem.spinUp(0.75));
+        return runOnce(() -> spitterSubsystem.spinUp(50));
     }
 }

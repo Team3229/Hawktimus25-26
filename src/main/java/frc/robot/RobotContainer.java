@@ -28,7 +28,6 @@ import frc.robot.inputs.FlightStick;
 import frc.robot.subsystems.VisualizerSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
-import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
 import swervelib.SwerveInputStream;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
@@ -39,7 +38,6 @@ public class RobotContainer {
 	ButtonBoard buttonBoard;
 	DriveSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
-	SpitterSubsystem spitterSubsystem;
 
 	VisualizerSubsystem visualizerSubsystem;
 
@@ -58,7 +56,6 @@ public class RobotContainer {
 			TelemetryVerbosity.HIGH
 		);
 		manipSubsystem = new ManipSubsystem();
-		spitterSubsystem = new SpitterSubsystem();
 
 		// visualizerSubsystem = new VisualizerSubsystem(
 		// 	() -> coralSubsystem.getElevatorPose().in(Meters),
@@ -143,37 +140,13 @@ public class RobotContainer {
 			manipSubsystem.shoot()
 		);
 
-		// manipController.b_Trigger().whileFalse(
-		// 	manipSubsystem.shoot()
-		// );
-
 		manipController.b_3().whileTrue(
 			manipSubsystem.spinUp()
 		);
 
-		// manipController.b_3().whileFalse(
-		// 	spitterSubsystem.spinUp(0)
-		// );
-
-		// manipController.b_Trigger().whileTrue(
-		// 	spitterSubsystem.shoot(50)
-		// );
-
-		// manipController.b_Trigger().whileFalse(
-		// 	spitterSubsystem.shoot(0)
-		// );
-
-		// manipController.b_3().whileTrue(
-		// 	spitterSubsystem.spinUp(50)
-		// );
-
-		// manipController.b_3().whileFalse(
-		// 	spitterSubsystem.spinUp(0)
-		// );
-
-		// manipController.b_Hazard().onTrue(
-		// 	manipSubsystem.intake()
-		// );
+		manipController.b_Hazard().onTrue(
+			manipSubsystem.intake()
+		);
 
 		manipController.b_5().onTrue(
 			manipSubsystem.extendStorage()
