@@ -21,7 +21,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class SpitterSubsystem extends SubsystemBase {
 
-    private double requestedVelocity = 0;
+    private double requestedShooterVelocity = 0;
+    private double requestedFeederVelocity = 0;
 
     // change PID (if needed)
     private static double kP = 0.1;
@@ -133,7 +134,7 @@ public class SpitterSubsystem extends SubsystemBase {
             @Override
             public void initialize() { 
 
-                requestedVelocity = rps;
+                requestedShooterVelocity = rps;
             }
 
             // is in execute bc we need to call it every few seconds
@@ -169,19 +170,20 @@ public class SpitterSubsystem extends SubsystemBase {
         return out;
     }
 
-    public Command shoot(double rps) {
+    public Command shoot(double srps, double frps) {
         Command out = new Command() {
             @Override
             public void initialize() {
-                requestedVelocity = rps;
+                requestedShooterVelocity = srps;
+                requestedFeederVelocity = frps;
             }
             
             @Override
             public void execute() {
-                leftSpitter.setControl(new VelocityVoltage(rps).withSlot(0));
-                rightSpitter.setControl(new VelocityVoltage(rps).withSlot(0));
+                leftSpitter.setControl(new VelocityVoltage(srps).withSlot(0));
+                rightSpitter.setControl(new VelocityVoltage(srps).withSlot(0));
                 if(shooterIsReady()) {
-                    feeder.setControl(new VelocityVoltage(25).withSlot(0));
+                    feeder.setControl(new VelocityVoltage(frps).withSlot(0));
                 } else {
                     feeder.setControl(new VelocityVoltage(0).withSlot(0));
                 }
@@ -205,21 +207,21 @@ public class SpitterSubsystem extends SubsystemBase {
         double deadBand = 2;
         double leftVelocity = leftSpitter.getVelocity().getValueAsDouble();
         double rightVelocity = rightSpitter.getVelocity().getValueAsDouble();
-        if(requestedVelocity == 0) {
+        if(requestedShooterVelocity == 0) {
             return false;
         } else {
-            return Math.abs(requestedVelocity - leftVelocity) <= deadBand 
-            && Math.abs(requestedVelocity - rightVelocity) <= deadBand;
+            return Math.abs(requestedShooterVelocity - leftVelocity) <= deadBand 
+            && Math.abs(requestedShooterVelocity - rightVelocity) <= deadBand;
         }
     }
    
         public boolean feederIsReady() {
         double deadBand = 2;
         double feederVelocity = feeder.getVelocity().getValueAsDouble();
-        if(requestedVelocity == 0) {
+        if(requestedFeederVelocity == 0) {
             return false;
         } else {
-            return Math.abs(requestedVelocity - feederVelocity) <= deadBand;
+            return Math.abs(requestedFeederVelocity - feederVelocity) <= deadBand;
         }
     }
 
