@@ -178,6 +178,19 @@ public class SpitterSubsystem extends SubsystemBase {
             public void execute() {
                 leftSpitter.setControl(new VelocityVoltage(rps).withSlot(0));
                 rightSpitter.setControl(new VelocityVoltage(rps).withSlot(0));
+                System.out.println("don't cry, i am just a fish");
+                if(rightSpitter.getVelocity().getValueAsDouble() > 0) {
+                    System.out.println("error :((((((((((((((((((");
+                }
+            }
+
+            @Override
+            public void end(boolean interrupted) {
+                
+                leftSpitter.setControl(new VelocityVoltage(0).withSlot(0));
+                rightSpitter.setControl(new VelocityVoltage(0).withSlot(0));
+                System.out.println("I CAME IN LIKE A WRECKING BALLLLLLLLLLLLLLLLLLLLLLLLLL");
+                
             }
 
         };
@@ -215,6 +228,13 @@ public class SpitterSubsystem extends SubsystemBase {
                 } else {
                     feeder.setControl(new VelocityVoltage(0).withSlot(0));
                 }
+            }
+
+            @Override
+            public void end(boolean interrupted) {
+                leftSpitter.setControl(new VelocityVoltage(0).withSlot(0));
+                rightSpitter.setControl(new VelocityVoltage(0).withSlot(0));
+                feeder.setControl(new VelocityVoltage(0).withSlot(0));
             }
             
         };

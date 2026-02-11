@@ -140,24 +140,40 @@ public class RobotContainer {
 	private void configManipControls() {
 		
 		manipController.b_Trigger().whileTrue(
-			spitterSubsystem.shoot(50)
+			manipSubsystem.shoot()
 		);
 
-		manipController.b_Trigger().whileFalse(
-			spitterSubsystem.shoot(0)
-		);
+		// manipController.b_Trigger().whileFalse(
+		// 	manipSubsystem.shoot()
+		// );
 
 		manipController.b_3().whileTrue(
-			spitterSubsystem.spinUp(50)
+			manipSubsystem.spinUp()
 		);
 
-		manipController.b_3().whileFalse(
-			spitterSubsystem.spinUp(0)
-		);
+		// manipController.b_3().whileFalse(
+		// 	spitterSubsystem.spinUp(0)
+		// );
 
-		manipController.b_Hazard().onTrue(
-			manipSubsystem.intake()
-		);
+		// manipController.b_Trigger().whileTrue(
+		// 	spitterSubsystem.shoot(50)
+		// );
+
+		// manipController.b_Trigger().whileFalse(
+		// 	spitterSubsystem.shoot(0)
+		// );
+
+		// manipController.b_3().whileTrue(
+		// 	spitterSubsystem.spinUp(50)
+		// );
+
+		// manipController.b_3().whileFalse(
+		// 	spitterSubsystem.spinUp(0)
+		// );
+
+		// manipController.b_Hazard().onTrue(
+		// 	manipSubsystem.intake()
+		// );
 
 		manipController.b_5().onTrue(
 			manipSubsystem.extendStorage()

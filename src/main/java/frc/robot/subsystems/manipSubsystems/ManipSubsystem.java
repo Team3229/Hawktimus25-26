@@ -33,11 +33,11 @@ public class ManipSubsystem extends SubsystemBase {
     }
     
     public Command spinUp() {
-        return runOnce(() -> spitterSubsystem.spinUp(1 /*placeholder will be replaced with distance*/));
+        return spitterSubsystem.spinUp(25 /*placeholder will be replaced with distance*/);
     }
 
     public Command shoot() {
-        return runOnce(() -> spitterSubsystem.shoot(1));
+        return(spitterSubsystem.shoot(25));
         // .andThen(indexSubsystem.index(indexSubsystem.forwards))
         // .andThen(intakeSubsystem.agitateFuel());
 
