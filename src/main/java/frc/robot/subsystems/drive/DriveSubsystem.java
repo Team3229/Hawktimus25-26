@@ -21,6 +21,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
@@ -396,15 +397,33 @@ public class DriveSubsystem extends SubsystemBase {
 		return new SwerveInputStream(swerveDrive, x, y, rot);
 	}
 
+	// Might be the right dimensions
+	public Translation2d getHubPose() {
+		return new Translation2d(4.034663d, 4.611624d);
+	}
+
 	/*
-	 * Returns the angle from the robot to the hub (in Angle radians)
+	 * Returns the angle from the robot to the hub (in radians)
 	 */
-	public double angleFromHub(Pose2d robotPos, Pose2d hubPos) {
-		return Math.atan2(hubPos.getY() - robotPos.getY(), hubPos.getX() - robotPos.getX());
+	public double angleFromHub() {
+		return Math.atan2(getHubPose().getY() - getPose().getY(), getHubPose().getX() - getPose().getX());
 	}
 
-	public double distanceFromHub(Pose2d robotPos, Pose2d hubPos) {
-		return Math.sqrt(Math.pow(hubPos.getX() - robotPos.getX(), 2) + Math.pow(hubPos.getY() - robotPos.getY(), 2));
+	/*
+	 * Returns the distance from the robot to the hub 
+	 */
+	public double distanceFromHub() {
+		return Math.sqrt(Math.pow(getHubPose().getX() - getPose().getX(), 2) + Math.pow(getHubPose().getY() - getPose().getY(), 2));
 	}
 
+	// Should this be a Command or void since the driveToPose is a Command???
+    public void alignToHub() {
+        driveToPose(() -> {
+            return new Pose2d(
+				getPose().getX(),
+				getPose().getY(),
+				getPose().getRotation().plus(new Rotation2d(angleFromHub()))
+			);
+        });
+    }
 }

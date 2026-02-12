@@ -13,6 +13,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -20,6 +21,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.drive.DriveSubsystem;
 
 public class ShooterArmSubsystem extends SubsystemBase {
 // this is a comment!
@@ -27,6 +29,9 @@ public class ShooterArmSubsystem extends SubsystemBase {
     private SparkMaxConfig armMotorConfig;
     private ArmFeedforward feedForward;
     private ProfiledPIDController pidController;
+
+    // test idk if this works
+	DriveSubsystem driveSubsystem;
 
     private static final int CAN_ID = -1; // Change
     private static final double POSITION_CONVERSION_FACTOR = 2 * Math.PI;
