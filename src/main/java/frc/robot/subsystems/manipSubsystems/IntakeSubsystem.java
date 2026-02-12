@@ -64,7 +64,6 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public IntakeSubsystem() {
 
-        armMotor.getConfigurator().apply(armMotorConfig);
 
         armCanMotor= new CANcoder(ARM_CAN_ID);
 
@@ -87,6 +86,9 @@ public class IntakeSubsystem extends SubsystemBase {
         armMotorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.SyncCANcoder;
         armMotorConfig.Feedback.SensorToMechanismRatio = 0.0; //TODO: Change
         armMotorConfig.Feedback.RotorToSensorRatio = 0.0; //TODO: Change
+       
+       
+        armMotor.getConfigurator().apply(armMotorConfig);
 
         feedForward = new ArmFeedforward(
             0, // TODO: change this

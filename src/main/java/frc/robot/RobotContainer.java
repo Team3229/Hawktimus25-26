@@ -34,6 +34,7 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 public class RobotContainer {
 
 	FlightStick driverController;
+	FlightStick manipController;
 	ButtonBoard buttonBoard;
 	DriveSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
@@ -46,7 +47,10 @@ public class RobotContainer {
 	public RobotContainer() {
 
 		driverController = new FlightStick(0);
-		buttonBoard = new ButtonBoard(1);
+		manipController = new FlightStick(1);
+		buttonBoard = new ButtonBoard(2);
+
+		// buttonBoard = new ButtonBoard(1);
 		driveSubsystem = new DriveSubsystem(
 			"swerve",
 			TelemetryVerbosity.HIGH
@@ -70,12 +74,14 @@ public class RobotContainer {
 
 		configDriveControls();
 		configManipControls();
+		configButtonControls();
 
 	}
 
 	public void teleopInit() {
 
 		System.out.println("TELEOP INIT");
+		driveSubsystem.zeroGyroWithAlliance();
 		
 	}
 
@@ -108,8 +114,6 @@ public class RobotContainer {
 			)
 		);
 
-
-
 		driverController.b_10().onTrue(
 			driveSubsystem.zeroGyroWithLimelight()
 		);
@@ -122,20 +126,61 @@ public class RobotContainer {
 			driveSubsystem.zeroGyroWithLimelight()
 		);
 
-
-
 		driverController.b_Hazard().onTrue(
-				Commands.runOnce(() -> {
-					driveSubsystem.getCurrentCommand().cancel();
-					// cancels ALL DRIVING on driver controller
+			Commands.runOnce(() -> {
+				driveSubsystem.getCurrentCommand().cancel();
+				// cancels ALL DRIVING on driver controller
 			})
 		);
 
 	}
 
 	private void configManipControls() {
-
 		
+		manipController.b_Trigger().whileTrue(
+			manipSubsystem.shoot()
+		);
+
+		manipController.b_3().whileTrue(
+			manipSubsystem.spinUp()
+		);
+
+		manipController.b_Hazard().onTrue(
+			manipSubsystem.intake()
+		);
+
+		manipController.b_5().onTrue(
+			manipSubsystem.extendStorage()
+		);
+
+		manipController.b_4().onTrue(
+			manipSubsystem.manualShoot()
+		);
+
+	}
+
+	private void configButtonControls() {
+
+		buttonBoard.b_1().onTrue(
+			manipSubsystem.shoot()
+		);
+
+		buttonBoard.b_2().onTrue(
+			manipSubsystem.spinUp()
+		);
+
+		buttonBoard.b_3().onTrue(
+			manipSubsystem.intake()
+		);
+
+		buttonBoard.b_4().onTrue(
+			manipSubsystem.extendStorage()
+		);
+
+		buttonBoard.b_5().onTrue(
+			manipSubsystem.manualShoot()
+		);
+
 	}
 
 	public void initTelemetery() {
