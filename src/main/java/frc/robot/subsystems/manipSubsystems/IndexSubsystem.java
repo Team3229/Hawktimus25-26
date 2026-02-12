@@ -53,6 +53,7 @@ public class IndexSubsystem extends SubsystemBase {
         indexMotor.getConfigurator().apply(indexMotorConfig);
 
     }
+    /**Command to run the index motors */
     public Command index(int speed) {
         return new Command() {
             @Override

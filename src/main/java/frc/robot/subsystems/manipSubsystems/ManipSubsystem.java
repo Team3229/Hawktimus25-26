@@ -20,28 +20,43 @@ public class ManipSubsystem extends SubsystemBase {
         shooterArmSubsystem = new ShooterArmSubsystem();
         spitterSubsystem = new SpitterSubsystem();
     }
-
+    /**Command that runs intaking
+     * 
+     * @return Prints Intaking then it intakes and waits 2 seconds
+     */
     public Command intake() {
         return runOnce(() -> System.out.println("Intaking...")) 
         .andThen(intakeSubsystem.intake())
         .andThen(Commands.waitTime(Seconds.of(2)))
         .andThen(indexSubsystem.index(indexSubsystem.forwards)); // might not be needed
     }
-
+    /**Extends storage
+     * 
+     * @return Runs the extend storage command
+     */
     public Command extendStorage() {
         return runOnce(() -> intakeSubsystem.extendIntake());
     }
-    
+    /**Spins the shooter wheel
+     * 
+     * @return Runs the Spit command from
+     */
     public Command spinUp() {
         return spitterSubsystem.spinUp(25 /*placeholder will be replaced with distance*/);
     }
-
+    /**moves the fuel forward and then takes it into the shooter
+     * 
+     * @return moves the index and then runs the intake motor on the shooter
+     */
     public Command shoot() {
         return(spitterSubsystem.shoot(25, 25))
         .andThen(indexSubsystem.index(indexSubsystem.forwards))
         .andThen(intakeSubsystem.agitateFuel());
     }
-
+    /** reverses the intake to blast out balls from intake
+     * 
+     * @return Runs the extake command
+     */
     public Command extake() {
         return runOnce(() -> intakeSubsystem.extake())
         .andThen(indexSubsystem.index(indexSubsystem.reverse));

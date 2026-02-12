@@ -24,7 +24,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.drive.DriveSubsystem;
 
 public class ShooterArmSubsystem extends SubsystemBase {
-// this is a comment!
+// this is a comment! 
+//this^ is not a comment they are lying to you (sorry I got bored)
     private SparkMax armMotor;
     private SparkMaxConfig armMotorConfig;
     private ArmFeedforward feedForward;
@@ -93,11 +94,11 @@ public class ShooterArmSubsystem extends SubsystemBase {
         );
 
     }
-
+    /** Gets the angle of the Shooter Arms motor*/
     public Angle getPosition() {
         return Radians.of(armMotor.getAbsoluteEncoder().getPosition());
     }
-
+    /**Gets the velocity in Radians per second of the Shooter Arm motor*/
     public AngularVelocity getVelocity() {
         return RadiansPerSecond.of(armMotor.getAbsoluteEncoder().getVelocity());
     }
