@@ -128,4 +128,10 @@ public class ShooterArmSubsystem extends SubsystemBase {
             )
         );
     }
+
+    // example for later
+    public double alignToHub(double example) {
+        return example;
+    }
+    
 }

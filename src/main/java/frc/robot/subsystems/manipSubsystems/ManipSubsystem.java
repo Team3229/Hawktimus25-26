@@ -14,7 +14,7 @@ public class ManipSubsystem extends SubsystemBase {
     ShooterArmSubsystem shooterArmSubsystem;
     SpitterSubsystem spitterSubsystem;
 
-    public void manipSubsystems() {
+    public ManipSubsystem() {
         intakeSubsystem = new IntakeSubsystem();
         indexSubsystem = new IndexSubsystem();
         shooterArmSubsystem = new ShooterArmSubsystem();
@@ -33,16 +33,21 @@ public class ManipSubsystem extends SubsystemBase {
     }
     
     public Command spinUp() {
-        return runOnce(() -> spitterSubsystem.spit(1 /*placeholder will be replaced with distance*/));
+        return spitterSubsystem.spinUp(25 /*placeholder will be replaced with distance*/);
     }
 
     public Command shoot() {
-        return runOnce(() -> indexSubsystem.index(indexSubsystem.forwards))
+        return(spitterSubsystem.shoot(25, 25))
+        .andThen(indexSubsystem.index(indexSubsystem.forwards))
         .andThen(intakeSubsystem.agitateFuel());
     }
 
     public Command extake() {
         return runOnce(() -> intakeSubsystem.extake())
         .andThen(indexSubsystem.index(indexSubsystem.reverse));
+    }
+    //TODO: Find and change double value later
+    public Command manualShoot() {
+        return runOnce(() -> spitterSubsystem.spinUp(50));
     }
 }
