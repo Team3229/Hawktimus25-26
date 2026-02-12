@@ -11,7 +11,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "S3-Hub3"
+                  "pathName": "S2-Hub2"
                 }
               },
               {
@@ -30,13 +30,13 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "sequential",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Hub3-BNeutral"
+                  "pathName": "Hub2-TN"
                 }
               },
               {
@@ -53,15 +53,15 @@
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "path",
                 "data": {
-                  "name": "Intake"
+                  "pathName": "TNeutral Grab"
                 }
               },
               {
-                "type": "path",
+                "type": "named",
                 "data": {
-                  "pathName": "BNeutral Grab"
+                  "name": "Intake"
                 }
               }
             ]
