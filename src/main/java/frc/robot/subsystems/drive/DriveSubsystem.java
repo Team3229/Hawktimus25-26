@@ -74,7 +74,7 @@ public class DriveSubsystem extends SubsystemBase {
     private static final Pose2d startingRedPose = new Pose2d(2, 4, new Rotation2d(Math.PI));
 
 	// Standard PID
-    private static final PIDConstants TRANSLATION_CONSTANTS =
+        private static final PIDConstants TRANSLATION_CONSTANTS =
 		new PIDConstants(
 			5.5,
 			0.2,
@@ -103,17 +103,9 @@ public class DriveSubsystem extends SubsystemBase {
 			0.0
 		);
 
-	private static final Distance TRANS_ERR_TOL = Meters.of(0.025);
-	private static final LinearVelocity TRANS_VEL_TOL = MetersPerSecond.of(0.1);
-	private static final Angle ROT_ERR_TOL = Degrees.of(0.5);
-	private static final AngularVelocity ROT_VEL_TOL = DegreesPerSecond.of(0.5);
-
-	private static final LinearVelocity TRANS_MAX_VEL = MetersPerSecond.of(1);
-	private static final LinearAcceleration TRANS_MAX_ACCEL = MetersPerSecondPerSecond.of(2);
-
-	private static final AngularVelocity ROT_MAX_VEL = DegreesPerSecond.of(720);
-	private static final AngularAcceleration ROT_MAX_ACCEL = DegreesPerSecondPerSecond.of(720);
-
+	/**
+	 * Estaablishes PID for X axis
+	 */
     private ProfiledPIDController xTranslationPID = new ProfiledPIDController(
         TRANSLATION_CONSTANTS.kP,
         TRANSLATION_CONSTANTS.kI,
@@ -178,12 +170,8 @@ public class DriveSubsystem extends SubsystemBase {
 			e.printStackTrace();
 		}
 
-		if (RobotBase.isSimulation()) {
-			swerveDrive.field.setRobotPose(new Pose2d(2, 4, new Rotation2d()));
-		}
-
-		swerveDrive.setHeadingCorrection(false);
-		swerveDrive.setCosineCompensator(RobotBase.isReal());
+		resetOdometry(new Pose2d(2, 4, swerveDrive.getYaw()));
+			
 		swerveDrive.setAngularVelocityCompensation(
 			true,
 			true,
@@ -203,48 +191,37 @@ public class DriveSubsystem extends SubsystemBase {
 	}
 
 	public void setupPathPlanner() {
-
 		RobotConfig config;
-		
+
 		try {
 			config = RobotConfig.fromGUISettings();
 
-			final boolean enableFeedforward = true;
+            final boolean enableFeedforward = true;
 
-			// Configure AutoBuilder last
-		AutoBuilder.configure(
-			() -> {
-				if (RobotBase.isSimulation()) {
-					return swerveDrive.field.getRobotPose();
-				} else {
-					return swerveDrive.getPose();
-				}
-			},
-			// Robot pose supplier
-			this::resetOdometry,
-			// Method to reset odometry (will be called if your auto has a starting pose)
-			() -> swerveDrive.getRobotVelocity(),
-			// ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-			(speedsRobotRelative, moduleFeedForwards) -> {
-				if (enableFeedforward) {
-					swerveDrive.drive(
-						speedsRobotRelative,
-						swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
-						moduleFeedForwards.linearForces());
-				} else {
-					swerveDrive.setChassisSpeeds(speedsRobotRelative);
-				}
-			},
-			new PPHolonomicDriveController(
-				PP_TRANS,
-				PP_ROT
-			),
-			config,
-			() -> {
-				return Alliance.getAlliance() == AllianceColor.Red;
-			},
-			this);
-
+            AutoBuilder.configure(
+                () -> swerveDrive.getPose(),
+                this::resetOdometry,
+                () -> swerveDrive.getRobotVelocity(),
+                (speedsRobotRelative, moduleFeedForwards) -> {
+					if (enableFeedforward) {
+						swerveDrive.drive(
+							speedsRobotRelative,
+							swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
+							moduleFeedForwards.linearForces()
+						);
+					} else {
+						swerveDrive.setChassisSpeeds(speedsRobotRelative);
+					}
+				},
+				new PPHolonomicDriveController(
+					PP_TRANS,
+					PP_ROT
+				),
+				config,
+				() -> Alliance.getAlliance() == AllianceColor.Red,
+				this
+            );
+			PathfindingCommand.warmupCommand().schedule();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -261,14 +238,12 @@ public class DriveSubsystem extends SubsystemBase {
 		swerveDrive.resetOdometry(new Pose2d(getPose().getX(), getPose().getY(), yaw));
 	}
 
-	/**
-	 * Returns a Command that centers the modules of the SwerveDrive subsystem.
-	 *
-	 * @return a Command that centers the modules of the SwerveDrive subsystem
-	 */
-	public Command centerModulesCommand() {
-		return run(() -> Arrays.asList(swerveDrive.getModules())
-				.forEach(it -> it.setAngle(0.0)));
+	public Pigeon2 getIMU() {
+		return ((Pigeon2) swerveDrive.getGyro().getIMU());
+	}
+
+	public Rotation2d getIMUYaw() {
+		return getIMU().getRotation2d();
 	}
 
 	public AngularVelocity getIMUYawRate() {
@@ -365,6 +340,7 @@ public class DriveSubsystem extends SubsystemBase {
 	 * Zeros the gyro with the lime light based on 2d april tags
 	 */
 	public Command zeroGyroWithLimelight() {
+
 		return runOnce(
 			() -> {
 				Rotation2d mt1 = new Rotation2d();
@@ -397,33 +373,66 @@ public class DriveSubsystem extends SubsystemBase {
 		return new SwerveInputStream(swerveDrive, x, y, rot);
 	}
 
+	/**
+	 * Use PID control to go to a point on the field.
+	 *
+	 * @param pose Target {@link Pose2d} to go to.
+	 * @return PID command
+	 */
+	public Command driveToPose(Supplier<Pose2d> pose) {
+
+		return
+			runOnce(
+				() -> {
+					xTranslationPID.reset(getPose().getX(), swerveDrive.getFieldVelocity().vxMetersPerSecond);
+					yTranslationPID.reset(getPose().getY(), swerveDrive.getFieldVelocity().vyMetersPerSecond);
+					rotationPID.reset(getPose().getRotation().getRadians(), swerveDrive.getFieldVelocity().omegaRadiansPerSecond);
+				}
+			).andThen(
+				driveFieldOriented(
+					() -> {
+						return new ChassisSpeeds(
+							xTranslationPID.calculate(getPose().getX(), pose.get().getX()),
+							yTranslationPID.calculate(getPose().getY(), pose.get().getY()),
+							rotationPID.calculate(getPose().getRotation().getRadians(), pose.get().getRotation().getRadians())
+						);
+					}
+				)
+			)
+			.ignoringDisable(false)
+			.until(
+				() -> xTranslationPID.atGoal() && yTranslationPID.atGoal() && rotationPID.atGoal()
+			);
+    }
+
+	
 	// Might be the right dimensions
 	public Translation2d getHubPose() {
 		return new Translation2d(4.034663d, 4.611624d);
 	}
-
+	
 	/*
-	 * Returns the angle from the robot to the hub (in radians)
-	 */
+	* Returns the angle from the robot to the hub (in radians)
+	*/
 	public double angleFromHub() {
 		return Math.atan2(getHubPose().getY() - getPose().getY(), getHubPose().getX() - getPose().getX());
 	}
-
+	
 	/*
-	 * Returns the distance from the robot to the hub 
-	 */
+	* Returns the distance from the robot to the hub 
+	*/
 	public double distanceFromHub() {
 		return Math.sqrt(Math.pow(getHubPose().getX() - getPose().getX(), 2) + Math.pow(getHubPose().getY() - getPose().getY(), 2));
 	}
-
+	
 	// Should this be a Command or void since the driveToPose is a Command???
     public void alignToHub() {
-        driveToPose(() -> {
-            return new Pose2d(
+		driveToPose(() -> {
+			return new Pose2d(
 				getPose().getX(),
 				getPose().getY(),
 				getPose().getRotation().plus(new Rotation2d(angleFromHub()))
-			);
-        });
-    }
-}
+				);
+			});
+		}
+	}
