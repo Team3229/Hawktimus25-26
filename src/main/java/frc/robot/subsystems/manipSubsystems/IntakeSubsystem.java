@@ -11,6 +11,7 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.units.measure.Acceleration;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -47,11 +48,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private static final double aP = 0; // TODO: change this
     private static final double aI = 0; // TODO: change this
-    private static final double aD = 0; // TODO: change this
+    private static final double aD = 0; // TODO: change this    
 
     private static final double rP = 0; // TODO: change this
-    private static final double rI = 0; // TODO: change this
-    private static final double rD = 0; // TODO: change this
+    private static final double rV = 0; // TODO: change this
 
     private static final double CW_SPEED = 0; // TODO: change this
     private static final double CCW_SPEED = 0; // TODO: change this
@@ -61,7 +61,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private static final Angle POSITION_TOLERANCE = Degrees.of(0); // TODO: change this
     private static final AngularVelocity VELOCITY_TOLERANCE = DegreesPerSecond.of(0); // TODO: change this
-
+    private static final AngularAcceleration ACCELERATION_TOLERANCE = DegreesPerSecondPerSecond.of(0);//TODO: change this
     public IntakeSubsystem() {
 
 
@@ -113,7 +113,8 @@ public class IntakeSubsystem extends SubsystemBase {
 
         armPIDController.setTolerance(
             POSITION_TOLERANCE.in(Degrees),
-            VELOCITY_TOLERANCE.in(DegreesPerSecond)
+            VELOCITY_TOLERANCE.in(DegreesPerSecond),
+            ACCELERATION_TOLERANCE.in(DegreesPerSecondPerSecond)
         );
 
         setSetpoint(HOME_ANGLE);
@@ -133,6 +134,9 @@ public class IntakeSubsystem extends SubsystemBase {
     */
     public static AngularVelocity getVelocity() {
         return DegreesPerSecond.of(armCanMotor.getAbsolutePosition().getValueAsDouble());
+    }
+    public static AngularAcceleration getAcceleration() {
+        return DegreesPerSecondPerSecond.of(armCanMotor.getAbsolutePosition().getValueAsDouble());
     }
     /**Command that rotates the arm to a setpoint
      * 
@@ -203,7 +207,8 @@ public class IntakeSubsystem extends SubsystemBase {
             armPIDController.calculate(getPosition().in(Degrees)) +
                 feedForward.calculate(
                     armPIDController.getSetpoint().position,
-                    armPIDController.getSetpoint().velocity
+                    armPIDController.getSetpoint().velocity,
+                    armPIDController.getSetpoint().acceleration
                 )
             );
     }
