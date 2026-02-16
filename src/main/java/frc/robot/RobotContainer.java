@@ -30,6 +30,7 @@ import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import swervelib.SwerveInputStream;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
+import frc.robot.subsystems.drive.HubAlign;
 
 public class RobotContainer {
 
@@ -38,6 +39,7 @@ public class RobotContainer {
 	ButtonBoard buttonBoard;
 	DriveSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
+	HubAlign hubAlign;
 
 	VisualizerSubsystem visualizerSubsystem;
 
@@ -56,6 +58,7 @@ public class RobotContainer {
 			TelemetryVerbosity.HIGH
 		);
 		manipSubsystem = new ManipSubsystem();
+		hubAlign = new HubAlign();
 
 		configureBindings();
 		initTelemetery();
@@ -124,6 +127,10 @@ public class RobotContainer {
 				driveSubsystem.getCurrentCommand().cancel();
 				// cancels ALL DRIVING on driver controller
 			})
+		);
+
+		driverController.b_Trigger().onTrue(
+			hubAlign.alignToHub()
 		);
 
 	}

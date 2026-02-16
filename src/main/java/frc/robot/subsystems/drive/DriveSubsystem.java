@@ -74,7 +74,7 @@ public class DriveSubsystem extends SubsystemBase {
     private static final Pose2d startingRedPose = new Pose2d(2, 4, new Rotation2d(Math.PI));
 
 	// Standard PID
-        private static final PIDConstants TRANSLATION_CONSTANTS =
+    private static final PIDConstants TRANSLATION_CONSTANTS =
 		new PIDConstants(
 			5.5,
 			0.2,
@@ -380,7 +380,6 @@ public class DriveSubsystem extends SubsystemBase {
 	 * @return PID command
 	 */
 	public Command driveToPose(Supplier<Pose2d> pose) {
-
 		return
 			runOnce(
 				() -> {
@@ -404,35 +403,4 @@ public class DriveSubsystem extends SubsystemBase {
 				() -> xTranslationPID.atGoal() && yTranslationPID.atGoal() && rotationPID.atGoal()
 			);
     }
-
-	
-	// Might be the right dimensions
-	public Translation2d getHubPose() {
-		return new Translation2d(4.034663d, 4.611624d);
-	}
-	
-	/*
-	* Returns the angle from the robot to the hub (in radians)
-	*/
-	public double angleFromHub() {
-		return Math.atan2(getHubPose().getY() - getPose().getY(), getHubPose().getX() - getPose().getX());
-	}
-	
-	/*
-	* Returns the distance from the robot to the hub 
-	*/
-	public double distanceFromHub() {
-		return Math.sqrt(Math.pow(getHubPose().getX() - getPose().getX(), 2) + Math.pow(getHubPose().getY() - getPose().getY(), 2));
-	}
-	
-	// Should this be a Command or void since the driveToPose is a Command???
-    public void alignToHub() {
-		driveToPose(() -> {
-			return new Pose2d(
-				getPose().getX(),
-				getPose().getY(),
-				getPose().getRotation().plus(new Rotation2d(angleFromHub()))
-				);
-			});
-		}
-	}
+}
