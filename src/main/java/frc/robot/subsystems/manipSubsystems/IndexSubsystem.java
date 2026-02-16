@@ -32,10 +32,9 @@ public class IndexSubsystem extends SubsystemBase {
     private static final Current CURRENT_LIMIT = Amps.of(40);
 
     //change indexSpeed
-    private static final double indexSpeed = 0.1;
 
-    public final int forwards = 1;
-    public final int reverse = -1;
+    public final int forwards = 10;
+    public final int reverse = -10;
 
     public IndexSubsystem() {
         // initializes motor
@@ -59,17 +58,17 @@ public class IndexSubsystem extends SubsystemBase {
     }
     
     /**Command to run the index motors */
-    public Command index(int speed) {
+    public Command index(double rps) {
         return new Command() {
             @Override
             public void initialize() {
                 System.out.println("Indexing");
-                requestedSpeed = speed;
+                requestedSpeed = rps;
             }
 
             @Override
             public void execute() {
-                indexMotor.setControl(new VelocityVoltage(speed).withSlot(0));
+                indexMotor.setControl(new VelocityVoltage(rps).withSlot(0));
             }
 
             @Override
