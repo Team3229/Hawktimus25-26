@@ -57,13 +57,6 @@ public class RobotContainer {
 		);
 		manipSubsystem = new ManipSubsystem();
 
-		// visualizerSubsystem = new VisualizerSubsystem(
-		// 	() -> coralSubsystem.getElevatorPose().in(Meters),
-		// 	() -> coralSubsystem.getFeederAngle().in(Degrees),
-		// 	() -> climbSubsystem.getCurrentAngle().in(Degrees),
-		// 	() -> algaeSubsystem.getPosition().in(Degrees)
-		// );
-
 		configureBindings();
 		initTelemetery();
 	}

@@ -258,7 +258,7 @@ public class DriveSubsystem extends SubsystemBase {
 	*/
 	public void updateOdometry() {
 
-		for (String side : new String[] {"LIMELIGHT1", "LIMELIGHT2"}) { //TODO: Name the limelights
+		for (String side : new String[] {"left", "right"}) { //TODO: Name the limelights
 
 			LimelightHelpers.SetRobotOrientation("limelight-" + side, getIMUYaw().getDegrees(), getIMUYawRate().in(DegreesPerSecond), 0, 0, 0, 0);
 			LimelightHelpers.PoseEstimate estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-" + side);
