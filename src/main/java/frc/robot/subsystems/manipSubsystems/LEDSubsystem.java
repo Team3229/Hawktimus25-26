@@ -1,4 +1,4 @@
-package main.java.frc.robot.subsystems.manipSubsystems;
+package frc.robot.subsystems.manipSubsystems;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
