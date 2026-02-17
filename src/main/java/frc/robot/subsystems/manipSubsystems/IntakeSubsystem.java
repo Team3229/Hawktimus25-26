@@ -35,7 +35,6 @@ public class IntakeSubsystem extends SubsystemBase {
     private static TalonFXConfiguration rodMotorConfig;
     private static CANcoderConfiguration armCanCoderConfig;
 
-
     private static ArmFeedforward feedForward;
     private static ProfiledPIDController armPIDController;
 
@@ -48,9 +47,11 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private static final double aP = 0; // TODO: change this
     private static final double aI = 0; // TODO: change this
-    private static final double aD = 0; // TODO: change this    
+    private static final double aD = 0; // TODO: change this
 
     private static final double rP = 0; // TODO: change this
+    private static final double rI = 0; // TODO: change this
+    private static final double rD = 0; // TODO: change this
     private static final double rV = 0; // TODO: change this
 
     private static final double CW_SPEED = 0; // TODO: change this
@@ -61,11 +62,12 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private static final Angle POSITION_TOLERANCE = Degrees.of(0); // TODO: change this
     private static final AngularVelocity VELOCITY_TOLERANCE = DegreesPerSecond.of(0); // TODO: change this
-    private static final AngularAcceleration ACCELERATION_TOLERANCE = DegreesPerSecondPerSecond.of(0);//TODO: change this
+    private static final AngularAcceleration ACCELERATION_TOLERANCE = DegreesPerSecondPerSecond.of(0);// TODO: change
+                                                                                                      // this
+
     public IntakeSubsystem() {
 
-
-        armCanMotor= new CANcoder(ARM_CAN_ID);
+        armCanMotor = new CANcoder(ARM_CAN_ID);
 
         armMotor = new TalonFX(ARM_CAN_ID, "Placeholder");
 
@@ -77,75 +79,77 @@ public class IntakeSubsystem extends SubsystemBase {
 
         rodMotorConfig = new TalonFXConfiguration();
 
-        armCanCoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0; //TODO: Change
+        armCanCoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0; // TODO: Change
         armCanCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
         armCanCoderConfig.MagnetSensor.MagnetOffset = 0.0;
         armCanMotor.getConfigurator().apply(armCanCoderConfig);
 
         armMotorConfig.Feedback.FeedbackRemoteSensorID = armCanMotor.getDeviceID();
         armMotorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.SyncCANcoder;
-        armMotorConfig.Feedback.SensorToMechanismRatio = 0.0; //TODO: Change
-        armMotorConfig.Feedback.RotorToSensorRatio = 0.0; //TODO: Change
-       
-       
+        armMotorConfig.Feedback.SensorToMechanismRatio = 0.0; // TODO: Change
+        armMotorConfig.Feedback.RotorToSensorRatio = 0.0; // TODO: Change
+
         armMotor.getConfigurator().apply(armMotorConfig);
 
         feedForward = new ArmFeedforward(
-            0, // TODO: change this
-            0, // TODO: change this
-            0, // TODO: change this
-            0 // TODO: change this
+                0, // TODO: change this
+                0, // TODO: change this
+                0, // TODO: change this
+                0 // TODO: change this
         );
 
         rodMotorConfig.Slot0.kP = (rP);
         rodMotorConfig.Slot0.kI = (rI);
         rodMotorConfig.Slot0.kD = (rD);
-        
+        rodMotorConfig.Slot0.kV = (rV);
+
         armPIDController = new ProfiledPIDController(
-            aP,
-            aI,
-            aD,
-            new Constraints(
-                MAX_VELOCITY.in(DegreesPerSecond),
-                MAX_ACCELERATION.in(DegreesPerSecondPerSecond)
-            )
-        );
+                aP,
+                aI,
+                aD,
+                new Constraints(
+                        MAX_VELOCITY.in(DegreesPerSecond),
+                        MAX_ACCELERATION.in(DegreesPerSecondPerSecond)));
 
         armPIDController.setTolerance(
-            POSITION_TOLERANCE.in(Degrees),
-            VELOCITY_TOLERANCE.in(DegreesPerSecond),
-            ACCELERATION_TOLERANCE.in(DegreesPerSecondPerSecond)
-        );
+                POSITION_TOLERANCE.in(Degrees),
+                VELOCITY_TOLERANCE.in(DegreesPerSecond));
 
         setSetpoint(HOME_ANGLE);
-            armPIDController.reset(getPosition().in(Degrees)
-        );
+        armPIDController.reset(getPosition().in(Degrees));
     }
-    /** Gets the angle in degrees of the arm from the CAN
+
+    /**
+     * Gets the angle in degrees of the arm from the CAN
      * 
      * @return The degree of the arm
-    */
+     */
     public static Angle getPosition() {
         return Degrees.of(armCanMotor.getAbsolutePosition().getValueAsDouble());
     }
-    /**Gets the angular velocity of the arm from the CAN
+
+    /**
+     * Gets the angular velocity of the arm from the CAN
      * 
      * @return The velocity of the arm
-    */
+     */
     public static AngularVelocity getVelocity() {
         return DegreesPerSecond.of(armCanMotor.getAbsolutePosition().getValueAsDouble());
     }
+
     public static AngularAcceleration getAcceleration() {
         return DegreesPerSecondPerSecond.of(armCanMotor.getAbsolutePosition().getValueAsDouble());
     }
-    /**Command that rotates the arm to a setpoint
+
+    /**
+     * Command that rotates the arm to a setpoint
      * 
      * @return Command to rotate arm
      */
     public Command rotateTo(Angle setpoint) {
         return runOnce(
-            () -> setSetpoint(setpoint)).until(
-                () -> atGoal());
+                () -> setSetpoint(setpoint)).until(
+                        () -> atGoal());
     }
 
     /**
@@ -155,17 +159,19 @@ public class IntakeSubsystem extends SubsystemBase {
      */
     public Command intake() {
         return Commands.runOnce(
-            () -> rodMotor.set(CW_SPEED) // TODO: Check direction
+                () -> rodMotor.set(CW_SPEED) // TODO: Check direction
         );
     }
 
     /**
-     * creates a command to reverse the intake to put the fuel into the human player station 
+     * creates a command to reverse the intake to put the fuel into the human player
+     * station
+     * 
      * @return Command to spin the rod in reverse
      */
     public Command extake() {
         return Commands.runOnce(
-            () -> rodMotor.set(CCW_SPEED) // TODO: Check direction
+                () -> rodMotor.set(CCW_SPEED) // TODO: Check direction
         );
     }
 
@@ -178,21 +184,23 @@ public class IntakeSubsystem extends SubsystemBase {
     public Command extendIntake() {
         return rotateTo(COLLECTION_POINT);
     }
+
     /**
-     * creates a command that pulls the intake arm back to the 
+     * creates a command that pulls the intake arm back to the
      * home point in order to move the fuel in storage.
+     * 
      * @return Command to pull arm back
      */
     public Command agitateFuel() {
         return rotateTo(HOME_ANGLE)
-        .andThen(new WaitCommand(0.5))
-        .andThen(rotateTo(COLLECTION_POINT)); //TODO: Should work but will need a controlled test
+                .andThen(new WaitCommand(0.5))
+                .andThen(rotateTo(COLLECTION_POINT)); // TODO: Should work but will need a controlled test
     }
-   
+
     public StatusSignal<Current> getDraw() {
         return rodMotor.getMotorStallCurrent();
     }
-    
+
     private static void setSetpoint(Angle setpoint) {
         armPIDController.setGoal(setpoint.in(Degrees));
     }
@@ -203,14 +211,17 @@ public class IntakeSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        double currentAngle = armMotor.getPosition().getValueAsDouble();
+        double currentVelocity = armMotor.getVelocity().getValueAsDouble();
+        double nextVelocity = (armMotor.getAcceleration().getValueAsDouble() + currentVelocity) / 10;
+
         armMotor.setVoltage(
             armPIDController.calculate(getPosition().in(Degrees)) +
-                feedForward.calculate(
-                    armPIDController.getSetpoint().position,
-                    armPIDController.getSetpoint().velocity,
-                    armPIDController.getSetpoint().acceleration
-                )
-            );
+            feedForward.calculateWithVelocities(
+                currentAngle,
+                currentVelocity,
+                nextVelocity
+            )
+        );
     }
-
 }
