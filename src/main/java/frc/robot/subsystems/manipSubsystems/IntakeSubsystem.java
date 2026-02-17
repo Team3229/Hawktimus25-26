@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 
@@ -50,8 +51,6 @@ public class IntakeSubsystem extends SubsystemBase {
     private static final double aD = 0; // TODO: change this
 
     private static final double rP = 0; // TODO: change this
-    private static final double rI = 0; // TODO: change this
-    private static final double rD = 0; // TODO: change this
     private static final double rV = 0; // TODO: change this
 
     private static final double CW_SPEED = 0; // TODO: change this
@@ -67,9 +66,9 @@ public class IntakeSubsystem extends SubsystemBase {
 
         armCanMotor = new CANcoder(ARM_CAN_ID);
 
-        armMotor = new TalonFX(ARM_CAN_ID, "Placeholder");
+        armMotor = new TalonFX(ARM_CAN_ID, CANBus.roboRIO());
 
-        rodMotor = new TalonFX(ROD_CAN_ID, "Placeholder");
+        rodMotor = new TalonFX(ROD_CAN_ID, CANBus.roboRIO());
 
         armMotorConfig = new TalonFXConfiguration();
 
@@ -97,8 +96,6 @@ public class IntakeSubsystem extends SubsystemBase {
         );
 
         rodMotorConfig.Slot0.kP = (rP);
-        rodMotorConfig.Slot0.kI = (rI);
-        rodMotorConfig.Slot0.kD = (rD);
         rodMotorConfig.Slot0.kV = (rV);
 
         armPIDController = new ProfiledPIDController(
@@ -136,6 +133,11 @@ public class IntakeSubsystem extends SubsystemBase {
         return DegreesPerSecond.of(armCanMotor.getAbsolutePosition().getValueAsDouble());
     }
 
+    /**
+     * Gets the angular acceleration of the arm from the CAN
+     * 
+     * @return The acceleration of the arm
+     */
     public static AngularAcceleration getAcceleration() {
         return DegreesPerSecondPerSecond.of(armCanMotor.getAbsolutePosition().getValueAsDouble());
     }
@@ -198,10 +200,12 @@ public class IntakeSubsystem extends SubsystemBase {
         .andThen(rotateTo(COLLECTION_POINT)); // TODO: Should work but will need a controlled test
     }
 
+    /** gets your currrent current */
     public StatusSignal<Current> getDraw() {
         return rodMotor.getMotorStallCurrent();
     }
 
+    /** sets a setpoint for the arm to go to */
     private static void setSetpoint(Angle setpoint) {
         armPIDController.setGoal(setpoint.in(Degrees));
     }
@@ -212,7 +216,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     /**
      * This command runs 3 values from the motor (angle, velocity, acceleration), and uses them 
-     * to calculate in a feed forward loop
+     * to calculate a feed forward loop
      */
 
     @Override

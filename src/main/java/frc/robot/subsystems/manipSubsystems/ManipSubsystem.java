@@ -25,10 +25,16 @@ public class ManipSubsystem extends SubsystemBase {
      * @return Prints Intaking then it intakes and waits 2 seconds
      */
     public Command intake() {
-        return runOnce(() -> System.out.println("Intaking...")) 
+        return runOnce(() -> System.out.println("Intaking..."))
         .andThen(intakeSubsystem.intake())
         .andThen(Commands.waitTime(Seconds.of(2)))
         .andThen(indexSubsystem.index(indexSubsystem.forwards)); // might not be needed
+    }
+
+    public Command stow() {
+        return runOnce(() -> System.out.println("SSTOOOOOOOOWWWWWWWWWWWWWW"))
+        .andThen(intakeSubsystem.rotateTo(IntakeSubsystem.HOME_ANGLE));
+
     }
     /**Extends storage
      * 

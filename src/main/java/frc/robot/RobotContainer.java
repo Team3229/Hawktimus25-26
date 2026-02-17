@@ -146,7 +146,10 @@ public class RobotContainer {
 		);
 
 		manipController.b_Hazard().onTrue(
-			manipSubsystem.intake()
+			Commands.runOnce(() -> {
+				manipSubsystem.getCurrentCommand().cancel();
+				// cancels ALL manipING on manip controller
+			})
 		);
 
 		manipController.b_5().onTrue(
@@ -154,7 +157,11 @@ public class RobotContainer {
 		);
 
 		manipController.b_4().onTrue(
-			manipSubsystem.manualShoot()
+			manipSubsystem.intake()
+		);
+
+		manipController.b_12().onTrue(
+			manipSubsystem.stow()
 		);
 
 	}
