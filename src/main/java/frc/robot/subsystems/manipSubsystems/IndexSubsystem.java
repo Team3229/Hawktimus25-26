@@ -9,6 +9,9 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -59,7 +62,7 @@ public class IndexSubsystem extends SubsystemBase {
     
     /**Command to run the index motors */
     public Command index(double rps) {
-        return new Command() {
+        Command out = new Command() {
             @Override
             public void initialize() {
                 System.out.println("Indexing");
@@ -76,10 +79,20 @@ public class IndexSubsystem extends SubsystemBase {
                 indexMotor.stopMotor();
             }
         };
+        SmartDashboard.putData("Index", new Sendable() {
+            @Override 
+            public void initSendable(SendableBuilder builder) {
+                builder.addBooleanProperty("Indexing", ()-> isReady(), null);
+            }
+        });
+
+        out.addRequirements(this);
+            return out;
     }
+    
 
     public boolean isReady() {
-        double deadBand = 2;
+        double deadBand = 1;
         double indexVelocity = indexMotor.getVelocity().getValueAsDouble();
         if (requestedSpeed == 0) {
             return false;
