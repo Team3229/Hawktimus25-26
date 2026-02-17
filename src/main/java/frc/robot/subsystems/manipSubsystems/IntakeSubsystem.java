@@ -62,9 +62,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private static final Angle POSITION_TOLERANCE = Degrees.of(0); // TODO: change this
     private static final AngularVelocity VELOCITY_TOLERANCE = DegreesPerSecond.of(0); // TODO: change this
-    private static final AngularAcceleration ACCELERATION_TOLERANCE = DegreesPerSecondPerSecond.of(0);// TODO: change
-                                                                                                      // this
-
+    
     public IntakeSubsystem() {
 
         armCanMotor = new CANcoder(ARM_CAN_ID);
@@ -208,6 +206,11 @@ public class IntakeSubsystem extends SubsystemBase {
     private boolean atGoal() {
         return armPIDController.atGoal();
     }
+
+    /**
+     * This command runs 3 values from the motor (angle, velocity, acceleration), and uses them 
+     * to calculate in a feed forward loop
+     */
 
     @Override
     public void periodic() {
