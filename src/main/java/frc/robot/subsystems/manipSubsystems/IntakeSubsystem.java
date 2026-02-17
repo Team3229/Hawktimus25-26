@@ -102,17 +102,18 @@ public class IntakeSubsystem extends SubsystemBase {
         rodMotorConfig.Slot0.kV = (rV);
 
         armPIDController = new ProfiledPIDController(
-                aP,
-                aI,
-                aD,
-                new Constraints(
-                        MAX_VELOCITY.in(DegreesPerSecond),
-                        MAX_ACCELERATION.in(DegreesPerSecondPerSecond)));
+            aP,
+            aI,
+            aD,
+            new Constraints(
+                MAX_VELOCITY.in(DegreesPerSecond),
+                MAX_ACCELERATION.in(DegreesPerSecondPerSecond)
+            )
+        );
 
         armPIDController.setTolerance(
-                POSITION_TOLERANCE.in(Degrees),
-                VELOCITY_TOLERANCE.in(DegreesPerSecond));
-
+            POSITION_TOLERANCE.in(Degrees),
+            VELOCITY_TOLERANCE.in(DegreesPerSecond));
         setSetpoint(HOME_ANGLE);
         armPIDController.reset(getPosition().in(Degrees));
     }
@@ -146,8 +147,10 @@ public class IntakeSubsystem extends SubsystemBase {
      */
     public Command rotateTo(Angle setpoint) {
         return runOnce(
-                () -> setSetpoint(setpoint)).until(
-                        () -> atGoal());
+            () -> setSetpoint(setpoint))
+        .until(
+            () -> atGoal()
+        );
     }
 
     /**
@@ -157,7 +160,7 @@ public class IntakeSubsystem extends SubsystemBase {
      */
     public Command intake() {
         return Commands.runOnce(
-                () -> rodMotor.set(CW_SPEED) // TODO: Check direction
+            () -> rodMotor.set(CW_SPEED) // TODO: Check direction
         );
     }
 
@@ -169,7 +172,7 @@ public class IntakeSubsystem extends SubsystemBase {
      */
     public Command extake() {
         return Commands.runOnce(
-                () -> rodMotor.set(CCW_SPEED) // TODO: Check direction
+            () -> rodMotor.set(CCW_SPEED) // TODO: Check direction
         );
     }
 
@@ -191,8 +194,8 @@ public class IntakeSubsystem extends SubsystemBase {
      */
     public Command agitateFuel() {
         return rotateTo(HOME_ANGLE)
-                .andThen(new WaitCommand(0.5))
-                .andThen(rotateTo(COLLECTION_POINT)); // TODO: Should work but will need a controlled test
+        .andThen(new WaitCommand(0.5))
+        .andThen(rotateTo(COLLECTION_POINT)); // TODO: Should work but will need a controlled test
     }
 
     public StatusSignal<Current> getDraw() {
