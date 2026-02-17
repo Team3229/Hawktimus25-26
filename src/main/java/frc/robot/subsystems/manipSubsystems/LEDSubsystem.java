@@ -1,7 +1,11 @@
 package frc.robot.subsystems.manipSubsystems;
 
+import static edu.wpi.first.units.Units.Centimeters;
+
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -10,25 +14,24 @@ public class LEDSubsystem extends SubsystemBase {
     
     private AddressableLED led;
     private AddressableLEDBuffer ledBuffer;
+    private LEDPattern pattern;
 
-    private int rainbowFirstPixelHue;
+    private final Color purple = Color.packRGB(128,0,128);
+    private final Color yellow = Color.packRGB(255,255,0);
 
-    public enum Pattern {
-        Rainbow,
-        Hawk,
-        Alternate
-    }
+    private final int LEDPortNumber = 3;
+    private final int LEDBuffer = 180;
 
     public LEDSubsystem() {
-        led = new AddressableLED(3);
-        ledBuffer = new AddressableLEDBuffer(180);
+        led = new AddressableLED(LEDPortNumber);
+        ledBuffer = new AddressableLEDBuffer(LEDBuffer);
 
-        led.setLength(ledBuffer.getLength());
+        led.setLength(ledBuffer.getLength()); 
 
         led.setData(ledBuffer);
         led.start();
 
-        this.setDefaultCommand(defaultRainbow());
+        // this.setDefaultCommand(defaultRainbow());
 
     }
 
@@ -37,79 +40,87 @@ public class LEDSubsystem extends SubsystemBase {
         led.setData(ledBuffer);
     }
 
-    public Command hasFuel() {
-         Command out = new Command() {
-            @Override public void execute() {
-                setAllLEDs(new Color(255, 0, 0));
-            }
-
-            @Override public String getName() {
-                return "ledNote";
-            }
-        };
-
-        out.addRequirements(this);
-
-        return out;
+    public void setRed() {
+        setColor(Color.kRed);
     }
 
-    private Command defaultRainbow() {
+    public void setColor(Color color) {
+        pattern = LEDPattern.solid(color);
+        pattern.applyTo(ledBuffer);
+    }
 
-        Command out = new Command() {
-            @Override public void execute() {
-                rainbowPattern(ledBuffer.getLength());
-            }
+    public void setColorsContinuous(Color c1, Color c2) {
+        pattern = LEDPattern.gradient(LEDPattern.GradientType.kContinuous, c1, c2);
+        pattern.applyTo(ledBuffer);
+    }
 
-            @Override public boolean runsWhenDisabled() {
-                return true;
-            }
+    public void setPurpleAndYellowContinuous() {
+        setColorsContinuous(purple, yellow);
+    }
 
-            @Override public String getName() {
-                return "LEDs";
-            }
-        };
+    public void setPurpleAndYellowDiscontinuous() {
+        pattern = LEDPattern.gradient(LEDPattern.GradientType.kDiscontinuous, purple, yellow);
+        pattern.applyTo(ledBuffer);
+    }
 
-        out.addRequirements(this);
+    public void setColorsSteps(Color colorsAreCoolAndTheyMakeRobotLookBetterBecauseColorsYouKnowLikeWhyNot, Color colorsAreCoolAndTheyMakeRobotLookBetterBecauseColorsYouKnowLikeWhyNotAndThenWeHaveSecondColorWhichMakesEvenMoreCoolnessOnRobotBecauseThenWeYesWeAreCool) {
+        pattern = LEDPattern.steps(Map.of(0, colorsAreCoolAndTheyMakeRobotLookBetterBecauseColorsYouKnowLikeWhyNot, 0.5, colorsAreCoolAndTheyMakeRobotLookBetterBecauseColorsYouKnowLikeWhyNotAndThenWeHaveSecondColorWhichMakesEvenMoreCoolnessOnRobotBecauseThenWeYesWeAreCool));
+        pattern.applyTo(ledBuffer);
+    }
+    
+    public void setColorProgressMask() {
+        pattern = LEDPattern.progressMaskLayer(() -> elevator.getHeight() / elevator.getMaxHeight());
+        pattern.applyTo(ledBuffer);
+    }
 
-        return out;
+    public void setColorOffset(Color colorForOffset, Color secondColorForOffset) {
+        pattern = LEDPattern.discontinuousGradient(colorForOffset, secondColorForOffset);
+        pattern = base.offsetBy(40);
+        pattern = base.offsetBy(-20);
+        pattern.applyTo(ledBuffer);
+    }
+
+    public void setColorReverse(Color colorForReverse, Color secondColorForReverse) {
+        pattern = LEDPattern.discontinuousGradient(colorForReverse, secondColorForReverse);
+        pattern = base.reversed();
+        pattern.applyTo(ledBuffer);
+    }
+
+    public void setColorScroll(Color colorForScroll, Color secondColorForScroll) {
+        pattern = LEDPattern.discontinuousGradient(colorForScroll, secondColorForScroll);
+        pattern = base.scrollAtRelativeSpeed(Percent.per(Second).of(25));
+        pattern = base.scrollAtAbsoluteSpeed(Centimeters.per(Second).of(12.5), ledSpacing);
+        pattern.applyTo(ledBuffer);
+    }
+
+    public void setColorBreathe(Color colorForBreathe, Color secondColorForBreathe) {
+        pattern = LEDPattern.discontinuousGradient(colorForBreathe, secondColorForBreathe);
+        pattern = base.breathe(Seconds.of(2));
+        pattern.applyTo(ledBuffer);
+    }
+
+    public void setColorBlink(Color colorForBlink, Color secondColorForBlink) {
+        pattern = LEDPattern.discontinuousGradient(colorForBlink, secondColorForBlink);
+        pattern = base.blink(Seconds.of(1.5));
+        pattern = base.blink(Seconds.of(2), Seconds.of(1));
+        pattern = base.synchronizedBlink(RobotController::getRSLState);
+        pattern.applyTo(ledBuffer);
     }
 
 
+    // public Command hasFuel() {
+    //      Command out = new Command() {
+    //         @Override public void execute() {
+    //             setAllLEDs(new Color(255, 0, 0));
+    //         }
 
+    //         @Override public String getName() {
+    //             return "ledNote";
+    //         }
+    //     };
 
+    //     out.addRequirements(this);
 
-
-
-    // Helpers
-
-    private  void setLED(int index, Color color) {
-        ledBuffer.setLED(index % ledBuffer.getLength(), new Color(color.red, color.blue, color.green));
-    }
-
-    private void setAllLEDs(Color color) {
-        for (int i = 0; i < ledBuffer.getLength(); i++) {
-            setLED(i, color);
-        }
-    }
-
-    public void setLEDRange(int first, int last, Color color) {
-        for (int i = first; i < last; i++) {
-            setLED(i, color);
-        }
-    }
-
-    private void rainbowPattern(int stripLength) {
-        for (var i = 0; i < stripLength; i++) {
-            // Calculate the hue - hue is easier for rainbows because the color
-            // shape is a circle so only one value needs to precess
-            final var hue = (rainbowFirstPixelHue + (i * 180 / stripLength)) % 180;
-            // Set the value
-            setLED(i, Color.fromHSV(hue, 255, 128));
-          }
-          // Increase by to make the rainbow "move"
-          rainbowFirstPixelHue += 1;
-          // Check bounds
-          rainbowFirstPixelHue %= 180;
-    }
-
+    //     return out;
+    // }
 }
