@@ -3,13 +3,19 @@ package frc.robot.subsystems.manipSubsystems;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Amps;
+
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -31,13 +37,17 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 public class IntakeSubsystem extends SubsystemBase {
 
-    private static TalonFX armMotor;
+    private static TalonFX arm1Motor;
+    private static TalonFX arm2Motor;
     private static TalonFX rodMotor;
-    private static CANcoder armCanMotor;
+    private static CANcoder arm1CanMotor;
+    private static CANcoder arm2CanMotor;
     private static TalonFXConfiguration armMotorConfig;
     private static TalonFXConfiguration rodMotorConfig;
     private static CANcoderConfiguration armCanCoderConfig;
@@ -45,9 +55,13 @@ public class IntakeSubsystem extends SubsystemBase {
     private static ArmFeedforward feedForward;
     private static ProfiledPIDController armPIDController;
 
-    private static final int ARM_CAN_ID = 9; // TODO: change this
+    private static final int ARM1_CAN_ID = 9; // TODO: change this
+    private static final int ARM2_CAN_ID = 1122; // TODO: change this
+
     private static final int ROD_CAN_ID = 8; // TODO: change this
     // private static final double POSITION_CONVERSION_FACTOR = 2 * Math.PI;
+
+    private static final Current CURRENT_LIMIT = Amps.of(40);
 
     public static final Angle HOME_ANGLE = Degrees.of(345); // TODO: change this
     public static final Angle COLLECTION_POINT = Degrees.of(270); // TODO: change this
@@ -73,29 +87,44 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public IntakeSubsystem() {
 
-        armCanMotor = new CANcoder(ARM_CAN_ID);
+        arm1CanMotor = new CANcoder(ARM1_CAN_ID);
 
-        armMotor = new TalonFX(ARM_CAN_ID, CANBus.roboRIO());
+        arm1Motor = new TalonFX(ARM1_CAN_ID, CANBus.roboRIO());
+
+        arm2Motor = new TalonFX(ARM2_CAN_ID, CANBus.roboRIO());
 
         rodMotor = new TalonFX(ROD_CAN_ID, CANBus.roboRIO());
 
-        armMotorConfig = new TalonFXConfiguration();
-
+        
         armCanCoderConfig = new CANcoderConfiguration();
-
+        
         rodMotorConfig = new TalonFXConfiguration();
-
+        
         armCanCoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0; // TODO: Change
         armCanCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
         armCanCoderConfig.MagnetSensor.MagnetOffset = 0.0;
-        armCanMotor.getConfigurator().apply(armCanCoderConfig);
-
-        armMotorConfig.Feedback.FeedbackRemoteSensorID = armCanMotor.getDeviceID();
+        arm1CanMotor.getConfigurator().apply(armCanCoderConfig);
+        
+        arm2CanMotor.getConfigurator().apply(armCanCoderConfig);        
+        
+        armMotorConfig = new TalonFXConfiguration()
+        .withMotorOutput(
+                new MotorOutputConfigs()
+                        .withNeutralMode(NeutralModeValue.Coast)
+            )
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(CURRENT_LIMIT)
+                    .withStatorCurrentLimitEnable(true)
+            );
+        armMotorConfig.Feedback.FeedbackRemoteSensorID = arm1CanMotor.getDeviceID();
         armMotorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.SyncCANcoder;
         armMotorConfig.Feedback.SensorToMechanismRatio = 0.0; // TODO: Change
         armMotorConfig.Feedback.RotorToSensorRatio = 0.0; // TODO: Change
 
-        armMotor.getConfigurator().apply(armMotorConfig);
+        arm1Motor.getConfigurator().apply(armMotorConfig);
+        arm2Motor.getConfigurator().apply(armMotorConfig);
+        arm2Motor.setControl(new Follower(ARM1_CAN_ID, MotorAlignmentValue.Opposed));
 
         feedForward = new ArmFeedforward(
                 0, // TODO: change this
@@ -128,7 +157,7 @@ public class IntakeSubsystem extends SubsystemBase {
      * @return The degree of the arm
      */
     public static Angle getPosition() {
-        return Degrees.of(armCanMotor.getAbsolutePosition().getValueAsDouble());
+        return Degrees.of(arm1CanMotor.getAbsolutePosition().getValueAsDouble());
     }
 
     /**
@@ -137,7 +166,7 @@ public class IntakeSubsystem extends SubsystemBase {
      * @return The velocity of the arm
      */
     public static AngularVelocity getVelocity() {
-        return DegreesPerSecond.of(armCanMotor.getAbsolutePosition().getValueAsDouble());
+        return DegreesPerSecond.of(arm1CanMotor.getAbsolutePosition().getValueAsDouble());
     }
 
     /**
@@ -146,7 +175,7 @@ public class IntakeSubsystem extends SubsystemBase {
      * @return The acceleration of the arm
      */
     public static AngularAcceleration getAcceleration() {
-        return DegreesPerSecondPerSecond.of(armCanMotor.getAbsolutePosition().getValueAsDouble());
+        return DegreesPerSecondPerSecond.of(arm1CanMotor.getAbsolutePosition().getValueAsDouble());
     }
 
     /**
@@ -267,15 +296,17 @@ public class IntakeSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        double currentAngle = armMotor.getPosition().getValueAsDouble();
-        double currentVelocity = armMotor.getVelocity().getValueAsDouble();
-        double nextVelocity = (armMotor.getAcceleration().getValueAsDouble() + currentVelocity) / 10;
+        double currentAngle = arm1Motor.getPosition().getValueAsDouble();
+        double currentVelocity = arm1Motor.getVelocity().getValueAsDouble();
+        double nextVelocity = (arm1Motor.getAcceleration().getValueAsDouble() + currentVelocity) / 10;
 
-        armMotor.setVoltage(
-                armPIDController.calculate(getPosition().in(Degrees)) +
-                        feedForward.calculateWithVelocities(
-                                currentAngle,
-                                currentVelocity,
-                                nextVelocity));
+        arm1Motor.setVoltage(
+            armPIDController.calculate(getPosition().in(Degrees)) +
+            feedForward.calculateWithVelocities(
+                currentAngle,
+                currentVelocity,
+                nextVelocity
+            )
+        );
     }
 }
