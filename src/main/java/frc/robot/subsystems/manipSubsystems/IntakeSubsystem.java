@@ -9,6 +9,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.StrictFollower;
+import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -28,6 +30,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
@@ -60,6 +66,9 @@ public class IntakeSubsystem extends SubsystemBase {
     public static final Angle HOME_ANGLE = Degrees.of(345); // TODO: change this
     public static final Angle COLLECTION_POINT = Degrees.of(270); // TODO: change this
 
+    private Angle requestedAngle;
+    private double requestedVelocity;
+
     private static final double aP = 0; // TODO: change this
     private static final double aI = 0; // TODO: change this
     private static final double aD = 0; // TODO: change this
@@ -75,7 +84,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private static final Angle POSITION_TOLERANCE = Degrees.of(0); // TODO: change this
     private static final AngularVelocity VELOCITY_TOLERANCE = DegreesPerSecond.of(0); // TODO: change this
-    
+
     public IntakeSubsystem() {
 
         arm1CanMotor = new CANcoder(ARM1_CAN_ID);
@@ -128,18 +137,16 @@ public class IntakeSubsystem extends SubsystemBase {
         rodMotorConfig.Slot0.kV = (rV);
 
         armPIDController = new ProfiledPIDController(
-            aP,
-            aI,
-            aD,
-            new Constraints(
-                MAX_VELOCITY.in(DegreesPerSecond),
-                MAX_ACCELERATION.in(DegreesPerSecondPerSecond)
-            )
-        );
+                aP,
+                aI,
+                aD,
+                new Constraints(
+                        MAX_VELOCITY.in(DegreesPerSecond),
+                        MAX_ACCELERATION.in(DegreesPerSecondPerSecond)));
 
         armPIDController.setTolerance(
-            POSITION_TOLERANCE.in(Degrees),
-            VELOCITY_TOLERANCE.in(DegreesPerSecond));
+                POSITION_TOLERANCE.in(Degrees),
+                VELOCITY_TOLERANCE.in(DegreesPerSecond));
         setSetpoint(HOME_ANGLE);
         armPIDController.reset(getPosition().in(Degrees));
     }
@@ -177,10 +184,11 @@ public class IntakeSubsystem extends SubsystemBase {
      * @return Command to rotate arm
      */
     public Command rotateTo(Angle setpoint) {
+        requestedAngle = setpoint;
         return runOnce(
-            () -> setSetpoint(setpoint))
-        .until(
-            () -> atGoal()
+            () -> setSetpoint(setpoint)
+        ).until(
+            () -> armIsReady()
         );
     }
 
@@ -190,9 +198,24 @@ public class IntakeSubsystem extends SubsystemBase {
      * @return Command to spin rod
      */
     public Command intake() {
-        return Commands.runOnce(
-            () -> rodMotor.set(CW_SPEED) // TODO: Check direction
-        );
+        Command out = new Command() {
+            @Override
+            public void initialize() {
+                requestedVelocity = rodMotor.getVelocity().getValueAsDouble();
+            }
+            @Override
+            public void execute() {
+                rodMotor.setControl(new VelocityVoltage(CW_SPEED).withSlot(0)); // TODO: Check direction
+            }
+        };
+          SmartDashboard.putData("Intake", new Sendable() {
+            @Override 
+            public void initSendable(SendableBuilder builder) {
+                builder.addBooleanProperty("Indexing", ()-> rodIsReady(), null); //TODO: atGoal may be wrong boolean new booleans may need to be made
+            }
+        });
+        out.addRequirements(this);
+        return out;
     }
 
     /**
@@ -202,9 +225,15 @@ public class IntakeSubsystem extends SubsystemBase {
      * @return Command to spin the rod in reverse
      */
     public Command extake() {
-        return Commands.runOnce(
-            () -> rodMotor.set(CCW_SPEED) // TODO: Check direction
-        );
+        Command out = new Command() {
+            @Override
+            public void execute() {
+                rodMotor.set(CCW_SPEED); //TODO: Check direction
+            }
+        };
+        
+        out.addRequirements(this);
+        return out;
     }
 
     /**
@@ -225,8 +254,8 @@ public class IntakeSubsystem extends SubsystemBase {
      */
     public Command agitateFuel() {
         return rotateTo(HOME_ANGLE)
-        .andThen(new WaitCommand(0.5))
-        .andThen(rotateTo(COLLECTION_POINT)); // TODO: Should work but will need a controlled test
+                .andThen(new WaitCommand(0.5))
+                .andThen(rotateTo(COLLECTION_POINT)); // TODO: Should work but will need a controlled test
     }
 
     /** gets your currrent current */
@@ -242,9 +271,26 @@ public class IntakeSubsystem extends SubsystemBase {
     private boolean atGoal() {
         return armPIDController.atGoal();
     }
+    private boolean armIsReady() {
+        double deadBand = 2;
+        double armAngle = armMotor.getPosition().getValueAsDouble();
+        return Math.abs(((BaseStatusSignal) requestedAngle).getValueAsDouble() - armAngle) <= deadBand;
+     
+    }
+    private boolean rodIsReady() {
+        double deadBand = 1;
+        double rodVelocity = rodMotor.getVelocity().getValueAsDouble();
+        if(deadBand == 0){
+            return false;
+        } 
+        else{
+          return Math.abs(requestedVelocity - rodVelocity) <= deadBand;
+        }
+    }
 
     /**
-     * This command runs 3 values from the motor (angle, velocity, acceleration), and uses them 
+     * This command runs 3 values from the motor (angle, velocity, acceleration),
+     * and uses them
      * to calculate a feed forward loop
      */
 
