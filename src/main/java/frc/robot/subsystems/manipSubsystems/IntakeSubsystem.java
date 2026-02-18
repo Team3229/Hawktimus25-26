@@ -273,7 +273,7 @@ public class IntakeSubsystem extends SubsystemBase {
     }
     private boolean armIsReady() {
         double deadBand = 2;
-        double armAngle = armMotor.getPosition().getValueAsDouble();
+        double armAngle = arm1Motor.getPosition().getValueAsDouble();
         return Math.abs(((BaseStatusSignal) requestedAngle).getValueAsDouble() - armAngle) <= deadBand;
      
     }
