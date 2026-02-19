@@ -47,18 +47,18 @@ public class IntakeSubsystem extends SubsystemBase {
     private static TalonFX arm2Motor;
     private static TalonFX rodMotor;
     private static CANcoder arm1CanMotor;
-    private static CANcoder arm2CanMotor;
     private static TalonFXConfiguration armMotorConfig;
     private static TalonFXConfiguration rodMotorConfig;
     private static CANcoderConfiguration armCanCoderConfig;
 
+
     private static ArmFeedforward feedForward;
     private static ProfiledPIDController armPIDController;
 
-    private static final int ARM1_CAN_ID = 9; // TODO: change this
+    private static final int ARM1_CAN_ID = 945; // TODO: change this
     private static final int ARM2_CAN_ID = 1122; // TODO: change this
 
-    private static final int ROD_CAN_ID = 8; // TODO: change this
+    private static final int ROD_CAN_ID = 865; // TODO: change this
     // private static final double POSITION_CONVERSION_FACTOR = 2 * Math.PI;
 
     private static final Current CURRENT_LIMIT = Amps.of(40);
@@ -95,7 +95,6 @@ public class IntakeSubsystem extends SubsystemBase {
 
         rodMotor = new TalonFX(ROD_CAN_ID, CANBus.roboRIO());
 
-        
         armCanCoderConfig = new CANcoderConfiguration();
         
         rodMotorConfig = new TalonFXConfiguration();
@@ -104,9 +103,7 @@ public class IntakeSubsystem extends SubsystemBase {
         armCanCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
         armCanCoderConfig.MagnetSensor.MagnetOffset = 0.0;
         arm1CanMotor.getConfigurator().apply(armCanCoderConfig);
-        
-        arm2CanMotor.getConfigurator().apply(armCanCoderConfig);        
-        
+                
         armMotorConfig = new TalonFXConfiguration()
         .withMotorOutput(
                 new MotorOutputConfigs()

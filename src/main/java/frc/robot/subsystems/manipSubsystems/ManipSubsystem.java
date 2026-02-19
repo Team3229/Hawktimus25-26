@@ -11,13 +11,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class ManipSubsystem extends SubsystemBase {
     IntakeSubsystem intakeSubsystem;
     IndexSubsystem indexSubsystem;
-    ShooterArmSubsystem shooterArmSubsystem;
     SpitterSubsystem spitterSubsystem;
 
     public ManipSubsystem() {
         intakeSubsystem = new IntakeSubsystem();
         indexSubsystem = new IndexSubsystem();
-        shooterArmSubsystem = new ShooterArmSubsystem();
         spitterSubsystem = new SpitterSubsystem();
     }
     /**Command that runs intaking
