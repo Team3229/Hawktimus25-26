@@ -31,6 +31,7 @@ import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import swervelib.SwerveInputStream;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 import frc.robot.subsystems.drive.HubAlign;
+import frc.robot.subsystems.manipSubsystems.PathPlannerCommands;
 
 public class RobotContainer {
 
@@ -42,6 +43,7 @@ public class RobotContainer {
 	HubAlign hubAlign;
 
 	VisualizerSubsystem visualizerSubsystem;
+	PathPlannerCommands pathPlannerCommands;
 
 	private SendableChooser<Command> autoChooser;
 	private Command autoCommand;
@@ -87,10 +89,10 @@ public class RobotContainer {
 
 	private void configDriveControls() {
 
-		NamedCommands.registerCommand("Intake", manipSubsystem.intake());
-		NamedCommands.registerCommand("ArmOut", manipSubsystem.extendStorage());
-		NamedCommands.registerCommand("WheelSpinUp", manipSubsystem.spinUp());
-		NamedCommands.registerCommand("Shoot", manipSubsystem.shoot());
+		NamedCommands.registerCommand("Intake", pathPlannerCommands.pathIntake());
+		NamedCommands.registerCommand("ArmOut", pathPlannerCommands.pathExtendStorage());
+		NamedCommands.registerCommand("WheelSpinUp", pathPlannerCommands.pathSpinUp());
+		NamedCommands.registerCommand("Shoot", pathPlannerCommands.pathShoot());
 
 		SwerveInputStream driveAngularVelocity = driveSubsystem.getInputStream(
 			() -> -driverController.a_Y(),
