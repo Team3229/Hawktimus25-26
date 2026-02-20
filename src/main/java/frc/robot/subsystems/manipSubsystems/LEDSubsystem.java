@@ -26,20 +26,22 @@ public class LEDSubsystem extends SubsystemBase {
     private final Color purple = Color.fromHSV(300, 100, 50);
     private final Color yellow = Color.fromHSV(60,100,100);
 
-    private final int LEDPortNumber = 3;
+    private final int LEDPortNumber = 1;
     private final int LEDBuffer = 180;
 
     public LEDSubsystem() {
         led = new AddressableLED(LEDPortNumber);
-        ledBuffer = new AddressableLEDBuffer(LEDBuffer);
+
+        ledBuffer = new AddressableLEDBuffer(LEDBuffer);    
 
         led.setLength(ledBuffer.getLength());
 
         led.setData(ledBuffer);
+        
         led.start();
-
-        this.setDefaultCommand(runPattern(setColor(Color.kBlue)));
-
+        
+        this.setDefaultCommand(runPattern(setColor(purple)));
+        
     }
 
     @Override
@@ -48,11 +50,15 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     public Command runPattern(LEDPattern pattern) {
-        return run(() -> pattern.applyTo(ledBuffer));
+        return run(() -> pattern.applyTo(ledBuffer)); 
     }
 
     public LEDPattern setColor(Color color) {
         return LEDPattern.solid(color);
+    }
+
+    public LEDPattern setPurple() {
+        return setColor(purple);
     }
 
     public void setColorsContinuous(Color c1, Color c2) {
