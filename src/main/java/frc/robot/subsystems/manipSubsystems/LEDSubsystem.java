@@ -27,9 +27,10 @@ public class LEDSubsystem extends SubsystemBase {
     private final Color yellow = Color.fromHSV(60,100,100);
 
     private final int LEDPortNumber = 1;
-    private final int LEDBuffer = 180;
+    private final int LEDBuffer = 84;
 
     public LEDSubsystem() {
+
         led = new AddressableLED(LEDPortNumber);
 
         ledBuffer = new AddressableLEDBuffer(LEDBuffer);    
@@ -40,7 +41,7 @@ public class LEDSubsystem extends SubsystemBase {
         
         led.start();
         
-        this.setDefaultCommand(runPattern(setColor(purple)));
+        this.setDefaultCommand(runPattern(setPurple()));
         
     }
 
