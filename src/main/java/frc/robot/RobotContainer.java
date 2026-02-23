@@ -27,6 +27,7 @@ import frc.robot.inputs.ButtonBoard;
 import frc.robot.inputs.FlightStick;
 import frc.robot.subsystems.VisualizerSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.manipSubsystems.LEDSubsystem;
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import swervelib.SwerveInputStream;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
@@ -41,6 +42,7 @@ public class RobotContainer {
 	DriveSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
 	HubAlign hubAlign;
+	LEDSubsystem ledSubsystem;
 
 	VisualizerSubsystem visualizerSubsystem;
 	PathPlannerCommands pathPlannerCommands;
@@ -52,15 +54,15 @@ public class RobotContainer {
 
 		driverController = new FlightStick(0);
 		manipController = new FlightStick(1);
-		buttonBoard = new ButtonBoard(2);
 
-		// buttonBoard = new ButtonBoard(1);
 		driveSubsystem = new DriveSubsystem(
 			"swerve",
 			TelemetryVerbosity.HIGH
 		);
 		manipSubsystem = new ManipSubsystem();
+		ledSubsystem = new LEDSubsystem();
 		hubAlign = new HubAlign();
+		pathPlannerCommands = new PathPlannerCommands();
 
 		configureBindings();
 		initTelemetery();
@@ -72,14 +74,12 @@ public class RobotContainer {
 
 		configDriveControls();
 		configManipControls();
-		configButtonControls();
 
 	}
 
 	public void teleopInit() {
 
 		System.out.println("TELEOP INIT");
-		driveSubsystem.zeroGyroWithAlliance();
 		
 	}
 
@@ -164,30 +164,6 @@ public class RobotContainer {
 
 		manipController.b_12().onTrue(
 			manipSubsystem.stow()
-		);
-
-	}
-
-	private void configButtonControls() {
-
-		buttonBoard.b_1().onTrue(
-			manipSubsystem.shoot()
-		);
-
-		buttonBoard.b_2().onTrue(
-			manipSubsystem.spinUp()
-		);
-
-		buttonBoard.b_3().onTrue(
-			manipSubsystem.intake()
-		);
-
-		buttonBoard.b_4().onTrue(
-			manipSubsystem.extendStorage()
-		);
-
-		buttonBoard.b_5().onTrue(
-			manipSubsystem.manualShoot()
 		);
 
 	}
