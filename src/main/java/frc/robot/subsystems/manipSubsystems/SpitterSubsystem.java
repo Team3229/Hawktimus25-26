@@ -124,45 +124,6 @@ public class SpitterSubsystem extends SubsystemBase {
         feeder.getConfigurator().apply(feederMotorConfig);
     }
 
-    public Command spinUp() {
-        Command out = new Command() {
-            @Override
-            public void initialize() { 
-
-            }
-
-            // is in execute bc we need to call it every few seconds
-            @Override
-            public void execute() {
-                leftSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0));
-                rightSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0));
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                leftSpitter.setControl(new VelocityVoltage(0).withSlot(0));
-                rightSpitter.setControl(new VelocityVoltage(0).withSlot(0));
-            }
-        };
-
-        SmartDashboard.putData("Shooter", new Sendable() {
-            @Override
-            public void initSendable(SendableBuilder builder) {
-                builder.addDoubleProperty("LSpitterVelocity", () -> leftSpitter.getVelocity().getValueAsDouble(), null);
-                builder.addDoubleProperty("RSpitterVelocity", () -> rightSpitter.getVelocity().getValueAsDouble(), null);
-                builder.addDoubleProperty("KickerVelocity", () -> feeder.getVelocity().getValueAsDouble(), null);
-                builder.addDoubleProperty("SRPS", () -> requestedShooterVelocity, null);
-                builder.addDoubleProperty("FRPS", () -> requestedFeederVelocity, null);
-                builder.addBooleanProperty("Ready to Shoot", () -> shooterIsReady(), null);
-                builder.addBooleanProperty("Is a Fed", () -> feederIsReady(), null);
-                
-            }
-        });
-        out.addRequirements(this);
-
-        return out;
-    }
-
     public Command shoot() {
         Command out = new Command() {
             @Override
@@ -185,6 +146,20 @@ public class SpitterSubsystem extends SubsystemBase {
             }
             
         };
+
+        SmartDashboard.putData("Shooter", new Sendable() {
+            @Override
+            public void initSendable(SendableBuilder builder) {
+                builder.addDoubleProperty("LSpitterVelocity", () -> leftSpitter.getVelocity().getValueAsDouble(), null);
+                builder.addDoubleProperty("RSpitterVelocity", () -> rightSpitter.getVelocity().getValueAsDouble(), null);
+                builder.addDoubleProperty("KickerVelocity", () -> feeder.getVelocity().getValueAsDouble(), null);
+                builder.addDoubleProperty("SRPS", () -> requestedShooterVelocity, null);
+                builder.addDoubleProperty("FRPS", () -> requestedFeederVelocity, null);
+                builder.addBooleanProperty("Ready to Shoot", () -> shooterIsReady(), null);
+                builder.addBooleanProperty("Is a Fed", () -> feederIsReady(), null);
+                
+            }
+        });
 
         out.addRequirements(this);
 

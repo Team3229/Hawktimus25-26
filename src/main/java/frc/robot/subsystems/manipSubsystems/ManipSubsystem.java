@@ -45,7 +45,7 @@ public class ManipSubsystem extends SubsystemBase {
      * @return Runs the Spit command from
      */
     public Command spinUp() {
-        return spitterSubsystem.spinUp();
+        return spitterSubsystem.shoot();
     }
 
     /**moves the fuel forward and then takes it into the shooter
@@ -69,7 +69,7 @@ public class ManipSubsystem extends SubsystemBase {
 
     //TODO: Find and change double value later
     public Command manualShoot() {
-        return runOnce(() -> spitterSubsystem.spinUp());
+        return runOnce(() -> spitterSubsystem.shoot());
     }
     
 }
