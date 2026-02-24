@@ -20,8 +20,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class SpitterSubsystem extends SubsystemBase {
-    private double requestedShooterVelocity = 0;
-    private double requestedFeederVelocity = 0;
+    private static double requestedShooterVelocity = 25;
+    private static double requestedFeederVelocity = 35;
 
     // change PID (if needed)
     private static double kP = 0.1;
@@ -29,15 +29,15 @@ public class SpitterSubsystem extends SubsystemBase {
     private static double kD = 0;
     private static double kV = 0.13;
 
-    private static final int LS_CAN_ID = 10;
+    private static final int LS_CAN_ID = 12;
     private TalonFX leftSpitter;
     private TalonFXConfiguration LSMotorConfig;
 
-    private static final int RS_CAN_ID = 8;
+    private static final int RS_CAN_ID = 11;
     private TalonFX rightSpitter;
     private TalonFXConfiguration RSMotorConfig;
 
-    private static final int Feeder_CAN_ID = 7;
+    private static final int Feeder_CAN_ID = 10;
     private TalonFX feeder;
     private TalonFXConfiguration feederMotorConfig;
 
@@ -124,18 +124,18 @@ public class SpitterSubsystem extends SubsystemBase {
         feeder.getConfigurator().apply(feederMotorConfig);
     }
 
-    public Command spinUp(double rps) {
+    public Command spinUp() {
         Command out = new Command() {
             @Override
             public void initialize() { 
-                requestedShooterVelocity = rps;
+
             }
 
             // is in execute bc we need to call it every few seconds
             @Override
             public void execute() {
-                leftSpitter.setControl(new VelocityVoltage(rps).withSlot(0));
-                rightSpitter.setControl(new VelocityVoltage(rps).withSlot(0));
+                leftSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0));
+                rightSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0));
             }
 
             @Override
@@ -161,23 +161,18 @@ public class SpitterSubsystem extends SubsystemBase {
         return out;
     }
 
-    public Command shoot(double srps, double frps) {
+    public Command shoot() {
         Command out = new Command() {
             @Override
             public void initialize() {
-                requestedShooterVelocity = srps;
-                requestedFeederVelocity = frps;
+
             }
             
             @Override
             public void execute() {
-                leftSpitter.setControl(new VelocityVoltage(srps).withSlot(0));
-                rightSpitter.setControl(new VelocityVoltage(srps).withSlot(0));
-                if(shooterIsReady()) {
-                    feeder.setControl(new VelocityVoltage(frps).withSlot(0));
-                } else {
-                    feeder.setControl(new VelocityVoltage(0).withSlot(0));
-                }
+                leftSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0));
+                rightSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0));
+                feeder.setControl(new VelocityVoltage(requestedFeederVelocity).withSlot(0));
             }
 
             @Override
@@ -214,5 +209,50 @@ public class SpitterSubsystem extends SubsystemBase {
         } else {
             return Math.abs(requestedFeederVelocity - feederVelocity) <= deadBand;
         }
+    }
+
+
+     private void upSRPS() {
+        requestedShooterVelocity = Math.min(requestedShooterVelocity + 5, 100);
+    }
+
+    public Command upSRPSCommand() {
+        return runOnce(() -> {
+            upSRPS(); 
+            System.out.println("WE UPPED SRPS TO: " + requestedShooterVelocity);
+        });
+    }
+
+    private void downSRPS() {
+        requestedShooterVelocity = Math.max(requestedShooterVelocity - 5, 5); //TODO: extract constant
+    }
+
+    public Command downSRPSCommand() {
+        return runOnce(() -> {
+            downSRPS(); 
+            System.out.println("WE lowered SRSPS to:" + requestedShooterVelocity);
+        });
+    }
+
+     private void upFRPS() {
+        requestedFeederVelocity = Math.min(requestedFeederVelocity + 5, 100);
+    }
+    
+    public Command upFRPSCommand() { 
+        return runOnce(() -> {
+            upFRPS(); 
+            System.out.println("WE raised FRSPS to:" + requestedFeederVelocity);
+        });
+    }
+
+     private void downFRPS() {
+        requestedFeederVelocity = Math.max(requestedFeederVelocity - 5, 5);
+    }
+
+     public Command downFRPSCommand() {
+        return runOnce(() -> {
+            downFRPS(); 
+            System.out.println("WE lowered FRSPS to:" + requestedFeederVelocity);
+        });
     }
 }
