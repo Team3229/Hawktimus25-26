@@ -45,7 +45,7 @@ public class SpitterSubsystem extends SubsystemBase {
     private static final Current CURRENT_LIMIT = Amps.of(40);
 
     public SpitterSubsystem() {
-        // initializes shooting motors
+        // initializes shooting motor
         leftSpitter = new TalonFX(LS_CAN_ID, CANBus.roboRIO()); 
         LSMotorConfig = new TalonFXConfiguration()
             .withMotorOutput(
@@ -151,6 +151,8 @@ public class SpitterSubsystem extends SubsystemBase {
                 builder.addDoubleProperty("LSpitterVelocity", () -> leftSpitter.getVelocity().getValueAsDouble(), null);
                 builder.addDoubleProperty("RSpitterVelocity", () -> rightSpitter.getVelocity().getValueAsDouble(), null);
                 builder.addDoubleProperty("KickerVelocity", () -> feeder.getVelocity().getValueAsDouble(), null);
+                builder.addDoubleProperty("SRPS", () -> requestedShooterVelocity, null);
+                builder.addDoubleProperty("FRPS", () -> requestedFeederVelocity, null);
                 builder.addBooleanProperty("Ready to Shoot", () -> shooterIsReady(), null);
                 builder.addBooleanProperty("Is a Fed", () -> feederIsReady(), null);
                 
