@@ -1,3 +1,4 @@
+//owen may or may not be bad at coding cause hes using documentation, like WHO WOULD EVER DO THAT? 👀
 package frc.robot.subsystems.manipSubsystems;
 
 import static edu.wpi.first.units.Units.Amps;
@@ -11,13 +12,16 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.spark.config.FeedForwardConfig;
 
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
 
 public class SpitterSubsystem extends SubsystemBase {
     private static double requestedShooterVelocity = 25;
@@ -33,6 +37,14 @@ public class SpitterSubsystem extends SubsystemBase {
     private TalonFX leftSpitter;
     private TalonFXConfiguration LSMotorConfig;
 
+    private SimpleMotorFeedforward shooterFeedForward;
+    private static double sKV = 0;
+    private static double sKS = 0;
+
+    private SimpleMotorFeedforward feederFeedforward;
+    private static double fKV = 0;
+    private static double fKS = 0;
+
     private static final int RS_CAN_ID = 11;
     private TalonFX rightSpitter;
     private TalonFXConfiguration RSMotorConfig;
@@ -45,6 +57,8 @@ public class SpitterSubsystem extends SubsystemBase {
     private static final Current CURRENT_LIMIT = Amps.of(40);
 
     public SpitterSubsystem() {
+        shooterFeedForward = new SimpleMotorFeedforward(sKS, sKV);
+        feederFeedforward = new SimpleMotorFeedforward(fKS, fKV);
         // initializes shooting motor
         leftSpitter = new TalonFX(LS_CAN_ID, CANBus.roboRIO()); 
         LSMotorConfig = new TalonFXConfiguration()
@@ -231,5 +245,13 @@ public class SpitterSubsystem extends SubsystemBase {
             downFRPS(); 
             System.out.println("WE lowered FRSPS to:" + requestedFeederVelocity);
         });
+    }
+
+    @Override
+    public void periodic() {
+        double currentVelocity = leftSpitter.getVelocity().getValueAsDouble();
+        double fCurrentVelocity = feeder.getVelocity().getValueAsDouble();
+        shooterFeedForward.calculate(currentVelocity);
+        feederFeedforward.calculate(fCurrentVelocity); 
     }
 }
