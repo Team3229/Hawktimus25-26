@@ -27,6 +27,7 @@ import frc.robot.inputs.ButtonBoard;
 import frc.robot.inputs.FlightStick;
 import frc.robot.subsystems.VisualizerSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.manipSubsystems.IntakeSubsystem;
 import frc.robot.subsystems.manipSubsystems.LEDSubsystem;
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import swervelib.SwerveInputStream;
@@ -41,6 +42,7 @@ public class RobotContainer {
 	ButtonBoard buttonBoard;
 	DriveSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
+	IntakeSubsystem intakeSubsystem;
 	HubAlign hubAlign;
 	LEDSubsystem ledSubsystem;
 
@@ -60,6 +62,7 @@ public class RobotContainer {
 			TelemetryVerbosity.HIGH
 		);
 		manipSubsystem = new ManipSubsystem();
+		intakeSubsystem = new IntakeSubsystem();
 		ledSubsystem = new LEDSubsystem();
 		hubAlign = new HubAlign();
 		pathPlannerCommands = new PathPlannerCommands();
@@ -158,8 +161,8 @@ public class RobotContainer {
 			manipSubsystem.extendStorage()
 		);
 
-		manipController.b_4().onTrue(
-			manipSubsystem.intake()
+		manipController.b_4().whileTrue(
+			intakeSubsystem.intake()
 		);
 
 		manipController.b_12().onTrue(

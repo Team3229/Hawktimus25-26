@@ -24,9 +24,9 @@ public class ManipSubsystem extends SubsystemBase {
      */
     public Command intake() {
         return runOnce(() -> System.out.println("Intaking..."))
-        .andThen(intakeSubsystem.intake())
-        .andThen(Commands.waitTime(Seconds.of(2)))
-        .andThen(indexSubsystem.index(indexSubsystem.forwards)); // might not be needed
+        .andThen(intakeSubsystem.intake());
+        // .andThen(Commands.waitTime(Seconds.of(2)))
+        // .andThen(indexSubsystem.index(indexSubsystem.forwards)); // might not be needed
     }
 
     public Command stow() {
