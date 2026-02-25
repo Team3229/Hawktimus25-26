@@ -25,6 +25,8 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.revrobotics.spark.config.ExternalEncoderConfig;
+import com.thethriftybot.devices.ThriftyNova.ExternalEncoder;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -34,6 +36,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -44,14 +47,10 @@ public class IntakeSubsystem extends SubsystemBase {
     private static TalonFX armMotorRight;
     private static TalonFX armMotorLeft;
     private static TalonFX rodMotor;
-    private static CANcoder armRightCanMotor;
+    private static ExternalEncoder armEncoder;
     private static TalonFXConfiguration armMotorConfig;
     private static TalonFXConfiguration rodMotorConfig;
-    private static CANcoderConfiguration armCanCoderConfig;
-
-
-    private static ArmFeedforward feedForward;
-    private static ProfiledPIDController armPIDController;
+    private static ExternalEncoderConfig armEncoderConfig;
 
     private static final int ARM_R_CAN_ID = 9; 
     private static final int ARM_L_CAN_ID = 1; 
@@ -70,15 +69,15 @@ public class IntakeSubsystem extends SubsystemBase {
     private static final double aI = 0; 
     private static final double aD = 0; 
 
-    private static final double rP = 0.1; 
+    private static final double rP = 0.3; 
     private static final double rV = 0.13; 
 
-    private static final double ROD_CW_SPEED = 5; 
-    private static final double ROD_CCW_SPEED = -5;
+    private static final double ROD_CW_SPEED = 50; 
+    private static final double ROD_CCW_SPEED = -50;
 
     public IntakeSubsystem() {
 
-        armRightCanMotor = new CANcoder(0);
+        armEncoder = new CANcoder(8);
 
         armMotorRight = new TalonFX(ARM_R_CAN_ID, CANBus.roboRIO());
 
@@ -86,12 +85,13 @@ public class IntakeSubsystem extends SubsystemBase {
 
         rodMotor = new TalonFX(ROD_CAN_ID, CANBus.roboRIO());
 
-        armCanCoderConfig = new CANcoderConfiguration();
-                
-        armCanCoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0; // TODO: Change
-        armCanCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-        armCanCoderConfig.MagnetSensor.MagnetOffset = 0.0;
-        armRightCanMotor.getConfigurator().apply(armCanCoderConfig);
+        armEncoderConfig = new ExternalEncoderConfig();
+        
+        armEncoderConfig.apply(armEncoderConfig)
+        armEncoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0; // TODO: Change
+        armEncoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+        armEncoderConfig.MagnetSensor.MagnetOffset = 0.0;
+        armEncoder.getConfigurator().apply(armEncoderConfig);
                 
         armMotorConfig = new TalonFXConfiguration()
         .withMotorOutput(
@@ -108,10 +108,10 @@ public class IntakeSubsystem extends SubsystemBase {
         armMotorConfig.Slot0.kI = aI;
         armMotorConfig.Slot0.kD = aD;
 
-        armMotorConfig.Feedback.FeedbackRemoteSensorID = armRightCanMotor.getDeviceID();
+        armMotorConfig.Feedback.FeedbackRemoteSensorID = armEncoder.getDeviceID();
         armMotorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.SyncCANcoder;
-        armMotorConfig.Feedback.SensorToMechanismRatio = 0.0; // TODO: Change
-        armMotorConfig.Feedback.RotorToSensorRatio = 0.0; // TODO: Change
+        armMotorConfig.Feedback.SensorToMechanismRatio = 0.04;
+        armMotorConfig.Feedback.RotorToSensorRatio = 25.0;
 
         armMotorRight.getConfigurator().apply(armMotorConfig);
         armMotorLeft.getConfigurator().apply(armMotorConfig);
@@ -139,7 +139,7 @@ public class IntakeSubsystem extends SubsystemBase {
      * @return The degree of the arm
      */
     public static Angle getPosition() {
-        return Degrees.of(armRightCanMotor.getAbsolutePosition().getValueAsDouble());
+        return Degrees.of(armEncoder.getAbsolutePosition().getValueAsDouble());
     }
 
     /**
@@ -148,7 +148,7 @@ public class IntakeSubsystem extends SubsystemBase {
      * @return The velocity of the arm
      */
     public static AngularVelocity getVelocity() {
-        return DegreesPerSecond.of(armRightCanMotor.getAbsolutePosition().getValueAsDouble());
+        return DegreesPerSecond.of(armEncoder.getAbsolutePosition().getValueAsDouble());
     }
 
     /**
@@ -157,7 +157,7 @@ public class IntakeSubsystem extends SubsystemBase {
      * @return The acceleration of the arm
      */
     public static AngularAcceleration getAcceleration() {
-        return DegreesPerSecondPerSecond.of(armRightCanMotor.getAbsolutePosition().getValueAsDouble());
+        return DegreesPerSecondPerSecond.of(armEncoder.getAbsolutePosition().getValueAsDouble());
     }
 
     // /**
@@ -298,27 +298,5 @@ public class IntakeSubsystem extends SubsystemBase {
         } else {
           return Math.abs(requestedVelocity - rodVelocity) <= deadBand;
         }
-    }
-
-    /**
-     * This command runs 3 values from the motor (angle, velocity, acceleration),
-     * and uses them
-     * to calculate a feed forward loop
-     */
-
-    @Override
-    public void periodic() {
-        double currentAngle = armMotorRight.getPosition().getValueAsDouble();
-        double currentVelocity = armMotorRight.getVelocity().getValueAsDouble();
-        double nextVelocity = (armMotorRight.getAcceleration().getValueAsDouble() + currentVelocity) / 10;
-
-        armMotorRight.setVoltage(
-            armPIDController.calculate(getPosition().in(Degrees)) +
-            feedForward.calculateWithVelocities(
-                currentAngle,
-                currentVelocity,
-                nextVelocity
-            )
-        );
     }
 }
