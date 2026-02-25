@@ -36,6 +36,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalSource;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -50,9 +51,14 @@ public class IntakeSubsystem extends SubsystemBase {
     private static TalonFX rodMotor;
     private static TalonFXConfiguration armMotorConfig;
     private static TalonFXConfiguration rodMotorConfig;
+    private static DigitalInput restLimitSwitch;
+    private static DigitalInput outLimitSwitch;
 
     private static final int ARM_R_CAN_ID = 9; 
     private static final int ARM_L_CAN_ID = 1; 
+
+    private static final int REST_LIMIT_PORT = 0; //TODO: update upon implementation
+    private static final int OUT_LIMIT_PORT = 0; //TODO: update upon implementation
 
     private static final int ROD_CAN_ID = 2; 
 
@@ -81,6 +87,9 @@ public class IntakeSubsystem extends SubsystemBase {
     private static final double ROD_CCW_SPEED = -50;
 
     public IntakeSubsystem() {
+        restLimitSwitch = new DigitalInput(REST_LIMIT_PORT);
+       
+        outLimitSwitch = new DigitalInput(OUT_LIMIT_PORT);
 
         armMotorRight = new TalonFX(ARM_R_CAN_ID, CANBus.roboRIO());
 
