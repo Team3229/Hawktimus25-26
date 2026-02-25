@@ -51,9 +51,6 @@ public class IntakeSubsystem extends SubsystemBase {
     private static TalonFXConfiguration armMotorConfig;
     private static TalonFXConfiguration rodMotorConfig;
 
-    private static Encoder armEncoder;
-    private static ExternalEncoderConfig armEncoderConfig;
-
     private static final int ARM_R_CAN_ID = 9; 
     private static final int ARM_L_CAN_ID = 1; 
 
@@ -63,6 +60,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public static final Angle HOME_ANGLE = Rotations.of(0);
     public static final Angle COLLECTION_POINT = Rotations.of(0.25);
+
+    private static final Angle LOW_LIMIT = Rotations.of(-0.01);
+    private static final Angle HIGH_LIMIT = Rotations.of(0.26);
+
 
     public static final boolean inversion = false;
 
@@ -86,10 +87,6 @@ public class IntakeSubsystem extends SubsystemBase {
         armMotorLeft = new TalonFX(ARM_L_CAN_ID, CANBus.roboRIO());
 
         rodMotor = new TalonFX(ROD_CAN_ID, CANBus.roboRIO());
-
-        armEncoderConfig = new ExternalEncoderConfig.Presets().REV_ThroughBoreEncoder;
-
-        armEncoder = new Encoder(null /*need to learn what this is asking*/, /*need to learn*/, inversion);
                       
         armMotorConfig = new TalonFXConfiguration()
         .withMotorOutput(
@@ -105,11 +102,6 @@ public class IntakeSubsystem extends SubsystemBase {
         armMotorConfig.Slot0.kP = aP;
         armMotorConfig.Slot0.kI = aI;
         armMotorConfig.Slot0.kD = aD;
-
-        armMotorConfig.Feedback.FeedbackRemoteSensorID = armEncoder.getDeviceID();
-        armMotorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.SyncCANcoder;
-        armMotorConfig.Feedback.SensorToMechanismRatio = 0.04;
-        armMotorConfig.Feedback.RotorToSensorRatio = 25.0;
 
         armMotorRight.getConfigurator().apply(armMotorConfig);
         armMotorLeft.getConfigurator().apply(armMotorConfig);
@@ -137,7 +129,7 @@ public class IntakeSubsystem extends SubsystemBase {
      * @return The degree of the arm
      */
     public static Angle getPosition() {
-        return Degrees.of(armEncoder.getAbsolutePosition().getValueAsDouble());
+        return Degrees.of(armMotorRight.getPosition().getValueAsDouble());
     }
 
     /**
@@ -146,7 +138,7 @@ public class IntakeSubsystem extends SubsystemBase {
      * @return The velocity of the arm
      */
     public static AngularVelocity getVelocity() {
-        return DegreesPerSecond.of(armEncoder.getAbsolutePosition().getValueAsDouble());
+        return DegreesPerSecond.of(armMotorRight.getVelocity().getValueAsDouble());
     }
 
     /**
@@ -155,7 +147,7 @@ public class IntakeSubsystem extends SubsystemBase {
      * @return The acceleration of the arm
      */
     public static AngularAcceleration getAcceleration() {
-        return DegreesPerSecondPerSecond.of(armEncoder.getAbsolutePosition().getValueAsDouble());
+        return DegreesPerSecondPerSecond.of(armMotorRight.getAcceleration().getValueAsDouble());
     }
 
     // /**
@@ -182,8 +174,8 @@ public class IntakeSubsystem extends SubsystemBase {
             @Override
             public void execute() {
                 armMotorRight.setControl(new Diff_MotionMagicDutyCycle_Position(
-                    new MotionMagicDutyCycle(setpoint).withSlot(0),
-                    new PositionDutyCycle(setpoint).withSlot(0)
+                    new MotionMagicDutyCycle(setpoint).withSlot(0).withFeedForward(0),
+                    new PositionDutyCycle(setpoint).withSlot(0).withFeedForward(0)
                 ));
             }
 
