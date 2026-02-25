@@ -26,7 +26,7 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.spark.config.ExternalEncoderConfig;
-import com.thethriftybot.devices.ThriftyNova.ExternalEncoder;
+import com.revrobotics.spark.config.ExternalEncoderConfig.Presets;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -36,6 +36,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.DigitalSource;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -47,9 +48,10 @@ public class IntakeSubsystem extends SubsystemBase {
     private static TalonFX armMotorRight;
     private static TalonFX armMotorLeft;
     private static TalonFX rodMotor;
-    private static ExternalEncoder armEncoder;
     private static TalonFXConfiguration armMotorConfig;
     private static TalonFXConfiguration rodMotorConfig;
+
+    private static Encoder armEncoder;
     private static ExternalEncoderConfig armEncoderConfig;
 
     private static final int ARM_R_CAN_ID = 9; 
@@ -61,6 +63,8 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public static final Angle HOME_ANGLE = Rotations.of(0);
     public static final Angle COLLECTION_POINT = Rotations.of(0.25);
+
+    public static final boolean inversion = false;
 
     private Angle requestedAngle;
     private double requestedVelocity;
@@ -77,22 +81,16 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public IntakeSubsystem() {
 
-        armEncoder = new CANcoder(8);
-
         armMotorRight = new TalonFX(ARM_R_CAN_ID, CANBus.roboRIO());
 
         armMotorLeft = new TalonFX(ARM_L_CAN_ID, CANBus.roboRIO());
 
         rodMotor = new TalonFX(ROD_CAN_ID, CANBus.roboRIO());
 
-        armEncoderConfig = new ExternalEncoderConfig();
-        
-        armEncoderConfig.apply(armEncoderConfig)
-        armEncoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0; // TODO: Change
-        armEncoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-        armEncoderConfig.MagnetSensor.MagnetOffset = 0.0;
-        armEncoder.getConfigurator().apply(armEncoderConfig);
-                
+        armEncoderConfig = new ExternalEncoderConfig.Presets().REV_ThroughBoreEncoder;
+
+        armEncoder = new Encoder(null /*need to learn what this is asking*/, /*need to learn*/, inversion);
+                      
         armMotorConfig = new TalonFXConfiguration()
         .withMotorOutput(
             new MotorOutputConfigs()
