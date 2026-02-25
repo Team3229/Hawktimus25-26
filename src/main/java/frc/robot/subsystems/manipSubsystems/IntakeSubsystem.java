@@ -41,8 +41,11 @@ import edu.wpi.first.wpilibj.DigitalSource;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class IntakeSubsystem extends SubsystemBase {
 
@@ -130,6 +133,9 @@ public class IntakeSubsystem extends SubsystemBase {
         rodMotorConfig.Slot0.kP = (rP);
         rodMotorConfig.Slot0.kV = (rV);
 
+        outLimit().onTrue(
+            Commands.runOnce(this::emergencyStow).ignoringDisable(true)
+        );
     }
 
     /**
@@ -220,6 +226,18 @@ public class IntakeSubsystem extends SubsystemBase {
             public void end(boolean interrupted) {
                 rodMotor.setControl(new VelocityVoltage(0).withSlot(0)); 
             }
+
+            // @Override
+            // public boolean isFinished() {
+            //     if(outLimitSwitch()) {
+            //         Commands.runOnce(() -> {
+            //             CommandScheduler.getInstance().cancelAll();
+            //         });
+            //         return true;
+            //     } else {
+            //         return false;
+            //     }
+            // }
         };
         
         SmartDashboard.putData("Intake", new Sendable() {
@@ -266,6 +284,13 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     /**
+     * Command to return to a safe angle after hitting limit
+     */
+    public Command emergencyStow() {
+        return rotateTo(Rotations.of(0.02));
+    }
+
+    /**
      * creates a command that pulls the intake arm back to the
      * home point in order to move the fuel in storage.
      * 
@@ -297,5 +322,20 @@ public class IntakeSubsystem extends SubsystemBase {
         } else {
           return Math.abs(requestedVelocity - rodVelocity) <= deadBand;
         }
+    }
+      public Trigger outLimit() {
+        return new Trigger(this::outLimitSwitch);
+    }
+
+    private boolean outLimitSwitch() {
+        return outLimitSwitch.get();
+    }
+
+      public Trigger restLimit() {
+        return new Trigger(this::restLimitSwitch);
+    }
+
+    private boolean restLimitSwitch() {
+        return restLimitSwitch.get();
     }
 }
