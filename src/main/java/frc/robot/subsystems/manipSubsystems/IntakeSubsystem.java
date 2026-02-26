@@ -14,7 +14,7 @@ import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -41,8 +41,11 @@ public class IntakeSubsystem extends SubsystemBase {
     private static TalonFX armMotorLeft;
     private static TalonFX rodMotor;
     private static TalonFXConfiguration armMotorConfig;
-
     private static TalonFXConfiguration armMotorConfig2;
+
+    private static double motionMagicCruiseVelocity = 0.5;
+    private static double motionMagicAcceleration = 1;
+    private static double motionMagicJerk = 10;
 
     private static TalonFXConfiguration rodMotorConfig;
     private static DigitalInput restLimitSwitch;
@@ -75,43 +78,50 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private static final double rP = 0.3; 
     private static final double rV = 0.13; 
-
+    
     private static final double ROD_CW_SPEED = 50; 
     private static final double ROD_CCW_SPEED = -50;
-
+    
     public IntakeSubsystem() {
+        super();
+
         restLimitSwitch = new DigitalInput(REST_LIMIT_PORT);
-       
+        
         outLimitSwitch = new DigitalInput(OUT_LIMIT_PORT);
-
+        
         armMotorRight = new TalonFX(ARM_R_CAN_ID, CANBus.roboRIO());
-
+        
         armMotorLeft = new TalonFX(ARM_L_CAN_ID, CANBus.roboRIO());
-
+        
         rodMotor = new TalonFX(ROD_CAN_ID, CANBus.roboRIO());
-                      
+
         armMotorConfig = new TalonFXConfiguration()
         .withMotorOutput(
-            new MotorOutputConfigs()
-                .withNeutralMode(NeutralModeValue.Brake)
+        new MotorOutputConfigs()
+        .withNeutralMode(NeutralModeValue.Brake)
         )
         .withCurrentLimits(
             new CurrentLimitsConfigs()
-                .withStatorCurrentLimit(CURRENT_LIMIT)
-                .withStatorCurrentLimitEnable(true)
+            .withStatorCurrentLimit(CURRENT_LIMIT)
+            .withStatorCurrentLimitEnable(true)
         )
         .withFeedback(
             new FeedbackConfigs()
             .withSensorToMechanismRatio(sensorToMechanismRatio)
         );
-
+                        
         armMotorConfig.Slot0.kP = aP;
         armMotorConfig.Slot0.kI = aI;
         armMotorConfig.Slot0.kD = aD;
+        armMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        
+        armMotorConfig.MotionMagic
+        .withMotionMagicCruiseVelocity(motionMagicCruiseVelocity)
+        .withMotionMagicAcceleration(motionMagicAcceleration)
+        .withMotionMagicJerk(motionMagicJerk);
 
-        armMotorRight.getConfigurator().apply(armMotorConfig);
-
-        // TEST 2 IS WITH SEPERATE CONFIG
+        // armMotorRight.getConfigurator().apply(armMotorConfig);
+        
         armMotorConfig2 = new TalonFXConfiguration()
         .withMotorOutput(
             new MotorOutputConfigs()
@@ -132,8 +142,14 @@ public class IntakeSubsystem extends SubsystemBase {
         armMotorConfig2.Slot0.kD = aD;
         armMotorConfig2.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
+        armMotorConfig2.MotionMagic
+        .withMotionMagicCruiseVelocity(motionMagicCruiseVelocity)
+        .withMotionMagicAcceleration(motionMagicAcceleration)
+        .withMotionMagicJerk(motionMagicJerk);
+
         armMotorLeft.getConfigurator().apply(armMotorConfig2);
 
+        armMotorRight.setControl(new Follower(ARM_L_CAN_ID, MotorAlignmentValue.Opposed));
 
         rodMotorConfig = new TalonFXConfiguration()
         .withMotorOutput(
@@ -153,24 +169,7 @@ public class IntakeSubsystem extends SubsystemBase {
             Commands.runOnce(this::emergencyStow).ignoringDisable(true)
         );
 
-        SmartDashboard.putData("Intake", new Sendable() {
-            @Override
-            public void initSendable(SendableBuilder builder) {
-                builder.addDoubleProperty("PositionR", () -> armMotorRight.getPosition().getValueAsDouble(), null);
-                builder.addDoubleProperty("PositionL", () -> armMotorLeft.getPosition().getValueAsDouble(), null);
-                builder.addDoubleProperty("VelocityR", () -> armMotorRight.getVelocity().getValueAsDouble(), null);
-                builder.addDoubleProperty("VelocityL", () -> armMotorLeft.getVelocity().getValueAsDouble(), null);
-                builder.addBooleanProperty("ReadyToIntake", () -> armIsReady(), null);
-            }
-        });
-
-        SmartDashboard.putData("IntakeRod", new Sendable() {
-            @Override
-            public void initSendable(SendableBuilder builder) {
-                builder.addDoubleProperty("Velocity", () -> rodMotor.getVelocity().getValueAsDouble(), null);
-                builder.addBooleanProperty("Intaking", () -> rodIsReady(), null);
-            }
-        });
+        // initSendable();
     }
 
     /**
@@ -225,12 +224,12 @@ public class IntakeSubsystem extends SubsystemBase {
             @Override
             public void execute() {
                 System.out.println("Rotating to " + setpoint.toShortString());
-                armMotorRight.setControl(new MotionMagicDutyCycle(setpoint)
-                .withSlot(0)
-                .withFeedForward(0));
-                armMotorLeft.setControl(new MotionMagicDutyCycle(setpoint)
-                .withSlot(0)
-                .withFeedForward(0));
+                
+                // armMotorRight.setControl(new MotionMagicVoltage(setpoint)
+                // .withSlot(0));
+
+                armMotorLeft.setControl(new MotionMagicVoltage(setpoint)
+                .withSlot(0));
             }
 
             @Override
@@ -239,6 +238,8 @@ public class IntakeSubsystem extends SubsystemBase {
                 return armIsReady();
             }
         };
+
+        initSendable();
 
         out.addRequirements(this);
         return out;
@@ -283,7 +284,7 @@ public class IntakeSubsystem extends SubsystemBase {
         SmartDashboard.putData("Intake", new Sendable() {
             @Override 
             public void initSendable(SendableBuilder builder) {
-                builder.addBooleanProperty("Indexing", ()-> rodIsReady(), null); 
+                builder.addBooleanProperty("Intaking", ()-> rodIsReady(), null); 
             }
         });
 
@@ -349,15 +350,19 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     private boolean armIsReady() {
-        Angle deadBand = Rotations.of(0.01);
-        Angle rightArmAngle = armMotorRight.getPosition().getValue();
-        Angle leftArmAngle = armMotorLeft.getPosition().getValue();
-        System.out.println("req: " + requestedAngle.toShortString() + " Rcur: " + rightArmAngle.toShortString() + " Lcur: " + leftArmAngle.toShortString());
-        if (rightArmAngle.isNear(requestedAngle, deadBand) && leftArmAngle.isNear(requestedAngle, deadBand)) {
-            return true;
-        } else {
+        if (requestedAngle == null) {
             return false;
         }
+        Angle deadBand = Rotations.of(0.02007); // usually 0.01
+        // Angle rightArmAngle = armMotorRight.getPosition().getValue();
+        Angle leftArmAngle = armMotorLeft.getPosition().getValue();
+        // System.out.println("req: " + requestedAngle.toShortString() + /* " Rcur: " + rightArmAngle.toShortString() + */ " Lcur: " + leftArmAngle.toShortString());
+        // if (rightArmAngle.isNear(requestedAngle, deadBand) && leftArmAngle.isNear(requestedAngle, deadBand)) {
+        //     return true;
+        // } else {
+        //     return false;
+        // }
+        return leftArmAngle.isNear(requestedAngle, deadBand);
     }
 
     private boolean rodIsReady() {
@@ -384,5 +389,22 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private boolean restLimitSwitch() {
         return restLimitSwitch.get();
+    }
+
+    public void initSendable() {
+        SmartDashboard.putData("Intake", new Sendable() {
+            @Override 
+            public void initSendable(SendableBuilder builder) {
+                builder.addDoubleProperty("PositionL", () -> armMotorLeft.getPosition().getValueAsDouble(), null);
+                builder.addDoubleProperty("PositionR", () -> armMotorRight.getPosition().getValueAsDouble(), null);
+                builder.addDoubleProperty("VelocityL", () -> armMotorLeft.getVelocity().getValueAsDouble(), null);
+                builder.addDoubleProperty("VelocityR", () -> armMotorRight.getVelocity().getValueAsDouble(), null);
+                builder.addDoubleProperty("VoltageL", ()-> armMotorLeft.getMotorVoltage().getValueAsDouble(), null); 
+                builder.addDoubleProperty("VoltageR", ()-> armMotorRight.getMotorVoltage().getValueAsDouble(), null); 
+                builder.addBooleanProperty("ReadyToIntake", () -> armIsReady(), null);
+                builder.addBooleanProperty("Intaking", () -> rodIsReady(), null);
+                builder.addDoubleProperty("Velocity", () -> rodMotor.getVelocity().getValueAsDouble(), null);
+                }
+        });
     }
 }
