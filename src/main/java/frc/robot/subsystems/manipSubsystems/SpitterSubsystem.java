@@ -37,9 +37,13 @@ public class SpitterSubsystem extends SubsystemBase {
     private TalonFX leftSpitter;
     private TalonFXConfiguration LSMotorConfig;
 
-    private SimpleMotorFeedforward shooterFeedForward;
-    private static double sKV = 0;
-    private static double sKS = 0;
+    private SimpleMotorFeedforward lShooterFeedForward;
+    private static double lSKV = 0;
+    private static double lSKS = 0;
+
+    private SimpleMotorFeedforward rShooterFeedForward;
+    private static double rSKV = 0;
+    private static double rSKS = 0;
 
     private SimpleMotorFeedforward feederFeedforward;
     private static double fKV = 0;
@@ -57,7 +61,10 @@ public class SpitterSubsystem extends SubsystemBase {
     private static final Current CURRENT_LIMIT = Amps.of(40);
 
     public SpitterSubsystem() {
-        shooterFeedForward = new SimpleMotorFeedforward(sKS, sKV);
+        lShooterFeedForward = new SimpleMotorFeedforward(lSKS, lSKV);
+
+        rShooterFeedForward = new SimpleMotorFeedforward(rSKS, rSKV);
+
         feederFeedforward = new SimpleMotorFeedforward(fKS, fKV);
         // initializes shooting motor
         leftSpitter = new TalonFX(LS_CAN_ID, CANBus.roboRIO()); 
@@ -249,9 +256,12 @@ public class SpitterSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        double currentVelocity = leftSpitter.getVelocity().getValueAsDouble();
+        double rCurrentVelocity = leftSpitter.getVelocity().getValueAsDouble();
+        double lCurrentVelocity = rightSpitter.getVelocity().getValueAsDouble(); 
         double fCurrentVelocity = feeder.getVelocity().getValueAsDouble();
-        shooterFeedForward.calculate(currentVelocity);
+        lShooterFeedForward.calculate(lCurrentVelocity);
+        rShooterFeedForward.calculate(rCurrentVelocity);
         feederFeedforward.calculate(fCurrentVelocity); 
     }
 }
+ 
