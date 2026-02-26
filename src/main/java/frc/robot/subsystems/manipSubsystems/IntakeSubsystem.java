@@ -7,25 +7,19 @@ import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Volts;
 
-import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.configs.TalonFXConfigurator;
-import com.ctre.phoenix6.controls.DifferentialFollower;
-import com.ctre.phoenix6.controls.DifferentialStrictFollower;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
-import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.VelocityVoltage;
-import com.ctre.phoenix6.controls.compound.Diff_MotionMagicDutyCycle_Position;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.DifferentialSensorSourceValue;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.configs.FeedbackConfigs;
 
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -47,6 +41,9 @@ public class IntakeSubsystem extends SubsystemBase {
     private static TalonFX armMotorLeft;
     private static TalonFX rodMotor;
     private static TalonFXConfiguration armMotorConfig;
+
+    private static TalonFXConfiguration armMotorConfig2;
+
     private static TalonFXConfiguration rodMotorConfig;
     private static DigitalInput restLimitSwitch;
     private static DigitalInput outLimitSwitch;
@@ -113,8 +110,30 @@ public class IntakeSubsystem extends SubsystemBase {
         armMotorConfig.Slot0.kD = aD;
 
         armMotorRight.getConfigurator().apply(armMotorConfig);
-        armMotorLeft.getConfigurator().apply(armMotorConfig);
-        armMotorLeft.setControl(new Follower(ARM_R_CAN_ID, MotorAlignmentValue.Opposed));
+
+        // TEST 2 IS WITH SEPERATE CONFIG
+        armMotorConfig2 = new TalonFXConfiguration()
+        .withMotorOutput(
+            new MotorOutputConfigs()
+                .withNeutralMode(NeutralModeValue.Brake)
+        )
+        .withCurrentLimits(
+            new CurrentLimitsConfigs()
+                .withStatorCurrentLimit(CURRENT_LIMIT)
+                .withStatorCurrentLimitEnable(true)
+        )
+        .withFeedback(
+            new FeedbackConfigs()
+            .withSensorToMechanismRatio(sensorToMechanismRatio)
+        );
+
+        armMotorConfig2.Slot0.kP = aP;
+        armMotorConfig2.Slot0.kI = aI;
+        armMotorConfig2.Slot0.kD = aD;
+        armMotorConfig2.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+
+        armMotorLeft.getConfigurator().apply(armMotorConfig2);
+
 
         rodMotorConfig = new TalonFXConfiguration()
         .withMotorOutput(
@@ -188,6 +207,9 @@ public class IntakeSubsystem extends SubsystemBase {
             public void execute() {
                 System.out.println("Rotating to " + setpoint.toShortString());
                 armMotorRight.setControl(new MotionMagicDutyCycle(setpoint)
+                .withSlot(0)
+                .withFeedForward(0));
+                armMotorLeft.setControl(new MotionMagicDutyCycle(setpoint)
                 .withSlot(0)
                 .withFeedForward(0));
             }
@@ -309,9 +331,14 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private boolean armIsReady() {
         Angle deadBand = Rotations.of(0.01);
-        Angle armAngle = armMotorRight.getPosition().getValue();
-        System.out.println("req: " + requestedAngle.toShortString() + " cur: " + armAngle.toShortString());
-        return armAngle.isNear(requestedAngle, deadBand);
+        Angle rightArmAngle = armMotorRight.getPosition().getValue();
+        Angle leftArmAngle = armMotorLeft.getPosition().getValue();
+        System.out.println("req: " + requestedAngle.toShortString() + " Rcur: " + rightArmAngle.toShortString() + " Lcur: " + leftArmAngle.toShortString());
+        if (rightArmAngle.isNear(requestedAngle, deadBand) && leftArmAngle.isNear(requestedAngle, deadBand)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private boolean rodIsReady() {
