@@ -152,6 +152,25 @@ public class IntakeSubsystem extends SubsystemBase {
         outLimit().onTrue(
             Commands.runOnce(this::emergencyStow).ignoringDisable(true)
         );
+
+        SmartDashboard.putData("Intake", new Sendable() {
+            @Override
+            public void initSendable(SendableBuilder builder) {
+                builder.addDoubleProperty("PositionR", () -> armMotorRight.getPosition().getValueAsDouble(), null);
+                builder.addDoubleProperty("PositionL", () -> armMotorLeft.getPosition().getValueAsDouble(), null);
+                builder.addDoubleProperty("VelocityR", () -> armMotorRight.getVelocity().getValueAsDouble(), null);
+                builder.addDoubleProperty("VelocityL", () -> armMotorLeft.getVelocity().getValueAsDouble(), null);
+                builder.addBooleanProperty("ReadyToIntake", () -> armIsReady(), null);
+            }
+        });
+
+        SmartDashboard.putData("IntakeRod", new Sendable() {
+            @Override
+            public void initSendable(SendableBuilder builder) {
+                builder.addDoubleProperty("Velocity", () -> rodMotor.getVelocity().getValueAsDouble(), null);
+                builder.addBooleanProperty("Intaking", () -> rodIsReady(), null);
+            }
+        });
     }
 
     /**
