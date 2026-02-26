@@ -10,26 +10,23 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.controls.DifferentialFollower;
+import com.ctre.phoenix6.controls.DifferentialStrictFollower;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.compound.Diff_MotionMagicDutyCycle_Position;
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.DifferentialSensorSourceValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.signals.SensorDirectionValue;
-import com.revrobotics.spark.config.ExternalEncoderConfig;
-import com.revrobotics.spark.config.ExternalEncoderConfig.Presets;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -37,11 +34,8 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DigitalSource;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -56,30 +50,29 @@ public class IntakeSubsystem extends SubsystemBase {
     private static TalonFXConfiguration rodMotorConfig;
     private static DigitalInput restLimitSwitch;
     private static DigitalInput outLimitSwitch;
-
+    
     private static final int ARM_R_CAN_ID = 9; 
     private static final int ARM_L_CAN_ID = 1; 
-
-    private static final int REST_LIMIT_PORT = 0; //TODO: update upon implementation
+    
+    private static final int REST_LIMIT_PORT = 1; //TODO: update upon implementation
     private static final int OUT_LIMIT_PORT = 0; //TODO: update upon implementation
-
+    
     private static final int ROD_CAN_ID = 2; 
-
+    
     private static final Current CURRENT_LIMIT = Amps.of(40);
-
+    
     public static final Angle HOME_ANGLE = Rotations.of(0);
-    public static final Angle COLLECTION_POINT = Rotations.of(0.25);
-
-    private static final Angle LOW_LIMIT = Rotations.of(-0.01);
-    private static final Angle HIGH_LIMIT = Rotations.of(0.26);
-
-
+    public static final Angle STOW_ANGLE = Rotations.of(0.097);
+    public static final Angle COLLECTION_POINT = Rotations.of(0.347);
+    
     public static final boolean inversion = false;
 
+    private static double sensorToMechanismRatio = 0.04;
+    
     private Angle requestedAngle;
     private double requestedVelocity;
-
-    private static final double aP = 0.5; 
+    
+    private static final double aP = 0.1;
     private static final double aI = 0; 
     private static final double aD = 0; 
 
@@ -109,6 +102,10 @@ public class IntakeSubsystem extends SubsystemBase {
             new CurrentLimitsConfigs()
                 .withStatorCurrentLimit(CURRENT_LIMIT)
                 .withStatorCurrentLimitEnable(true)
+        )
+        .withFeedback(
+            new FeedbackConfigs()
+            .withSensorToMechanismRatio(sensorToMechanismRatio)
         );
 
         armMotorConfig.Slot0.kP = aP;
@@ -184,18 +181,20 @@ public class IntakeSubsystem extends SubsystemBase {
             @Override
             public void initialize() {
                 requestedAngle = setpoint;
+                System.out.println("Rotate initialize print");
             }
 
             @Override
             public void execute() {
-                armMotorRight.setControl(new Diff_MotionMagicDutyCycle_Position(
-                    new MotionMagicDutyCycle(setpoint).withSlot(0).withFeedForward(0),
-                    new PositionDutyCycle(setpoint).withSlot(0).withFeedForward(0)
-                ));
+                System.out.println("Rotating to " + setpoint.toShortString());
+                armMotorRight.setControl(new MotionMagicDutyCycle(setpoint)
+                .withSlot(0)
+                .withFeedForward(0));
             }
 
             @Override
             public boolean isFinished() {
+                System.out.println("Checking done for rotate!!!!!!!!!!!!!!!!!!!!!!!!!");
                 return armIsReady();
             }
         };
@@ -287,7 +286,7 @@ public class IntakeSubsystem extends SubsystemBase {
      * Command to return to a safe angle after hitting limit
      */
     public Command emergencyStow() {
-        return rotateTo(Rotations.of(0.02));
+        return rotateTo(STOW_ANGLE);
     }
 
     /**
@@ -297,7 +296,7 @@ public class IntakeSubsystem extends SubsystemBase {
      * @return Command to pull arm back
      */
     public Command agitateFuel() {
-        return rotateTo(HOME_ANGLE)
+        return rotateTo(STOW_ANGLE)
             .andThen(new WaitCommand(0.5))
             .andThen(rotateTo(COLLECTION_POINT)
         );
@@ -309,20 +308,22 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     private boolean armIsReady() {
-        double deadBand = 0.01;
-        double armAngle = armMotorRight.getPosition().getValueAsDouble();
-        return Math.abs(((BaseStatusSignal) requestedAngle).getValueAsDouble() - armAngle) <= deadBand;
-     
+        Angle deadBand = Rotations.of(0.01);
+        Angle armAngle = armMotorRight.getPosition().getValue();
+        System.out.println("req: " + requestedAngle.toShortString() + " cur: " + armAngle.toShortString());
+        return armAngle.isNear(requestedAngle, deadBand);
     }
+
     private boolean rodIsReady() {
         double deadBand = 1;
         double rodVelocity = rodMotor.getVelocity().getValueAsDouble();
-        if(deadBand == 0) {
+        if(requestedVelocity == 0) {
             return false;
         } else {
           return Math.abs(requestedVelocity - rodVelocity) <= deadBand;
         }
     }
+
       public Trigger outLimit() {
         return new Trigger(this::outLimitSwitch);
     }

@@ -40,7 +40,6 @@ public class RobotContainer {
 	ButtonBoard buttonBoard;
 	DriveSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
-	IntakeSubsystem intakeSubsystem;
 	HubAlign hubAlign;
 	LEDSubsystem ledSubsystem;
 
@@ -60,10 +59,9 @@ public class RobotContainer {
 			TelemetryVerbosity.HIGH
 		);
 		manipSubsystem = new ManipSubsystem();
-		intakeSubsystem = new IntakeSubsystem();
 		ledSubsystem = new LEDSubsystem();
 		hubAlign = new HubAlign();
-		pathPlannerCommands = new PathPlannerCommands();
+		pathPlannerCommands = new PathPlannerCommands(manipSubsystem);
 
 		configureBindings();
 		initTelemetery();
@@ -150,7 +148,7 @@ public class RobotContainer {
 
 		manipController.b_Hazard().onTrue(
 			Commands.runOnce(() -> {
-				manipSubsystem.getCurrentCommand().cancel();
+				manipSubsystem.getCurrentCommand().cancel(); // TODO: currently crashes bot
 				// cancels ALL manipING on manip controller
 			})
 		);
@@ -160,7 +158,7 @@ public class RobotContainer {
 		);
 
 		manipController.b_4().whileTrue(
-			intakeSubsystem.intake()
+			manipSubsystem.intake()
 		);
 
 		manipController.b_12().onTrue(

@@ -26,16 +26,20 @@ public class ManipSubsystem extends SubsystemBase {
 
     public Command stow() {
         return runOnce(() -> System.out.println("SSTOOOOOOOOWWWWWWWWWWWWWW"))
-        .andThen(intakeSubsystem.rotateTo(IntakeSubsystem.HOME_ANGLE));
-
+        .andThen(intakeSubsystem.emergencyStow())
+        .andThen(runOnce(() -> System.out.println("WE ARE DONE WITH STOWING")));
     }
+
     /**Extends storage
      * 
      * @return Runs the extend storage command
      */
     public Command extendStorage() {
-        return runOnce(() -> intakeSubsystem.extendIntake());
+        return runOnce(() -> System.out.println("WE HAVE BEGUN THE PROCESS OF EXTENDING"))
+        .andThen(intakeSubsystem.extendIntake())
+        .andThen(runOnce(() -> System.out.println("WE ARE SO DONE WITH EXTENDING")));
     }
+
     /**Spins the shooter wheel
      * 
      * @return Runs the Spit command from
