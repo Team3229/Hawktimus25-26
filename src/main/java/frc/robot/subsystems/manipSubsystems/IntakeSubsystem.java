@@ -14,7 +14,9 @@ import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -43,19 +45,24 @@ public class IntakeSubsystem extends SubsystemBase {
     private static TalonFXConfiguration armMotorConfig;
     private static TalonFXConfiguration armMotorConfig2;
 
+    private static MotionMagicVoltage rotateRequest;
+
     private static double motionMagicCruiseVelocity = 0.5;
     private static double motionMagicAcceleration = 1;
     private static double motionMagicJerk = 10;
 
     private static TalonFXConfiguration rodMotorConfig;
-    private static DigitalInput restLimitSwitch;
-    private static DigitalInput outLimitSwitch;
+    private static DigitalInput homeLimitSwitch;
+    private static DigitalInput extendLimitSwitch;
+
+    private static Angle softLimitUp = Rotations.of(-0.07);
+    private static Angle softLimitDown = Rotations.of(0.37);
     
     private static final int ARM_R_CAN_ID = 9; 
     private static final int ARM_L_CAN_ID = 1; 
     
-    private static final int REST_LIMIT_PORT = 1; //TODO: update upon implementation
-    private static final int OUT_LIMIT_PORT = 0; //TODO: update upon implementation
+    private static final int HOME_LIMIT_PORT = 1; //TODO: update upon implementation
+    private static final int EXTEND_LIMIT_PORT = 0; //TODO: update upon implementation
     
     private static final int ROD_CAN_ID = 2; 
     
@@ -67,33 +74,41 @@ public class IntakeSubsystem extends SubsystemBase {
     
     public static final boolean inversion = false;
 
-    private static double sensorToMechanismRatio = 0.04;
+    private static double sensorToMechanismRatio = 25;
     
     private Angle requestedAngle;
     private double requestedVelocity;
     
-    private static final double aP = 0.1;
+    private static final double aP = 4.8;
     private static final double aI = 0; 
-    private static final double aD = 0; 
+    private static final double aD = 0.1; 
+    private static final double aV = 0.12;
+    private static final double aA = 0.01;
+    private static final double aS = 0.25;
+
 
     private static final double rP = 0.3; 
     private static final double rV = 0.13; 
     
     private static final double ROD_CW_SPEED = 50; 
     private static final double ROD_CCW_SPEED = -50;
+
+    Angle deadBand = Rotations.of(0.02007); // usually 0.01
     
     public IntakeSubsystem() {
         super();
 
-        restLimitSwitch = new DigitalInput(REST_LIMIT_PORT);
+        homeLimitSwitch = new DigitalInput(HOME_LIMIT_PORT);
         
-        outLimitSwitch = new DigitalInput(OUT_LIMIT_PORT);
+        extendLimitSwitch = new DigitalInput(EXTEND_LIMIT_PORT);
         
         armMotorRight = new TalonFX(ARM_R_CAN_ID, CANBus.roboRIO());
         
         armMotorLeft = new TalonFX(ARM_L_CAN_ID, CANBus.roboRIO());
         
         rodMotor = new TalonFX(ROD_CAN_ID, CANBus.roboRIO());
+
+        rotateRequest = new MotionMagicVoltage(0).withSlot(0);
 
         armMotorConfig = new TalonFXConfiguration()
         .withMotorOutput(
@@ -113,6 +128,9 @@ public class IntakeSubsystem extends SubsystemBase {
         armMotorConfig.Slot0.kP = aP;
         armMotorConfig.Slot0.kI = aI;
         armMotorConfig.Slot0.kD = aD;
+        armMotorConfig.Slot0.kV = aV;
+        armMotorConfig.Slot0.kA = aA;
+        armMotorConfig.Slot0.kS = aS;
         armMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         
         armMotorConfig.MotionMagic
@@ -120,7 +138,7 @@ public class IntakeSubsystem extends SubsystemBase {
         .withMotionMagicAcceleration(motionMagicAcceleration)
         .withMotionMagicJerk(motionMagicJerk);
 
-        // armMotorRight.getConfigurator().apply(armMotorConfig);
+        armMotorRight.getConfigurator().apply(armMotorConfig);
         
         armMotorConfig2 = new TalonFXConfiguration()
         .withMotorOutput(
@@ -140,6 +158,9 @@ public class IntakeSubsystem extends SubsystemBase {
         armMotorConfig2.Slot0.kP = aP;
         armMotorConfig2.Slot0.kI = aI;
         armMotorConfig2.Slot0.kD = aD;
+        armMotorConfig2.Slot0.kV = aV;
+        armMotorConfig2.Slot0.kA = aA;
+        armMotorConfig2.Slot0.kS = aS;
         armMotorConfig2.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
         armMotorConfig2.MotionMagic
@@ -165,9 +186,24 @@ public class IntakeSubsystem extends SubsystemBase {
         rodMotorConfig.Slot0.kP = (rP);
         rodMotorConfig.Slot0.kV = (rV);
 
-        outLimit().onTrue(
-            Commands.runOnce(this::emergencyStow).ignoringDisable(true)
+        extendLimit().onTrue(
+            Commands.runOnce(() -> {
+                armMotorLeft.set(0);
+                armMotorLeft.setPosition(COLLECTION_POINT);
+                armMotorRight.setPosition(COLLECTION_POINT);
+                System.out.println("Extend limit hit, stopping motors and reseting position");
+            })
         );
+
+        homeLimit().onTrue(
+            Commands.runOnce(() -> {
+                System.out.println("Home limit hit, stopping motors and reseting position");
+                setHome();
+            })
+        );
+
+        setHome();
+
 
         // initSendable();
     }
@@ -199,20 +235,6 @@ public class IntakeSubsystem extends SubsystemBase {
         return DegreesPerSecondPerSecond.of(armMotorRight.getAcceleration().getValueAsDouble());
     }
 
-    // /**
-    //  * Command that rotates the arm to a setpoint
-    //  * 
-    //  * @return Command to rotate arm
-    //  */
-    // public Command rotateTo(Angle setpoint) {
-    //     requestedAngle = setpoint;
-    //     return runOnce(
-    //         () -> setSetpoint(setpoint)
-    //     ).until(
-    //         () -> armIsReady()
-    //     );
-    // }
-
     public Command rotateTo(Angle setpoint) {
         Command out = new Command() {
             @Override
@@ -225,17 +247,19 @@ public class IntakeSubsystem extends SubsystemBase {
             public void execute() {
                 System.out.println("Rotating to " + setpoint.toShortString());
                 
-                // armMotorRight.setControl(new MotionMagicVoltage(setpoint)
-                // .withSlot(0));
+                armMotorLeft.setControl(rotateRequest.withPosition(setpoint));
 
-                armMotorLeft.setControl(new MotionMagicVoltage(setpoint)
-                .withSlot(0));
             }
 
             @Override
             public boolean isFinished() {
                 System.out.println("Checking done for rotate!!!!!!!!!!!!!!!!!!!!!!!!!");
                 return armIsReady();
+            }
+
+            @Override
+            public void end(boolean interrupted) {
+                armMotorLeft.setControl(new NeutralOut());
             }
         };
 
@@ -353,16 +377,21 @@ public class IntakeSubsystem extends SubsystemBase {
         if (requestedAngle == null) {
             return false;
         }
-        Angle deadBand = Rotations.of(0.02007); // usually 0.01
-        // Angle rightArmAngle = armMotorRight.getPosition().getValue();
+        Angle rightArmAngle = armMotorRight.getPosition().getValue();
         Angle leftArmAngle = armMotorLeft.getPosition().getValue();
-        // System.out.println("req: " + requestedAngle.toShortString() + /* " Rcur: " + rightArmAngle.toShortString() + */ " Lcur: " + leftArmAngle.toShortString());
+        // System.out.println("req: " + requestedAngle.toShortString() + " Rcur: " + rightArmAngle.toShortString() + " Lcur: " + leftArmAngle.toShortString());
+        
         // if (rightArmAngle.isNear(requestedAngle, deadBand) && leftArmAngle.isNear(requestedAngle, deadBand)) {
         //     return true;
         // } else {
         //     return false;
         // }
-        return leftArmAngle.isNear(requestedAngle, deadBand);
+        if (leftArmAngle.isNear(requestedAngle, deadBand) || leftArmAngle.isNear(softLimitUp, deadBand) || leftArmAngle.isNear(softLimitDown, deadBand)) {
+            return true;
+        } else {
+            return false;
+        }
+        // return leftArmAngle.isNear(requestedAngle, deadBand);
     }
 
     private boolean rodIsReady() {
@@ -375,20 +404,20 @@ public class IntakeSubsystem extends SubsystemBase {
         }
     }
 
-      public Trigger outLimit() {
-        return new Trigger(this::outLimitSwitch);
+    public Trigger extendLimit() {
+        return new Trigger(this::extendLimitSwitch);
     }
 
-    private boolean outLimitSwitch() {
-        return outLimitSwitch.get();
+    private boolean extendLimitSwitch() {
+        return extendLimitSwitch.get();
     }
 
-      public Trigger restLimit() {
-        return new Trigger(this::restLimitSwitch);
+      public Trigger homeLimit() {
+        return new Trigger(this::homeLimitSwitch);
     }
 
-    private boolean restLimitSwitch() {
-        return restLimitSwitch.get();
+    private boolean homeLimitSwitch() {
+        return homeLimitSwitch.get();
     }
 
     public void initSendable() {
@@ -406,5 +435,16 @@ public class IntakeSubsystem extends SubsystemBase {
                 builder.addDoubleProperty("Velocity", () -> rodMotor.getVelocity().getValueAsDouble(), null);
                 }
         });
+    }
+
+    public void setHome() {
+        armMotorLeft.set(0);
+        armMotorLeft.setPosition(HOME_ANGLE);
+        armMotorRight.setPosition(HOME_ANGLE);
+        System.out.println("Home has been set");
+    }
+
+    public void periodic() {
+
     }
 }
