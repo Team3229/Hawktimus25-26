@@ -93,7 +93,7 @@ public class IntakeSubsystem extends SubsystemBase {
     private static final double ROD_CW_SPEED = 50; 
     private static final double ROD_CCW_SPEED = -50;
 
-    Angle deadBand = Rotations.of(0.02007); // usually 0.01
+    Angle angleDeadBand = Rotations.of(0.01);
     
     public IntakeSubsystem() {
         super();
@@ -259,7 +259,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
             @Override
             public void end(boolean interrupted) {
-                armMotorLeft.setControl(new NeutralOut());
+                armMotorLeft.set(0);
             }
         };
 
@@ -381,17 +381,13 @@ public class IntakeSubsystem extends SubsystemBase {
         Angle leftArmAngle = armMotorLeft.getPosition().getValue();
         // System.out.println("req: " + requestedAngle.toShortString() + " Rcur: " + rightArmAngle.toShortString() + " Lcur: " + leftArmAngle.toShortString());
         
-        // if (rightArmAngle.isNear(requestedAngle, deadBand) && leftArmAngle.isNear(requestedAngle, deadBand)) {
+        // if (leftArmAngle.isNear(requestedAngle, angleDeadBand) || leftArmAngle.isNear(softLimitUp, angleDeadBand) || leftArmAngle.isNear(softLimitDown, angleDeadBand)) {
         //     return true;
         // } else {
         //     return false;
         // }
-        if (leftArmAngle.isNear(requestedAngle, deadBand) || leftArmAngle.isNear(softLimitUp, deadBand) || leftArmAngle.isNear(softLimitDown, deadBand)) {
-            return true;
-        } else {
-            return false;
-        }
-        // return leftArmAngle.isNear(requestedAngle, deadBand);
+
+        return leftArmAngle.isNear(requestedAngle, angleDeadBand);
     }
 
     private boolean rodIsReady() {
@@ -430,7 +426,7 @@ public class IntakeSubsystem extends SubsystemBase {
                 builder.addDoubleProperty("VelocityR", () -> armMotorRight.getVelocity().getValueAsDouble(), null);
                 builder.addDoubleProperty("VoltageL", ()-> armMotorLeft.getMotorVoltage().getValueAsDouble(), null); 
                 builder.addDoubleProperty("VoltageR", ()-> armMotorRight.getMotorVoltage().getValueAsDouble(), null); 
-                builder.addBooleanProperty("ReadyToIntake", () -> armIsReady(), null);
+                builder.addBooleanProperty("Arm is ready", () -> armIsReady(), null);
                 builder.addBooleanProperty("Intaking", () -> rodIsReady(), null);
                 builder.addDoubleProperty("Velocity", () -> rodMotor.getVelocity().getValueAsDouble(), null);
                 }
