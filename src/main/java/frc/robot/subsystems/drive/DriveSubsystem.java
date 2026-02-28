@@ -57,7 +57,7 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 public class DriveSubsystem extends SubsystemBase {
     
-    public static final LinearVelocity MAX_VELOCITY = MetersPerSecond.of(5.0);
+    public static  LinearVelocity MAX_VELOCITY = MetersPerSecond.of(5.0);
     
     private static final Distance TRANS_ERR_TOL = Meters.of(0.025); //TODO: Test this with a setpoint
 	private static final LinearVelocity TRANS_VEL_TOL = MetersPerSecond.of(0.1);
@@ -403,4 +403,19 @@ public class DriveSubsystem extends SubsystemBase {
 				() -> xTranslationPID.atGoal() && yTranslationPID.atGoal() && rotationPID.atGoal()
 			);
     }
+	public Command slowDrive(){
+		Command out = new Command() {
+			@Override 
+			public void execute(){
+				MAX_VELOCITY.div(2);
+			}
+
+			@Override
+			public void end(boolean interrupted) {
+				MAX_VELOCITY = MetersPerSecond.of(5);
+			}
+		};
+		out.addRequirements(this);
+		return out;
+	}
 }
