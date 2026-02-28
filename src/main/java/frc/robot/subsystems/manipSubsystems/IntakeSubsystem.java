@@ -29,6 +29,23 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
+import static edu.wpi.first.units.Units.Centimeters;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Percent;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
+
+import java.util.Map;
+
+import edu.wpi.first.wpilibj.AddressableLED;
+import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 public class IntakeSubsystem extends SubsystemBase {
 
     private static TalonFX armMotorRight;
@@ -84,7 +101,7 @@ public class IntakeSubsystem extends SubsystemBase {
     private static final double ROD_CW_SPEED = 50; 
     private static final double ROD_CCW_SPEED = -50;
 
-    Angle angleDeadBand = Rotations.of(0.01);
+    private static final Angle angleDeadBand = Rotations.of(0.01);
     
     public IntakeSubsystem() {
         super();
@@ -192,9 +209,17 @@ public class IntakeSubsystem extends SubsystemBase {
 
         setHome();
 
+        this.setDefaultCommand(stopArm());
+
+    }
+
+    /** sets arm motion to zero */
+    public Command stopArm() {
+        return Commands.runOnce(() -> armMotorLeft.set(0));
     }
     
 
+    /** rotates the arm to the angle, finishes when armIsReady returns true */
     public Command rotateTo(Angle setpoint) {
         Command out = new Command() {
             @Override
@@ -217,10 +242,10 @@ public class IntakeSubsystem extends SubsystemBase {
                 return armIsReady();
             }
 
-            @Override
-            public void end(boolean interrupted) {
-                armMotorLeft.set(0);
-            }
+            // @Override
+            // public void end(boolean interrupted) {
+            //     armMotorLeft.set(0);
+            // }
         };
 
         initSendable();
@@ -310,6 +335,7 @@ public class IntakeSubsystem extends SubsystemBase {
         );
     }
 
+    /** returns true when arm is within deadband */
     private boolean armIsReady() {
         if (requestedAngle == null) {
             return false;
