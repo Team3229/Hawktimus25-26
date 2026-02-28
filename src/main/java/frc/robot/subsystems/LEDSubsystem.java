@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import java.util.Map;
 
+import edu.wpi.first.units.FrequencyUnit;
 import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
@@ -38,7 +39,7 @@ public class LEDSubsystem extends SubsystemBase {
        
         led.start();
        
-        this.setDefaultCommand(runPattern(setDiscontGradientHawk()));
+        this.setDefaultCommand(runPattern(setPurple()));
        
     }
 
@@ -99,13 +100,13 @@ public class LEDSubsystem extends SubsystemBase {
         return setColorReverse(purple, yellow);
     }
 
-    public LEDPattern setColorScroll(Color colorForScroll, Color secondColorForScroll) {
-        return setDiscontGradient(colorForScroll, secondColorForScroll).scrollAtRelativeSpeed(Frequency.ofBaseUnits(LEDBuffer, null));
-    }
+    // public LEDPattern setColorScroll(Color colorForScroll, Color secondColorForScroll) {
+    //     return setDiscontGradient(colorForScroll, secondColorForScroll).scrollAtRelativeSpeed(new Frequency.of(1));
+    // }
 
-    public LEDPattern setHawkScroll() {
-        return setColorScroll(purple, yellow);
-    }
+    // public LEDPattern setHawkScroll() {
+    //     return setColorScroll(purple, yellow);
+    // }
 
     public LEDPattern setColorBreathe(Color colorForBreathe, Color secondColorForBreathe) {
         return setDiscontGradientHawk().breathe(Seconds.of(1));
