@@ -232,55 +232,44 @@ public class IntakeSubsystem extends SubsystemBase {
     
     }
 
+    public Command intakeExtake(double speedSetpoint) {
+        Command out = new Command() {
+             @Override 
+             public void initialize() {
+                 requestedVelocity = speedSetpoint;
+             }
+             @Override
+             public void execute() {
+                rodMotor.setControl(new VelocityVoltage(speedSetpoint).withSlot(0));
+
+             }
+             @Override
+             public void end(boolean interrupted) {
+                rodMotor.setControl(new VelocityVoltage(0).withSlot(0));
+             }
+        };
+        out.addRequirements(this);
+        return out;
+    }
     /**
     * creates a command to collect the fuel by spinning the rod
     * 
     * @return Command to spin rod
     */
     public Command intake() {
-        Command out = new Command() {
-            @Override
-            public void initialize() {
-                requestedVelocity = ROD_CW_SPEED;
-            }
-
-            @Override
-            public void execute() {
-                rodMotor.setControl(new VelocityVoltage(ROD_CW_SPEED).withSlot(0).withFeedForward(12)); 
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                rodMotor.setControl(new VelocityVoltage(0).withSlot(0)); 
-            }
-
-        };
-
-        out.addRequirements(this);
-        return out;
+       return intakeExtake(ROD_CCW_SPEED);
     }
-
-    /**
+      /**
      * creates a command to reverse the intake to put the fuel into the human player
      * station
      * 
      * @return Command to spin the rod in reverse
-     */
+     */ 
     public Command extake() {
-        Command out = new Command() {
-            @Override
-            public void execute() {
-                rodMotor.setControl(new VelocityVoltage(ROD_CCW_SPEED).withSlot(0).withFeedForward(Volts.of(12)));
-            }
-            @Override
-            public void end(boolean interrupted) {
-                rodMotor.setControl(new VelocityVoltage(0).withSlot(0).withFeedForward(Volts.of(12)));
-            }
-        };
-        
-        out.addRequirements(this);
-        return out;
+        return intakeExtake(ROD_CW_SPEED);
     }
+
+ 
 
     /**
      * creates a command that pushes the intake arm down to the collection point
