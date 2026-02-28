@@ -192,16 +192,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
         setHome();
 
-        this.setDefaultCommand(stopArm());
+        this.setDefaultCommand(Commands.runOnce(() -> armMotorLeft.set(0)));
 
-    }
-
-    /** sets arm motion to zero */
-    public Command stopArm() {
-        return Commands.runOnce(() -> armMotorLeft.set(0));
     }
     
-
     /** rotates the arm to the angle, finishes when armIsReady returns true */
     public Command rotateTo(Angle setpoint) {
         Command out = new Command() {
