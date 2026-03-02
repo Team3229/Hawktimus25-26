@@ -17,16 +17,16 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
 public class LEDSubsystem extends SubsystemBase {
-   // THE LEDS ARE IN BGR NOT RGB
     private AddressableLED led;
     private AddressableLEDBuffer ledBuffer;
-
+    
+    // THE LEDS ARE IN BGR NOT RGB
     private final Color purple = new Color(255, 0, 255);
-    private final Color yellow = new Color(0, 128, 255);
+    private final Color yellow = new Color(0, 100, 255);
     private final Color red = new Color(0, 0, 255);
 
     private final int LEDPortNumber = 1;
-    private final int LEDBuffer = 50;
+    private final int LEDBuffer = 60;
 
     public LEDSubsystem() {
         led = new AddressableLED(LEDPortNumber);
@@ -39,7 +39,7 @@ public class LEDSubsystem extends SubsystemBase {
        
         led.start();
        
-        this.setDefaultCommand(runPattern(setPurple()));
+        this.setDefaultCommand(runPattern(setHawkBreathe()));
        
     }
 
@@ -109,7 +109,7 @@ public class LEDSubsystem extends SubsystemBase {
     // }
 
     public LEDPattern setColorBreathe(Color colorForBreathe, Color secondColorForBreathe) {
-        return setDiscontGradientHawk().breathe(Seconds.of(1));
+        return setDiscontGradientHawk().breathe(Seconds.of(3));
     }
 
     public LEDPattern setHawkBreathe() {
