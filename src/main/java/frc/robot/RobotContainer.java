@@ -33,6 +33,7 @@ import swervelib.SwerveInputStream;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 import frc.robot.subsystems.drive.HubAlign;
 import frc.robot.subsystems.manipSubsystems.PathPlannerCommands;
+import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
 
 public class RobotContainer {
 
@@ -44,6 +45,8 @@ public class RobotContainer {
 	HubAlign hubAlign;
 	LEDSubsystem ledSubsystem;
 
+	SpitterSubsystem spitterSubsystem;
+	
 	VisualizerSubsystem visualizerSubsystem;
 	PathPlannerCommands pathPlannerCommands;
 
@@ -61,6 +64,9 @@ public class RobotContainer {
 		);
 		manipSubsystem = new ManipSubsystem();
 		ledSubsystem = new LEDSubsystem();
+
+		spitterSubsystem = new SpitterSubsystem();
+
 		hubAlign = new HubAlign();
 		pathPlannerCommands = new PathPlannerCommands();
 
@@ -168,6 +174,26 @@ public class RobotContainer {
 
 		manipController.b_12().onTrue(
 			manipSubsystem.stow()
+		);
+
+		manipController.p_Up().onTrue(
+			spitterSubsystem.upSRPSCommand()
+		);
+
+		manipController.p_Down().onTrue(
+			spitterSubsystem.downSRPSCommand()
+		);
+
+		manipController.p_Right().onTrue(
+			spitterSubsystem.upFRPSCommand()
+		);
+
+		manipController.p_Left().onTrue(
+			spitterSubsystem.downFRPSCommand()
+		);
+
+		manipController.b_6().onTrue(
+			spitterSubsystem.setSpitterSpeed(hubAlign.distanceFromHub())
 		);
 
 	}
