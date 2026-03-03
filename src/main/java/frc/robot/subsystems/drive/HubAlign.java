@@ -44,7 +44,7 @@ public class HubAlign {
 					return new Pose2d(
 						driveSubsystem.getPose().getX(),
 						driveSubsystem.getPose().getY(),
-						driveSubsystem.getPose().getRotation().plus(new Rotation2d(angleFromHub()))
+						new Rotation2d(angleFromHub())
 					);
 				});
 			};
