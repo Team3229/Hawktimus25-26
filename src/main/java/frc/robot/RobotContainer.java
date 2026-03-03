@@ -131,6 +131,10 @@ public class RobotContainer {
 			})
 		);
 
+		driverController.b_6().onTrue(
+			driveSubsystem.slowDrive()
+		);
+
 		driverController.b_Trigger().onTrue(
 			hubAlign.alignToHub()
 		);
