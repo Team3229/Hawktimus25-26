@@ -407,7 +407,7 @@ public class DriveSubsystem extends SubsystemBase {
 		Command out = new Command() {
 			@Override 
 			public void execute(){
-				MAX_VELOCITY.div(2);
+				MAX_VELOCITY = MetersPerSecond.of(2.5);
 			}
 
 			@Override
