@@ -188,6 +188,10 @@ public class RobotContainer {
 			spitterSubsystem.downFRPSCommand()
 		);
 
+		manipController.b_6().onTrue(
+			spitterSubsystem.setSpitterSpeed(hubAlign.distanceFromHub())
+		);
+
 	}
 
 	public void initTelemetery() {
