@@ -164,29 +164,7 @@ public class RobotContainer {
 			manipSubsystem.stow()
 		);
 
-	}
-
-	private void configButtonControls() {
-
-		buttonBoard.b_1().onTrue(
-			manipSubsystem.shoot()
-		);
-
-		buttonBoard.b_2().onTrue(
-			manipSubsystem.spinUp()
-		);
-
-		buttonBoard.b_3().onTrue(
-			manipSubsystem.intake()
-		);
-
-		buttonBoard.b_4().onTrue(
-			manipSubsystem.extendStorage()
-		);
-
-		buttonBoard.b_5().onTrue(
-			manipSubsystem.manualShoot()
-		);
+		manipController.a_Throttle();
 
 	}
 

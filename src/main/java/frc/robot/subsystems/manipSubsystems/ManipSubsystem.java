@@ -71,4 +71,16 @@ public class ManipSubsystem extends SubsystemBase {
     public Command manualShoot() {
         return runOnce(() -> spitterSubsystem.spinUp(50));
     }
+    
+    public Command lowShoot() {
+        return(spitterSubsystem.lowManuelShoot());
+    }
+
+    public Command midShoot() {
+        return(spitterSubsystem.midManuelShoot());
+    }
+
+    public Command highSHoot() {
+        return(spitterSubsystem.highManuelShoot());
+    }
 }
