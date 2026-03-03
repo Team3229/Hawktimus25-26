@@ -33,7 +33,7 @@ public class SpitterSubsystem extends SubsystemBase {
     private static double kD = 0;
     private static double kV = 0.13;
 
-    private static final int LS_CAN_ID = 12;
+    private static final int LS_CAN_ID = 10;
     private TalonFX leftSpitter;
     private TalonFXConfiguration LSMotorConfig;
 
@@ -49,11 +49,11 @@ public class SpitterSubsystem extends SubsystemBase {
     private static double fKV = 0;
     private static double fKS = 0;
 
-    private static final int RS_CAN_ID = 11;
+    private static final int RS_CAN_ID = 12;
     private TalonFX rightSpitter;
     private TalonFXConfiguration RSMotorConfig;
 
-    private static final int Feeder_CAN_ID = 10;
+    private static final int Feeder_CAN_ID = 15;
     private TalonFX feeder;
     private TalonFXConfiguration feederMotorConfig;
 
@@ -90,7 +90,7 @@ public class SpitterSubsystem extends SubsystemBase {
         LSMotorConfig.Slot0.kD = (kD);
         LSMotorConfig.Slot0.kV = (kV);
         
-        LSMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        LSMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         leftSpitter.getConfigurator().apply(LSMotorConfig);
 
         rightSpitter = new TalonFX(RS_CAN_ID, CANBus.roboRIO()); 
@@ -115,7 +115,7 @@ public class SpitterSubsystem extends SubsystemBase {
         RSMotorConfig.Slot0.kI = (kI);
         RSMotorConfig.Slot0.kD = (kD);
         RSMotorConfig.Slot0.kV = (kV);
-        RSMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        RSMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         rightSpitter.getConfigurator().apply(RSMotorConfig);
 
         // initializes feeding motor
@@ -154,8 +154,8 @@ public class SpitterSubsystem extends SubsystemBase {
             
             @Override
             public void execute() {
-                leftSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0));
-                rightSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0));
+                leftSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0).withFeedForward(0.12));
+                rightSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0).withFeedForward(0.12));
                 feeder.setControl(new VelocityVoltage(requestedFeederVelocity).withSlot(0));
             }
 
@@ -211,7 +211,7 @@ public class SpitterSubsystem extends SubsystemBase {
 
 
      private void upSRPS() {
-        requestedShooterVelocity = Math.min(requestedShooterVelocity + 5, 100);
+        requestedShooterVelocity = Math.min(requestedShooterVelocity + 1, 100);
     }
 
     public Command upSRPSCommand() {
@@ -222,7 +222,7 @@ public class SpitterSubsystem extends SubsystemBase {
     }
 
     private void downSRPS() {
-        requestedShooterVelocity = Math.max(requestedShooterVelocity - 5, 5); //TODO: extract constant
+        requestedShooterVelocity = Math.max(requestedShooterVelocity - 1, 5); //TODO: extract constant
     }
 
     public Command downSRPSCommand() {
@@ -233,7 +233,7 @@ public class SpitterSubsystem extends SubsystemBase {
     }
 
      private void upFRPS() {
-        requestedFeederVelocity = Math.min(requestedFeederVelocity + 5, 100);
+        requestedFeederVelocity = Math.min(requestedFeederVelocity + 1, 100);
     }
     
     public Command upFRPSCommand() { 
@@ -243,14 +243,29 @@ public class SpitterSubsystem extends SubsystemBase {
         });
     }
 
-     private void downFRPS() {
-        requestedFeederVelocity = Math.max(requestedFeederVelocity - 5, 5);
+    private void downFRPS() {
+        requestedFeederVelocity = Math.max(requestedFeederVelocity - 1, 5);
     }
 
-     public Command downFRPSCommand() {
+    public Command downFRPSCommand() {
         return runOnce(() -> {
             downFRPS(); 
             System.out.println("WE lowered FRSPS to:" + requestedFeederVelocity);
+        });
+    }
+
+    public void setFeederSpeed(double distanceFromHub) {
+        requestedFeederVelocity = 0.3048 * (0.5 * distanceFromHub + 33);
+    }
+
+    public void setShooterSpeed(double distanceFromHub) {
+        requestedShooterVelocity = 0.3048 * (1.5 * distanceFromHub + 17);
+    }
+
+    public Command setSpitterSpeed(double distanceFromHub) {
+        return runOnce(() -> {
+            setFeederSpeed(distanceFromHub);
+            setShooterSpeed(distanceFromHub);
         });
     }
 
