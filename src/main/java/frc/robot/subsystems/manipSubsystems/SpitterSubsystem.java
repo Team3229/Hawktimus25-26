@@ -12,16 +12,12 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.revrobotics.spark.config.FeedForwardConfig;
-
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Robot;
 
 public class SpitterSubsystem extends SubsystemBase {
     private static double requestedShooterVelocity = 25;
@@ -37,18 +33,6 @@ public class SpitterSubsystem extends SubsystemBase {
     private TalonFX leftSpitter;
     private TalonFXConfiguration LSMotorConfig;
 
-    private SimpleMotorFeedforward lShooterFeedForward;
-    private static double lSKV = 0;
-    private static double lSKS = 0;
-
-    private SimpleMotorFeedforward rShooterFeedForward;
-    private static double rSKV = 0;
-    private static double rSKS = 0;
-
-    private SimpleMotorFeedforward feederFeedforward;
-    private static double fKV = 0;
-    private static double fKS = 0;
-
     private static final int RS_CAN_ID = 12;
     private TalonFX rightSpitter;
     private TalonFXConfiguration RSMotorConfig;
@@ -61,11 +45,6 @@ public class SpitterSubsystem extends SubsystemBase {
     private static final Current CURRENT_LIMIT = Amps.of(40);
 
     public SpitterSubsystem() {
-        lShooterFeedForward = new SimpleMotorFeedforward(lSKS, lSKV);
-
-        rShooterFeedForward = new SimpleMotorFeedforward(rSKS, rSKV);
-
-        feederFeedforward = new SimpleMotorFeedforward(fKS, fKV);
         // initializes shooting motor
         leftSpitter = new TalonFX(LS_CAN_ID, CANBus.roboRIO()); 
         LSMotorConfig = new TalonFXConfiguration()
@@ -271,12 +250,7 @@ public class SpitterSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        double rCurrentVelocity = leftSpitter.getVelocity().getValueAsDouble();
-        double lCurrentVelocity = rightSpitter.getVelocity().getValueAsDouble(); 
-        double fCurrentVelocity = feeder.getVelocity().getValueAsDouble();
-        lShooterFeedForward.calculate(lCurrentVelocity);
-        rShooterFeedForward.calculate(rCurrentVelocity);
-        feederFeedforward.calculate(fCurrentVelocity); 
+
     }
 }
  
