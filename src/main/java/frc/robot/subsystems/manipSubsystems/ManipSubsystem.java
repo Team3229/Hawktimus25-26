@@ -68,19 +68,20 @@ public class ManipSubsystem extends SubsystemBase {
         .andThen(indexSubsystem.index(indexSubsystem.reverse));
     }
     //TODO: Find and change double value later
-    public Command manualShoot() {
-        return runOnce(() -> spitterSubsystem.spinUp(50));
-    }
+   
     
-    public Command lowShoot() {
-        return(spitterSubsystem.lowManuelShoot());
+    public Command lowPass() {
+        return(spitterSubsystem.lowPass())
+        .andThen(indexSubsystem.index(indexSubsystem.forwards));
     }
 
-    public Command midShoot() {
-        return(spitterSubsystem.midManuelShoot());
+    public Command midPass() {
+        return(spitterSubsystem.midPass())
+        .andThen(indexSubsystem.index(indexSubsystem.forwards));
     }
 
-    public Command highSHoot() {
-        return(spitterSubsystem.highManuelShoot());
+    public Command highPass() {
+        return(spitterSubsystem.highPass())
+        .andThen(indexSubsystem.index(indexSubsystem.forwards));
     }
 }
