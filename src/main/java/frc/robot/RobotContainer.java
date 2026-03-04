@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Seconds;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,6 +29,8 @@ import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import swervelib.SwerveInputStream;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 import frc.robot.subsystems.drive.HubAlign;
+import frc.robot.subsystems.manipSubsystems.PathPlannerCommands;
+import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
 
 public class RobotContainer {
 
@@ -41,7 +41,10 @@ public class RobotContainer {
 	ManipSubsystem manipSubsystem;
 	HubAlign hubAlign;
 
+	SpitterSubsystem spitterSubsystem;
+	
 	VisualizerSubsystem visualizerSubsystem;
+	PathPlannerCommands pathPlannerCommands;
 
 	private SendableChooser<Command> autoChooser;
 	private Command autoCommand;
@@ -50,15 +53,17 @@ public class RobotContainer {
 
 		driverController = new FlightStick(0);
 		manipController = new FlightStick(1);
-		buttonBoard = new ButtonBoard(2);
 
-		// buttonBoard = new ButtonBoard(1);
 		driveSubsystem = new DriveSubsystem(
 			"swerve",
 			TelemetryVerbosity.HIGH
 		);
 		manipSubsystem = new ManipSubsystem();
+
+		spitterSubsystem = new SpitterSubsystem();
+
 		hubAlign = new HubAlign();
+		pathPlannerCommands = new PathPlannerCommands(manipSubsystem);
 
 		configureBindings();
 		initTelemetery();
@@ -71,13 +76,11 @@ public class RobotContainer {
 		configDriveControls();
 		configManipControls();
 		
-
 	}
 
 	public void teleopInit() {
 
 		System.out.println("TELEOP INIT");
-		driveSubsystem.zeroGyroWithAlliance();
 		
 	}
 
@@ -87,10 +90,10 @@ public class RobotContainer {
 
 	private void configDriveControls() {
 
-		NamedCommands.registerCommand("Intake", manipSubsystem.intake());
-		NamedCommands.registerCommand("ArmOut", manipSubsystem.extendStorage());
-		NamedCommands.registerCommand("WheelSpinUp", manipSubsystem.spinUp());
-		NamedCommands.registerCommand("Shoot", manipSubsystem.shoot());
+		NamedCommands.registerCommand("Intake", pathPlannerCommands.pathIntake());
+		NamedCommands.registerCommand("ArmOut", pathPlannerCommands.pathExtendStorage());
+		NamedCommands.registerCommand("WheelSpinUp", pathPlannerCommands.pathSpinUp());
+		NamedCommands.registerCommand("Shoot", pathPlannerCommands.pathShoot());
 
 		SwerveInputStream driveAngularVelocity = driveSubsystem.getInputStream(
 			() -> -driverController.a_Y(),
@@ -129,6 +132,10 @@ public class RobotContainer {
 			})
 		);
 
+		driverController.b_6().onTrue(
+			driveSubsystem.slowDrive()
+		);
+
 		driverController.b_Trigger().onTrue(
 			hubAlign.alignToHub()
 		);
@@ -147,7 +154,7 @@ public class RobotContainer {
 
 		manipController.b_Hazard().onTrue(
 			Commands.runOnce(() -> {
-				manipSubsystem.getCurrentCommand().cancel();
+				manipSubsystem.getCurrentCommand().cancel(); // TODO: currently crashes bot
 				// cancels ALL manipING on manip controller
 			})
 		);
@@ -156,7 +163,7 @@ public class RobotContainer {
 			manipSubsystem.extendStorage()
 		);
 
-		manipController.b_4().onTrue(
+		manipController.b_4().whileTrue(
 			manipSubsystem.intake()
 		);
 
@@ -174,6 +181,26 @@ public class RobotContainer {
 
 		manipController.b_10().onTrue(
 			manipSubsystem.highPass()
+		);
+
+		manipController.p_Up().onTrue(
+			spitterSubsystem.upSRPSCommand()
+		);
+
+		manipController.p_Down().onTrue(
+			spitterSubsystem.downSRPSCommand()
+		);
+
+		manipController.p_Right().onTrue(
+			spitterSubsystem.upFRPSCommand()
+		);
+
+		manipController.p_Left().onTrue(
+			spitterSubsystem.downFRPSCommand()
+		);
+
+		manipController.b_6().onTrue(
+			spitterSubsystem.setSpitterSpeed(hubAlign.distanceFromHub())
 		);
 
 	}

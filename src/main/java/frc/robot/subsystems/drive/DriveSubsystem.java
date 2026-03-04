@@ -21,8 +21,6 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.measure.Angle;
@@ -57,7 +55,7 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 public class DriveSubsystem extends SubsystemBase {
     
-    public static final LinearVelocity MAX_VELOCITY = MetersPerSecond.of(5.0);
+    public static  LinearVelocity MAX_VELOCITY = MetersPerSecond.of(5.0);
     
     private static final Distance TRANS_ERR_TOL = Meters.of(0.025); //TODO: Test this with a setpoint
 	private static final LinearVelocity TRANS_VEL_TOL = MetersPerSecond.of(0.1);
@@ -264,6 +262,7 @@ public class DriveSubsystem extends SubsystemBase {
 			LimelightHelpers.PoseEstimate estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-" + side);
 
 			if (estimate != null && estimate.tagCount > 0) {
+				@SuppressWarnings("unused")
 				double tagID = LimelightHelpers.getFiducialID("limelight-" + side);
 			}
 		}
@@ -403,4 +402,19 @@ public class DriveSubsystem extends SubsystemBase {
 				() -> xTranslationPID.atGoal() && yTranslationPID.atGoal() && rotationPID.atGoal()
 			);
     }
+	public Command slowDrive(){
+		Command out = new Command() {
+			@Override 
+			public void execute(){
+				MAX_VELOCITY = MetersPerSecond.of(2.5);
+			}
+
+			@Override
+			public void end(boolean interrupted) {
+				MAX_VELOCITY = MetersPerSecond.of(5);
+			}
+		};
+		out.addRequirements(this);
+		return out;
+	}
 }
