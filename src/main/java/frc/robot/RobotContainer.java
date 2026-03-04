@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.inputs.ButtonBoard;
 import frc.robot.inputs.FlightStick;
+import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.VisualizerSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.manipSubsystems.IntakeSubsystem;
@@ -32,6 +33,7 @@ import swervelib.SwerveInputStream;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 import frc.robot.subsystems.drive.HubAlign;
 import frc.robot.subsystems.manipSubsystems.PathPlannerCommands;
+import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
 
 public class RobotContainer {
 
@@ -43,6 +45,8 @@ public class RobotContainer {
 	HubAlign hubAlign;
 	LEDSubsystem ledSubsystem;
 
+	SpitterSubsystem spitterSubsystem;
+	
 	VisualizerSubsystem visualizerSubsystem;
 	PathPlannerCommands pathPlannerCommands;
 
@@ -60,6 +64,9 @@ public class RobotContainer {
 		);
 		manipSubsystem = new ManipSubsystem();
 		ledSubsystem = new LEDSubsystem();
+
+		spitterSubsystem = new SpitterSubsystem();
+
 		hubAlign = new HubAlign();
 		pathPlannerCommands = new PathPlannerCommands(manipSubsystem);
 
@@ -130,6 +137,10 @@ public class RobotContainer {
 			})
 		);
 
+		driverController.b_6().onTrue(
+			driveSubsystem.slowDrive()
+		);
+
 		driverController.b_Trigger().onTrue(
 			hubAlign.alignToHub()
 		);
@@ -163,6 +174,26 @@ public class RobotContainer {
 
 		manipController.b_12().onTrue(
 			manipSubsystem.stow()
+		);
+
+		manipController.p_Up().onTrue(
+			spitterSubsystem.upSRPSCommand()
+		);
+
+		manipController.p_Down().onTrue(
+			spitterSubsystem.downSRPSCommand()
+		);
+
+		manipController.p_Right().onTrue(
+			spitterSubsystem.upFRPSCommand()
+		);
+
+		manipController.p_Left().onTrue(
+			spitterSubsystem.downFRPSCommand()
+		);
+
+		manipController.b_6().onTrue(
+			spitterSubsystem.setSpitterSpeed(hubAlign.distanceFromHub())
 		);
 
 	}
