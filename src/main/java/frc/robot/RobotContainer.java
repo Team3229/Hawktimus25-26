@@ -23,11 +23,8 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.inputs.ButtonBoard;
 import frc.robot.inputs.FlightStick;
-import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.VisualizerSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
-import frc.robot.subsystems.manipSubsystems.IntakeSubsystem;
-import frc.robot.subsystems.manipSubsystems.LEDSubsystem;
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import swervelib.SwerveInputStream;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
@@ -43,7 +40,6 @@ public class RobotContainer {
 	DriveSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
 	HubAlign hubAlign;
-	LEDSubsystem ledSubsystem;
 
 	SpitterSubsystem spitterSubsystem;
 	
@@ -63,7 +59,6 @@ public class RobotContainer {
 			TelemetryVerbosity.HIGH
 		);
 		manipSubsystem = new ManipSubsystem();
-		ledSubsystem = new LEDSubsystem();
 
 		spitterSubsystem = new SpitterSubsystem();
 
@@ -177,15 +172,17 @@ public class RobotContainer {
 		);
 
 		manipController.b_11().onTrue(
-			manipSubsystem.lowShoot();
+			manipSubsystem.lowShoot()
 		);
 
 		manipController.b_12().onTrue(
-			manipSubsystem.midShoot();
+			manipSubsystem.midShoot()
 		);
 
 		manipController.b_10().onTrue(
-			manipSubsystem.highShoot();
+			manipSubsystem.highShoot()
+		);
+
 		manipController.p_Up().onTrue(
 			spitterSubsystem.upSRPSCommand()
 		);

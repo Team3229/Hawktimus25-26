@@ -2,7 +2,6 @@ package frc.robot.subsystems.manipSubsystems;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -268,8 +267,6 @@ public class IntakeSubsystem extends SubsystemBase {
     public Command extake() {
         return intakeExtake(ROD_CW_SPEED);
     }
-
- 
 
     /**
      * creates a command that pushes the intake arm down to the collection point

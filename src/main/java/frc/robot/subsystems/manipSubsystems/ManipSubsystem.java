@@ -80,7 +80,7 @@ public class ManipSubsystem extends SubsystemBase {
         return(spitterSubsystem.midManuelShoot());
     }
 
-    public Command highSHoot() {
+    public Command highShoot() {
         return(spitterSubsystem.highManuelShoot());
     }
 }
