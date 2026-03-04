@@ -29,7 +29,7 @@ public class IndexSubsystem extends SubsystemBase {
     private final double kV = 0;
 
     //change ID
-    private static final int index_CAN_ID = 50;
+    private static final int index_CAN_ID = 0;
 
     //change current limit
     private static final Current CURRENT_LIMIT = Amps.of(40);

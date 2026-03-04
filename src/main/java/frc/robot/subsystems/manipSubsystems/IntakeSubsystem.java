@@ -50,13 +50,13 @@ public class IntakeSubsystem extends SubsystemBase {
     // private static Angle softLimitUp = Rotations.of(-0.07);
     // private static Angle softLimitDown = Rotations.of(0.37);
     
-    private static final int ARM_R_CAN_ID = 9; 
-    private static final int ARM_L_CAN_ID = 1; 
+    private static final int ARM_R_CAN_ID = 16; 
+    private static final int ARM_L_CAN_ID = 5; 
     
     private static final int HOME_LIMIT_PORT = 1; 
     private static final int EXTEND_LIMIT_PORT = 0;
     
-    private static final int ROD_CAN_ID = 2; 
+    private static final int ROD_CAN_ID = 18; 
     
     private static final Current CURRENT_LIMIT = Amps.of(40);
     
