@@ -29,15 +29,15 @@ public class SpitterSubsystem extends SubsystemBase {
     private static double kD = 0;
     private static double kV = 0.13;
 
-    private static final int LS_CAN_ID = 10;
+    private static final int LS_CAN_ID = 55;
     private TalonFX leftSpitter;
     private TalonFXConfiguration LSMotorConfig;
 
-    private static final int RS_CAN_ID = 12;
+    private static final int RS_CAN_ID = 56;
     private TalonFX rightSpitter;
     private TalonFXConfiguration RSMotorConfig;
 
-    private static final int Feeder_CAN_ID = 15;
+    private static final int Feeder_CAN_ID = 85;
     private TalonFX feeder;
     private TalonFXConfiguration feederMotorConfig;
 

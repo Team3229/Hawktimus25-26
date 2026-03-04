@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Seconds;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +26,8 @@ import frc.robot.inputs.FlightStick;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.VisualizerSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.manipSubsystems.IntakeSubsystem;
+import frc.robot.subsystems.manipSubsystems.LEDSubsystem;
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import swervelib.SwerveInputStream;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
@@ -68,7 +68,7 @@ public class RobotContainer {
 		spitterSubsystem = new SpitterSubsystem();
 
 		hubAlign = new HubAlign();
-		pathPlannerCommands = new PathPlannerCommands();
+		pathPlannerCommands = new PathPlannerCommands(manipSubsystem);
 
 		configureBindings();
 		initTelemetery();
@@ -159,7 +159,7 @@ public class RobotContainer {
 
 		manipController.b_Hazard().onTrue(
 			Commands.runOnce(() -> {
-				manipSubsystem.getCurrentCommand().cancel();
+				manipSubsystem.getCurrentCommand().cancel(); // TODO: currently crashes bot
 				// cancels ALL manipING on manip controller
 			})
 		);
@@ -168,7 +168,7 @@ public class RobotContainer {
 			manipSubsystem.extendStorage()
 		);
 
-		manipController.b_4().onTrue(
+		manipController.b_4().whileTrue(
 			manipSubsystem.intake()
 		);
 

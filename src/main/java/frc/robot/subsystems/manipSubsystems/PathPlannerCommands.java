@@ -10,8 +10,8 @@ public class PathPlannerCommands extends SubsystemBase {
 
 	ManipSubsystem manipSubsystem;
 	
-    public PathPlannerCommands () {
-        manipSubsystem = new ManipSubsystem();
+    public PathPlannerCommands(ManipSubsystem man) {
+        manipSubsystem = man;
     }
 
     public Command pathIntake() {
