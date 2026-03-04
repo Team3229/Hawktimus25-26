@@ -75,7 +75,7 @@ public class RobotContainer {
 
 		configDriveControls();
 		configManipControls();
-
+		
 	}
 
 	public void teleopInit() {
@@ -172,15 +172,15 @@ public class RobotContainer {
 		);
 
 		manipController.b_11().onTrue(
-			manipSubsystem.lowShoot()
+			manipSubsystem.lowPass()
 		);
 
 		manipController.b_12().onTrue(
-			manipSubsystem.midShoot()
+			manipSubsystem.midPass()
 		);
 
 		manipController.b_10().onTrue(
-			manipSubsystem.highShoot()
+			manipSubsystem.highPass()
 		);
 
 		manipController.p_Up().onTrue(

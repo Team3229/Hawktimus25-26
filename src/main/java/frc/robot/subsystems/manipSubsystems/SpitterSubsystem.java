@@ -169,64 +169,17 @@ public class SpitterSubsystem extends SubsystemBase {
         return out;
     }
 
-    public Command lowManuelShoot() {
-        Command out = new Command() {
-            @Override
-            public void execute() {
-                leftSpitter.setControl(new VelocityVoltage(25).withSlot(0));
-                rightSpitter.setControl(new VelocityVoltage(25).withSlot(0));
-                feeder.setControl(new VelocityVoltage(35).withSlot(0));
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                leftSpitter.setControl(new VelocityVoltage(0).withSlot(0));
-                rightSpitter.setControl(new VelocityVoltage(0).withSlot(0));
-                feeder.setControl(new VelocityVoltage(0).withSlot(0));
-            }
-        };
-        out.addRequirements(this);
-        return out;
+    public Command lowPass() {
+        return runOnce(() -> shoot(25, 35));
+        
     }
 
-    public Command midManuelShoot() {
-        Command out = new Command() {
-            @Override
-            public void execute() {
-                leftSpitter.setControl(new VelocityVoltage(40).withSlot(0));
-                rightSpitter.setControl(new VelocityVoltage(40).withSlot(0));
-                feeder.setControl(new VelocityVoltage(50).withSlot(0));
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                leftSpitter.setControl(new VelocityVoltage(0).withSlot(0));
-                rightSpitter.setControl(new VelocityVoltage(0).withSlot(0));
-                feeder.setControl(new VelocityVoltage(0).withSlot(0));
-            }
-        };
-        out.addRequirements(this);
-        return out;
+    public Command midPass() {
+        return runOnce(() -> shoot(40, 50));
     }
 
-    public Command highManuelShoot() {
-        Command out = new Command() {
-            @Override
-            public void execute() {
-                leftSpitter.setControl(new VelocityVoltage(55).withSlot(0));
-                rightSpitter.setControl(new VelocityVoltage(55).withSlot(0));
-                feeder.setControl(new VelocityVoltage(65).withSlot(0));
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                leftSpitter.setControl(new VelocityVoltage(0).withSlot(0));
-                rightSpitter.setControl(new VelocityVoltage(0).withSlot(0));
-                feeder.setControl(new VelocityVoltage(0).withSlot(0));
-            }
-        };
-        out.addRequirements(this);
-        return out;
+    public Command highPass() {
+         return runOnce(() -> shoot(55, 65));
     }
 
     public Command shoot(double srps, double frps) {

@@ -64,16 +64,22 @@ public class ManipSubsystem extends SubsystemBase {
         return runOnce(() -> intakeSubsystem.extake())
         .andThen(indexSubsystem.index(indexSubsystem.reverse));
     }
-    
-    public Command lowShoot() {
-        return(spitterSubsystem.lowManuelShoot());
+   
+    public Command lowPass() {
+        return(spitterSubsystem.lowPass())
+        .andThen(indexSubsystem.index(indexSubsystem.forwards))
+        .andThen(intakeSubsystem.agitateFuel());
     }
 
-    public Command midShoot() {
-        return(spitterSubsystem.midManuelShoot());
+    public Command midPass() {
+        return(spitterSubsystem.midPass())
+        .andThen(indexSubsystem.index(indexSubsystem.forwards))
+        .andThen(intakeSubsystem.agitateFuel());
     }
 
-    public Command highShoot() {
-        return(spitterSubsystem.highManuelShoot());
+    public Command highPass() {
+        return(spitterSubsystem.highPass())
+        .andThen(indexSubsystem.index(indexSubsystem.forwards))
+        .andThen(intakeSubsystem.agitateFuel());
     }
 }
