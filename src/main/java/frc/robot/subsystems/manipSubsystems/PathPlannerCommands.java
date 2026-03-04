@@ -34,8 +34,4 @@ public class PathPlannerCommands extends SubsystemBase {
     public Command pathExtake() {
         return manipSubsystem.extake().withTimeout(3);
     }
-
-    public Command pathManualShoot() {
-        return manipSubsystem.manualShoot().withTimeout(3);
-    }
 }

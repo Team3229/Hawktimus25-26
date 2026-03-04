@@ -2,16 +2,20 @@ package frc.robot.subsystems.manipSubsystems;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.VelocityVoltage;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.CANBus;
+
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.InvertedValue;
+
+import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.units.measure.Current;
+
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -23,13 +27,11 @@ public class IndexSubsystem extends SubsystemBase {
 
     private double requestedSpeed;
     
-    private final double kP = 0;
-    private final double kI = 0;
-    private final double kD = 0;
-    private final double kV = 0;
+    private static double kP = 0.1;
+    private static double kV = 0.13;
 
     //change ID
-    private static final int index_CAN_ID = 0;
+    private static final int index_CAN_ID = 6;
 
     //change current limit
     private static final Current CURRENT_LIMIT = Amps.of(40);
@@ -52,10 +54,8 @@ public class IndexSubsystem extends SubsystemBase {
                     .withStatorCurrentLimit(CURRENT_LIMIT)
                     .withStatorCurrentLimitEnable(true)
             );
-        indexMotorConfig.Slot0.kP = (kP);
-        indexMotorConfig.Slot0.kI = (kI);
-        indexMotorConfig.Slot0.kD = (kD);
-        indexMotorConfig.Slot0.kV = (kV);
+        indexMotorConfig.Slot0.kP = kP;
+        indexMotorConfig.Slot0.kV = kV;
         indexMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         indexMotor.getConfigurator().apply(indexMotorConfig);
     }

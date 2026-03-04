@@ -20,8 +20,6 @@ public class ManipSubsystem extends SubsystemBase {
     public Command intake() {
         return runOnce(() -> System.out.println("Intaking..."))
         .andThen(intakeSubsystem.intake());
-        // .andThen(Commands.waitTime(Seconds.of(2)))
-        // .andThen(indexSubsystem.index(indexSubsystem.forwards)); // might not be needed
     }
 
     public Command stow() {
@@ -65,11 +63,6 @@ public class ManipSubsystem extends SubsystemBase {
     public Command extake() {
         return runOnce(() -> intakeSubsystem.extake())
         .andThen(indexSubsystem.index(indexSubsystem.reverse));
-    }
-
-    //TODO: Find and change double value later
-    public Command manualShoot() {
-        return runOnce(() -> spitterSubsystem.shoot());
     }
     
     public Command lowShoot() {
