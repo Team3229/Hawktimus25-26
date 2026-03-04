@@ -147,6 +147,8 @@ public class SpitterSubsystem extends SubsystemBase {
             
         };
 
+     
+
         SmartDashboard.putData("Shooter", new Sendable() {
             @Override
             public void initSendable(SendableBuilder builder) {
@@ -160,6 +162,98 @@ public class SpitterSubsystem extends SubsystemBase {
                 
             }
         });
+        out.addRequirements(this);
+
+        return out;
+    }
+
+    public Command lowManuelShoot() {
+        Command out = new Command() {
+            @Override
+            public void execute() {
+                leftSpitter.setControl(new VelocityVoltage(25).withSlot(0));
+                rightSpitter.setControl(new VelocityVoltage(25).withSlot(0));
+                feeder.setControl(new VelocityVoltage(35).withSlot(0));
+            }
+
+            @Override
+            public void end(boolean interrupted) {
+                leftSpitter.setControl(new VelocityVoltage(0).withSlot(0));
+                rightSpitter.setControl(new VelocityVoltage(0).withSlot(0));
+                feeder.setControl(new VelocityVoltage(0).withSlot(0));
+            }
+        };
+        out.addRequirements(this);
+        return out;
+    }
+
+    public Command midManuelShoot() {
+        Command out = new Command() {
+            @Override
+            public void execute() {
+                leftSpitter.setControl(new VelocityVoltage(40).withSlot(0));
+                rightSpitter.setControl(new VelocityVoltage(40).withSlot(0));
+                feeder.setControl(new VelocityVoltage(50).withSlot(0));
+            }
+
+            @Override
+            public void end(boolean interrupted) {
+                leftSpitter.setControl(new VelocityVoltage(0).withSlot(0));
+                rightSpitter.setControl(new VelocityVoltage(0).withSlot(0));
+                feeder.setControl(new VelocityVoltage(0).withSlot(0));
+            }
+        };
+        out.addRequirements(this);
+        return out;
+    }
+
+    public Command highManuelShoot() {
+        Command out = new Command() {
+            @Override
+            public void execute() {
+                leftSpitter.setControl(new VelocityVoltage(55).withSlot(0));
+                rightSpitter.setControl(new VelocityVoltage(55).withSlot(0));
+                feeder.setControl(new VelocityVoltage(65).withSlot(0));
+            }
+
+            @Override
+            public void end(boolean interrupted) {
+                leftSpitter.setControl(new VelocityVoltage(0).withSlot(0));
+                rightSpitter.setControl(new VelocityVoltage(0).withSlot(0));
+                feeder.setControl(new VelocityVoltage(0).withSlot(0));
+            }
+        };
+        out.addRequirements(this);
+        return out;
+    }
+
+    public Command shoot(double srps, double frps) {
+        Command out = new Command() {
+            @Override
+            public void initialize() {
+                requestedShooterVelocity = srps;
+                requestedFeederVelocity = frps;
+            }
+            
+            @Override
+            public void execute() {
+                leftSpitter.setControl(new VelocityVoltage(srps).withSlot(0));
+                rightSpitter.setControl(new VelocityVoltage(srps).withSlot(0));
+                if(shooterIsReady()) {
+                    feeder.setControl(new VelocityVoltage(frps).withSlot(0));
+                } else {
+                    feeder.setControl(new VelocityVoltage(0).withSlot(0));
+                }
+            }
+
+            @Override
+            public void end(boolean interrupted) {
+                leftSpitter.setControl(new VelocityVoltage(0).withSlot(0));
+                rightSpitter.setControl(new VelocityVoltage(0).withSlot(0));
+                feeder.setControl(new VelocityVoltage(0).withSlot(0));
+            }
+            
+        };
 
         out.addRequirements(this);
 

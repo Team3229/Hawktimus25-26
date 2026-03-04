@@ -176,6 +176,16 @@ public class RobotContainer {
 			manipSubsystem.stow()
 		);
 
+		manipController.b_11().onTrue(
+			manipSubsystem.lowShoot();
+		);
+
+		manipController.b_12().onTrue(
+			manipSubsystem.midShoot();
+		);
+
+		manipController.b_10().onTrue(
+			manipSubsystem.highShoot();
 		manipController.p_Up().onTrue(
 			spitterSubsystem.upSRPSCommand()
 		);
