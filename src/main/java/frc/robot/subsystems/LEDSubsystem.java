@@ -5,8 +5,6 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import java.util.Map;
 
-import edu.wpi.first.units.FrequencyUnit;
-import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.LEDPattern;
@@ -23,6 +21,7 @@ public class LEDSubsystem extends SubsystemBase {
     // THE LEDS ARE IN BGR NOT RGB
     private final Color purple = new Color(255, 0, 255);
     private final Color yellow = new Color(0, 100, 255);
+    @SuppressWarnings("unused")
     private final Color red = new Color(0, 0, 255);
 
     private final int LEDPortNumber = 1;
