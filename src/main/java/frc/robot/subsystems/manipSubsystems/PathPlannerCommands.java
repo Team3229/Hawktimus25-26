@@ -10,7 +10,35 @@ public class PathPlannerCommands extends SubsystemBase {
 
 	ManipSubsystem manipSubsystem;
 	
-    public PathPlannerCommands () {
-        manipSubsystem = new ManipSubsystem();
+    public PathPlannerCommands(ManipSubsystem man) {
+        manipSubsystem = man;
+    }
+
+    public Command pathIntake() {
+        return manipSubsystem.intake().withTimeout(3);
+    }
+
+    public Command pathStow() {
+        return manipSubsystem.stow().withTimeout(3);
+    }
+
+    public Command pathExtendStorage() {
+        return manipSubsystem.extendStorage().withTimeout(3);
+    }
+
+    public Command pathSpinUp() {
+        return manipSubsystem.extendStorage().withTimeout(3);
+    }
+
+    public Command pathShoot() {
+        return manipSubsystem.shoot().withTimeout(3);
+    }
+
+    public Command pathExtake() {
+        return manipSubsystem.extake().withTimeout(3);
+    }
+
+    public Command pathManualShoot() {
+        return manipSubsystem.manualShoot().withTimeout(3);
     }
 }
