@@ -164,19 +164,16 @@ public class SpitterSubsystem extends SubsystemBase {
     }
 
     public Command lowPass() {
-        return runOnce(() -> spinUp(25))
-        .andThen(() -> feeder.setControl(new VelocityVoltage(35).withSlot(0)));
+        return runOnce(() -> shoot(25, 35));
         
     }
 
     public Command midPass() {
-        return runOnce(() -> spinUp(40))
-        .andThen(() -> feeder.setControl(new VelocityVoltage(50).withSlot(0)));
+        return runOnce(() -> shoot(40, 50));
     }
 
     public Command highPass() {
-         return runOnce(() -> spinUp(55))
-        .andThen(() -> feeder.setControl(new VelocityVoltage(65).withSlot(0)));
+         return runOnce(() -> shoot(55, 65));
     }
 
     public Command shoot(double srps, double frps) {

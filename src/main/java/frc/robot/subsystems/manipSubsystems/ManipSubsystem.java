@@ -72,16 +72,19 @@ public class ManipSubsystem extends SubsystemBase {
     
     public Command lowPass() {
         return(spitterSubsystem.lowPass())
-        .andThen(indexSubsystem.index(indexSubsystem.forwards));
+        .andThen(indexSubsystem.index(indexSubsystem.forwards))
+        .andThen(intakeSubsystem.agitateFuel());
     }
 
     public Command midPass() {
         return(spitterSubsystem.midPass())
-        .andThen(indexSubsystem.index(indexSubsystem.forwards));
+        .andThen(indexSubsystem.index(indexSubsystem.forwards))
+        .andThen(intakeSubsystem.agitateFuel());
     }
 
     public Command highPass() {
         return(spitterSubsystem.highPass())
-        .andThen(indexSubsystem.index(indexSubsystem.forwards));
+        .andThen(indexSubsystem.index(indexSubsystem.forwards))
+        .andThen(intakeSubsystem.agitateFuel());
     }
 }
