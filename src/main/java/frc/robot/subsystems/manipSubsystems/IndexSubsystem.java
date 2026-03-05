@@ -4,6 +4,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -26,6 +27,8 @@ public class IndexSubsystem extends SubsystemBase {
     private static TalonFXConfiguration indexMotorConfig;
 
     private double requestedSpeed;
+
+    private double sensorToMechanismRatio = 5;
     
     private static double kP = 0.1;
     private static double kV = 0.13;
@@ -38,8 +41,8 @@ public class IndexSubsystem extends SubsystemBase {
 
     //change indexSpeed
 
-    public final int forwards = 2;
-    public final int reverse = -2;
+    public final int forwards = 20;
+    public final int reverse = -20;
 
     public IndexSubsystem() {
         // initializes motor
@@ -53,7 +56,11 @@ public class IndexSubsystem extends SubsystemBase {
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(CURRENT_LIMIT)
                     .withStatorCurrentLimitEnable(true)
-            );
+            )
+            .withFeedback(
+			    new FeedbackConfigs()
+			        .withSensorToMechanismRatio(sensorToMechanismRatio)
+		    );
         indexMotorConfig.Slot0.kP = kP;
         indexMotorConfig.Slot0.kV = kV;
         indexMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -76,7 +83,7 @@ public class IndexSubsystem extends SubsystemBase {
 
             @Override
             public void end(boolean interrupted) {
-                indexMotor.stopMotor();
+                indexMotor.setControl(new VelocityVoltage(0).withSlot(0));
             }
         };
         SmartDashboard.putData("Index", new Sendable() {
@@ -92,7 +99,7 @@ public class IndexSubsystem extends SubsystemBase {
     
 
     public boolean isReady() {
-        double deadBand = 1;
+        double deadBand = 0.1;
         double indexVelocity = indexMotor.getVelocity().getValueAsDouble();
         if (requestedSpeed == 0) {
             return false;

@@ -1,6 +1,7 @@
 package frc.robot.subsystems.manipSubsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ManipSubsystem extends SubsystemBase {
@@ -66,20 +67,22 @@ public class ManipSubsystem extends SubsystemBase {
     }
    
     public Command lowPass() {
-        return(spitterSubsystem.lowPass())
-        .andThen(indexSubsystem.index(indexSubsystem.forwards))
-        .andThen(intakeSubsystem.agitateFuel());
+        return(new ParallelCommandGroup(
+            spitterSubsystem.lowPass(),
+            indexSubsystem.index(indexSubsystem.forwards)
+        ));
+        // .andThen(intakeSubsystem.agitateFuel());
     }
 
     public Command midPass() {
         return(spitterSubsystem.midPass())
-        .andThen(indexSubsystem.index(indexSubsystem.forwards))
-        .andThen(intakeSubsystem.agitateFuel());
+        .andThen(indexSubsystem.index(indexSubsystem.forwards));
+        // .andThen(intakeSubsystem.agitateFuel());
     }
 
     public Command highPass() {
         return(spitterSubsystem.highPass())
-        .andThen(indexSubsystem.index(indexSubsystem.forwards))
-        .andThen(intakeSubsystem.agitateFuel());
+        .andThen(indexSubsystem.index(indexSubsystem.forwards));
+        // .andThen(intakeSubsystem.agitateFuel());
     }
 }

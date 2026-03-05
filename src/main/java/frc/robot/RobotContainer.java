@@ -25,12 +25,12 @@ import frc.robot.inputs.ButtonBoard;
 import frc.robot.inputs.FlightStick;
 import frc.robot.subsystems.VisualizerSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
-import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
-import swervelib.SwerveInputStream;
-import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 import frc.robot.subsystems.drive.HubAlign;
+import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import frc.robot.subsystems.manipSubsystems.PathPlannerCommands;
 import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
+import swervelib.SwerveInputStream;
+import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 public class RobotContainer {
 
@@ -148,10 +148,6 @@ public class RobotContainer {
 			manipSubsystem.shoot()
 		);
 
-		manipController.b_3().whileTrue(
-			manipSubsystem.spinUp()
-		);
-
 		manipController.b_Hazard().onTrue(
 			Commands.runOnce(() -> {
 				manipSubsystem.getCurrentCommand().cancel(); // TODO: currently crashes bot
@@ -159,28 +155,32 @@ public class RobotContainer {
 			})
 		);
 
-		manipController.b_5().onTrue(
-			manipSubsystem.extendStorage()
+		manipController.b_3().whileTrue(
+			manipSubsystem.spinUp()
 		);
 
 		manipController.b_4().whileTrue(
 			manipSubsystem.intake()
 		);
 
-		manipController.b_12().onTrue(
-			manipSubsystem.stow()
+		manipController.b_5().onTrue(
+			manipSubsystem.extendStorage()
 		);
 
-		manipController.b_11().onTrue(
+		manipController.b_10().whileTrue(
+			manipSubsystem.highPass()
+		);
+
+		manipController.b_7().whileTrue(
 			manipSubsystem.lowPass()
 		);
 
-		manipController.b_12().onTrue(
+		manipController.b_9().whileTrue(
 			manipSubsystem.midPass()
 		);
 
-		manipController.b_10().onTrue(
-			manipSubsystem.highPass()
+		manipController.b_8().onTrue(
+			manipSubsystem.stow()
 		);
 
 		manipController.p_Up().onTrue(

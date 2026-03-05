@@ -71,7 +71,7 @@ public class SpitterSubsystem extends SubsystemBase {
         LSMotorConfig.Slot0.kD = kD;
         LSMotorConfig.Slot0.kV = kV;
         
-        LSMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        LSMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         leftSpitter.getConfigurator().apply(LSMotorConfig);
 
         rightSpitter = new TalonFX(RS_CAN_ID, CANBus.roboRIO()); 
@@ -96,7 +96,7 @@ public class SpitterSubsystem extends SubsystemBase {
         RSMotorConfig.Slot0.kI = (kI);
         RSMotorConfig.Slot0.kD = (kD);
         RSMotorConfig.Slot0.kV = (kV);
-        RSMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        RSMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         rightSpitter.getConfigurator().apply(RSMotorConfig);
 
         // initializes feeding motor
@@ -170,16 +170,15 @@ public class SpitterSubsystem extends SubsystemBase {
     }
 
     public Command lowPass() {
-        return runOnce(() -> shoot(25, 35));
-        
+        return shoot(25, 35);
     }
 
     public Command midPass() {
-        return runOnce(() -> shoot(40, 50));
+        return shoot(30, 40);
     }
 
     public Command highPass() {
-         return runOnce(() -> shoot(55, 65));
+         return shoot(35, 45);
     }
 
     public Command shoot(double srps, double frps) {
@@ -194,11 +193,7 @@ public class SpitterSubsystem extends SubsystemBase {
             public void execute() {
                 leftSpitter.setControl(new VelocityVoltage(srps).withSlot(0));
                 rightSpitter.setControl(new VelocityVoltage(srps).withSlot(0));
-                if(shooterIsReady()) {
-                    feeder.setControl(new VelocityVoltage(frps).withSlot(0));
-                } else {
-                    feeder.setControl(new VelocityVoltage(0).withSlot(0));
-                }
+                feeder.setControl(new VelocityVoltage(frps).withSlot(0));
             }
 
             @Override
@@ -250,7 +245,7 @@ public class SpitterSubsystem extends SubsystemBase {
     }
 
     private void downSRPS() {
-        requestedShooterVelocity = Math.max(requestedShooterVelocity - 1, 5); //TODO: extract constant
+        requestedShooterVelocity = Math.max(requestedShooterVelocity - 1, 5);
     }
 
     public Command downSRPSCommand() {
