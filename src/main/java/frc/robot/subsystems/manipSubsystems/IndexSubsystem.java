@@ -38,8 +38,8 @@ public class IndexSubsystem extends SubsystemBase {
 
     //change indexSpeed
 
-    public final int forwards = 10;
-    public final int reverse = -10;
+    public final int forwards = 2;
+    public final int reverse = -2;
 
     public IndexSubsystem() {
         // initializes motor

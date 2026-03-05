@@ -82,8 +82,8 @@ public class IntakeSubsystem extends SubsystemBase {
 	private static final double rP = 0.1; 
 	private static final double rV = 0.13; 
 	
-	private static final double ROD_CW_SPEED = 50; 
-	private static final double ROD_CCW_SPEED = -50;
+	private static final double ROD_CW_SPEED = 25; 
+	private static final double ROD_CCW_SPEED = -25;
 
 	private static final Angle angleDeadBand = Rotations.of(0.01);
 	
@@ -192,8 +192,6 @@ public class IntakeSubsystem extends SubsystemBase {
 		);
 
 		setHome();
-
-		this.setDefaultCommand(Commands.runOnce(() -> armMotorLeft.set(0)));
 
 	}
 	
