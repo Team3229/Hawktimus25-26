@@ -10,6 +10,7 @@ import static edu.wpi.first.units.Units.Milliseconds;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Inches;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -33,6 +34,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -47,6 +49,7 @@ import frc.robot.utilities.LimelightHelpers;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -74,7 +77,8 @@ public class DriveSubsystem extends SubsystemBase {
     private static final Pose2d startingBluePose = new Pose2d(2, 4, new Rotation2d(0));
     private static final Pose2d startingRedPose = new Pose2d(2, 4, new Rotation2d(Math.PI));
 
-	private static final Pose2d hubPose = new Pose2d(Units.inchesToMeters(54*12)/2, Units.inchesToMeters(27*12)/2, new Rotation2d());
+	private static final Pose2d redHubPose = new Pose2d(Inches.of(468.56), Inches.of(158.32), new Rotation2d());
+	private static final Pose2d blueHubPose = new Pose2d(Inches.of(152.56), Inches.of(158.32), new Rotation2d());
 
 	// Standard PID
     private static final PIDConstants TRANSLATION_CONSTANTS =
@@ -424,10 +428,15 @@ public class DriveSubsystem extends SubsystemBase {
 		return out;
 	}
 
+	public Pose2d getHubPose() {
+		return Alliance.getAlliance().equals(AllianceColor.Red) ? redHubPose : blueHubPose;
+	}
+
 	/*
 	* Returns the angle from the robot to the hub (in radians)
 	*/
 	public double angleFromHub() {
+		Pose2d hubPose = getHubPose();
 		return Math.atan2(hubPose.getY() - getPose().getY(), hubPose.getX() - getPose().getX());
 	}
 	
@@ -436,7 +445,7 @@ public class DriveSubsystem extends SubsystemBase {
 	*/
 	public double distanceFromHub() {
 		System.out.println("distance is running... better go catch it!");
-		var relativePose = getPose().relativeTo(hubPose);
+		var relativePose = getPose().relativeTo(getHubPose());
 		// System.out.println(Math.sqrt(Math.pow(getHubPose().getX() - getPose().getX(), 2) + Math.pow(getHubPose().getY() - getPose().getY(), 2)));
 		return Math.sqrt(Math.pow(relativePose.getX(), 2) + Math.pow(relativePose.getY(), 2));
 	}
