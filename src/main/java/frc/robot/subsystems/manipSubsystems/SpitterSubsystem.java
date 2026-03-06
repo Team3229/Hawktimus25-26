@@ -33,7 +33,7 @@ public class SpitterSubsystem extends SubsystemBase {
     private static double kD = 0;
     private static double kV = 0.13;
 
-    private static double fP = 0.2;
+    private static double fP = 0.3;
     private static double fI = 0;
     private static double fD = 0;
     private static double fV = 0.13;
@@ -179,15 +179,15 @@ public class SpitterSubsystem extends SubsystemBase {
     }
 
     public Command lowPass() {
-        return shoot(25, 35);
+        return shoot(30, 75);
     }
 
     public Command midPass() {
-        return shoot(30, 40);
+        return shoot(35, 80);
     }
 
     public Command highPass() {
-         return shoot(35, 45);
+         return shoot(40, 85);
     }
 
     public Command shoot(double srps, double frps) {
@@ -286,11 +286,11 @@ public class SpitterSubsystem extends SubsystemBase {
     }
 
     public void setFeederSpeed() {
-        requestedFeederVelocity = 0.5 * driveSubsystem.distanceFromHub() + 45;
+        requestedFeederVelocity = 0.5 * driveSubsystem.distanceFromHub() + 75;
     }
 
     public void setShooterSpeed() {
-        requestedShooterVelocity = 1.5 * driveSubsystem.distanceFromHub() + 17;
+        requestedShooterVelocity = 1.5 * driveSubsystem.distanceFromHub() + 18;
     }
 
     public Command setSpitterSpeed() {

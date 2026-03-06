@@ -32,7 +32,7 @@ public class IndexSubsystem extends SubsystemBase {
 
     private double sensorToMechanismRatio = 5;
     
-    private static double kP = 0.2;
+    private static double kP = 0.5;
     private static double kV = 0.13;
 
     //change ID
@@ -43,8 +43,9 @@ public class IndexSubsystem extends SubsystemBase {
 
     //change indexSpeed
     
-    public final int forwards = 10;
-    public final int reverse = -10;
+    // variables are halved when ran for some reason :(
+    public final int forwards = 30;
+    public final int reverse = -20;
 
     public IndexSubsystem(SpitterSubsystem spit) {
         spitterSubsystem = spit;
@@ -95,6 +96,8 @@ public class IndexSubsystem extends SubsystemBase {
             @Override 
             public void initSendable(SendableBuilder builder) {
                 builder.addBooleanProperty("Indexing", ()-> isReady(), null);
+                builder.addDoubleProperty("IndexActual", () -> indexMotor.getVelocity().getValueAsDouble(), null);
+
             }
         });
 
@@ -112,4 +115,5 @@ public class IndexSubsystem extends SubsystemBase {
             return Math.abs(requestedSpeed - indexVelocity) <= deadBand;
         }
     }
+
 }

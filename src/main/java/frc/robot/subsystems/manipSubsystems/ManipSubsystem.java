@@ -95,60 +95,27 @@ public class ManipSubsystem extends SubsystemBase {
     }
    
     public Command lowPass() {
-        Command out = new Command() {
-            @Override
-            public void initialize() {
-                // intakeSubsystem.agitateFuel();
-            }
-
-            @Override 
-            public void execute() {
-                spitterSubsystem.lowPass();
-                if(shooterIsReady()) {
-                    indexSubsystem.index(indexSubsystem.forwards);
-                }
-            }
-        };
-        out.addRequirements(this);
-        return out;
+        return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
+        .andThen(new ParallelCommandGroup(
+            spitterSubsystem.lowPass(),
+            indexSubsystem.index(indexSubsystem.forwards)
+        ));
     }
 
     public Command midPass() {
-        Command out = new Command() {
-            @Override
-            public void initialize() {
-                // intakeSubsystem.agitateFuel();
-            }
-
-            @Override 
-            public void execute() {
-                spitterSubsystem.midPass();
-                if(shooterIsReady()) {
-                    indexSubsystem.index(indexSubsystem.forwards);
-                }
-            }
-        };
-        out.addRequirements(this);
-        return out;
+     return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
+        .andThen(new ParallelCommandGroup(
+            spitterSubsystem.midPass(),
+            indexSubsystem.index(indexSubsystem.forwards)
+        ));
     }
 
     public Command highPass() {
-        Command out = new Command() {
-            @Override
-            public void initialize() {
-                // intakeSubsystem.agitateFuel();
-            }
-
-            @Override 
-            public void execute() {
-                spitterSubsystem.highPass();
-                if(shooterIsReady()) {
-                    indexSubsystem.index(indexSubsystem.forwards);
-                }
-            }
-        };
-        out.addRequirements(this);
-        return out;
+     return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
+        .andThen(new ParallelCommandGroup(
+            spitterSubsystem.highPass(),
+            indexSubsystem.index(indexSubsystem.forwards)
+        ));
     }
 
     public boolean shooterIsReady() {
