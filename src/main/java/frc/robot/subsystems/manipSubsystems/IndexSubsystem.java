@@ -26,11 +26,13 @@ public class IndexSubsystem extends SubsystemBase {
     private static TalonFX indexMotor;
     private static TalonFXConfiguration indexMotorConfig;
 
+    private SpitterSubsystem spitterSubsystem;
+
     private double requestedSpeed;
 
     private double sensorToMechanismRatio = 5;
     
-    private static double kP = 0.1;
+    private static double kP = 0.2;
     private static double kV = 0.13;
 
     //change ID
@@ -40,11 +42,12 @@ public class IndexSubsystem extends SubsystemBase {
     private static final Current CURRENT_LIMIT = Amps.of(40);
 
     //change indexSpeed
+    
+    public final int forwards = 10;
+    public final int reverse = -10;
 
-    public final int forwards = 20;
-    public final int reverse = -20;
-
-    public IndexSubsystem() {
+    public IndexSubsystem(SpitterSubsystem spit) {
+        spitterSubsystem = spit;
         // initializes motor
         indexMotor = new TalonFX(index_CAN_ID, CANBus.roboRIO()); // placeholder name for the canbus
         indexMotorConfig = new TalonFXConfiguration()
@@ -78,7 +81,9 @@ public class IndexSubsystem extends SubsystemBase {
 
             @Override
             public void execute() {
-                indexMotor.setControl(new VelocityVoltage(rps).withSlot(0));
+                if(rps != forwards || spitterSubsystem.shooterIsReady()) {
+                    indexMotor.setControl(new VelocityVoltage(rps).withSlot(0));
+                }
             }
 
             @Override
@@ -94,7 +99,7 @@ public class IndexSubsystem extends SubsystemBase {
         });
 
         out.addRequirements(this);
-            return out;
+        return out;
     }
     
 

@@ -16,7 +16,7 @@ public class HubAlign {
         );
     }
 
-    	// Might be the right dimensions
+    // Might be the right dimensions
 	public Translation2d getHubPose() {
 		return new Translation2d(4.034663d, 4.611624d);
 	}
@@ -32,6 +32,8 @@ public class HubAlign {
 	* Returns the distance from the robot to the hub 
 	*/
 	public double distanceFromHub() {
+		System.out.println("distance is running... better go catch it!");
+		// System.out.println(Math.sqrt(Math.pow(getHubPose().getX() - driveSubsystem.getPose().getX(), 2) + Math.pow(getHubPose().getY() - driveSubsystem.getPose().getY(), 2)));
 		return Math.sqrt(Math.pow(getHubPose().getX() - driveSubsystem.getPose().getX(), 2) + Math.pow(getHubPose().getY() - driveSubsystem.getPose().getY(), 2));
 	}
 	
@@ -53,4 +55,9 @@ public class HubAlign {
 		return out;
 		
 	};
+
+	public void periodic() {
+		distanceFromHub();
+	}
+
 }

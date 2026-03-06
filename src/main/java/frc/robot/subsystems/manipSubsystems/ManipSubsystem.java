@@ -3,16 +3,17 @@ package frc.robot.subsystems.manipSubsystems;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.drive.DriveSubsystem;
 
 public class ManipSubsystem extends SubsystemBase {
     IntakeSubsystem intakeSubsystem;
     IndexSubsystem indexSubsystem;
     SpitterSubsystem spitterSubsystem;
     
-    public ManipSubsystem() {
+    public ManipSubsystem(DriveSubsystem drive) {
         intakeSubsystem = new IntakeSubsystem();
-        indexSubsystem = new IndexSubsystem();
-        spitterSubsystem = new SpitterSubsystem();
+        spitterSubsystem = new SpitterSubsystem(drive);
+        indexSubsystem = new IndexSubsystem(spitterSubsystem);
     }
     /**Command that runs intaking
      * 
@@ -27,6 +28,12 @@ public class ManipSubsystem extends SubsystemBase {
         return runOnce(() -> System.out.println("SSTOOOOOOOOWWWWWWWWWWWWWW"))
         .andThen(intakeSubsystem.emergencyStow())
         .andThen(runOnce(() -> System.out.println("WE ARE DONE WITH STOWING")));
+    }
+
+    public Command home() {
+        return runOnce(() -> System.out.println("Returning to home"))
+        .andThen(intakeSubsystem.goHome())
+        .andThen(runOnce(() -> System.out.println("At home!")));
     }
 
     /**Extends storage
@@ -52,9 +59,30 @@ public class ManipSubsystem extends SubsystemBase {
      * @return moves the index and then runs the intake motor on the shooter
      */
     public Command shoot() {
-        return(spitterSubsystem.shoot())
-        .andThen(indexSubsystem.index(indexSubsystem.forwards))
-        .andThen(intakeSubsystem.agitateFuel());
+        return spitterSubsystem.setSpitterSpeed()
+        .andThen(indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1))
+        .andThen(new ParallelCommandGroup(
+            spitterSubsystem.shoot(),
+            indexSubsystem.index(indexSubsystem.forwards)
+        ));
+        // intakeSubsystem.agitateFuel();
+
+        //     Command out = new Command() {
+        //         @Override
+        //         public void initialize() {
+        //         }
+                
+        //         @Override 
+        //         public void execute() {
+        //         System.out.println("is executing");
+
+        //         if(shooterIsReady()) {
+        //             System.out.println("shooter is ready and index should start");
+        //         }
+        //     }
+        // };
+        // out.addRequirements(this);
+        // return out;
     }
 
     /** reverses the intake to blast out balls from intake
@@ -67,22 +95,83 @@ public class ManipSubsystem extends SubsystemBase {
     }
    
     public Command lowPass() {
-        return(new ParallelCommandGroup(
-            spitterSubsystem.lowPass(),
-            indexSubsystem.index(indexSubsystem.forwards)
-        ));
-        // .andThen(intakeSubsystem.agitateFuel());
+        Command out = new Command() {
+            @Override
+            public void initialize() {
+                // intakeSubsystem.agitateFuel();
+            }
+
+            @Override 
+            public void execute() {
+                spitterSubsystem.lowPass();
+                if(shooterIsReady()) {
+                    indexSubsystem.index(indexSubsystem.forwards);
+                }
+            }
+        };
+        out.addRequirements(this);
+        return out;
     }
 
     public Command midPass() {
-        return(spitterSubsystem.midPass())
-        .andThen(indexSubsystem.index(indexSubsystem.forwards));
-        // .andThen(intakeSubsystem.agitateFuel());
+        Command out = new Command() {
+            @Override
+            public void initialize() {
+                // intakeSubsystem.agitateFuel();
+            }
+
+            @Override 
+            public void execute() {
+                spitterSubsystem.midPass();
+                if(shooterIsReady()) {
+                    indexSubsystem.index(indexSubsystem.forwards);
+                }
+            }
+        };
+        out.addRequirements(this);
+        return out;
     }
 
     public Command highPass() {
-        return(spitterSubsystem.highPass())
-        .andThen(indexSubsystem.index(indexSubsystem.forwards));
-        // .andThen(intakeSubsystem.agitateFuel());
+        Command out = new Command() {
+            @Override
+            public void initialize() {
+                // intakeSubsystem.agitateFuel();
+            }
+
+            @Override 
+            public void execute() {
+                spitterSubsystem.highPass();
+                if(shooterIsReady()) {
+                    indexSubsystem.index(indexSubsystem.forwards);
+                }
+            }
+        };
+        out.addRequirements(this);
+        return out;
+    }
+
+    public boolean shooterIsReady() {
+        return spitterSubsystem.shooterIsReady();
+    }
+
+    public Command upSRPSCommand() {
+        return spitterSubsystem.upSRPSCommand();
+    }
+
+    public Command downSRPSCommand() {
+        return spitterSubsystem.downSRPSCommand();
+    }
+
+    public Command upFRPSCommand() {
+        return spitterSubsystem.upFRPSCommand();
+    }
+
+    public Command downFRPSCommand() {
+        return spitterSubsystem.downFRPSCommand();
+    }
+
+    public Command setSpitterSpeed() {
+        return spitterSubsystem.setSpitterSpeed();
     }
 }

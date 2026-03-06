@@ -25,7 +25,6 @@ import frc.robot.inputs.ButtonBoard;
 import frc.robot.inputs.FlightStick;
 import frc.robot.subsystems.VisualizerSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
-import frc.robot.subsystems.drive.HubAlign;
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import frc.robot.subsystems.manipSubsystems.PathPlannerCommands;
 import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
@@ -39,9 +38,7 @@ public class RobotContainer {
 	ButtonBoard buttonBoard;
 	DriveSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
-	HubAlign hubAlign;
 
-	SpitterSubsystem spitterSubsystem;
 	
 	VisualizerSubsystem visualizerSubsystem;
 	PathPlannerCommands pathPlannerCommands;
@@ -58,11 +55,8 @@ public class RobotContainer {
 			"swerve",
 			TelemetryVerbosity.HIGH
 		);
-		manipSubsystem = new ManipSubsystem();
+		manipSubsystem = new ManipSubsystem(driveSubsystem);
 
-		spitterSubsystem = new SpitterSubsystem();
-
-		hubAlign = new HubAlign();
 		pathPlannerCommands = new PathPlannerCommands(manipSubsystem);
 
 		configureBindings();
@@ -137,7 +131,7 @@ public class RobotContainer {
 		);
 
 		driverController.b_Trigger().onTrue(
-			hubAlign.alignToHub()
+			driveSubsystem.alignToHub()
 		);
 
 	}
@@ -167,8 +161,8 @@ public class RobotContainer {
 			manipSubsystem.extendStorage()
 		);
 
-		manipController.b_10().whileTrue(
-			manipSubsystem.highPass()
+		manipController.b_12().onTrue(
+			manipSubsystem.home()
 		);
 
 		manipController.b_7().whileTrue(
@@ -179,28 +173,32 @@ public class RobotContainer {
 			manipSubsystem.midPass()
 		);
 
+		manipController.b_10().whileTrue(
+			manipSubsystem.highPass()
+		);
+
 		manipController.b_8().onTrue(
 			manipSubsystem.stow()
 		);
 
 		manipController.p_Up().onTrue(
-			spitterSubsystem.upSRPSCommand()
+			manipSubsystem.upSRPSCommand()
 		);
 
 		manipController.p_Down().onTrue(
-			spitterSubsystem.downSRPSCommand()
+			manipSubsystem.downSRPSCommand()
 		);
 
 		manipController.p_Right().onTrue(
-			spitterSubsystem.upFRPSCommand()
+			manipSubsystem.upFRPSCommand()
 		);
 
 		manipController.p_Left().onTrue(
-			spitterSubsystem.downFRPSCommand()
+			manipSubsystem.downFRPSCommand()
 		);
 
 		manipController.b_6().onTrue(
-			spitterSubsystem.setSpitterSpeed(hubAlign.distanceFromHub())
+			manipSubsystem.setSpitterSpeed()
 		);
 
 	}
@@ -228,7 +226,10 @@ public class RobotContainer {
 			pathPlannerPaths = PathPlannerAuto.getPathGroupFromAutoFile(autoName);
 			List<Pose2d> poses = new ArrayList<>();
 			for (PathPlannerPath path : pathPlannerPaths) {
-				poses.addAll(path.getAllPathPoints().stream().map(point -> new Pose2d(point.position.getX(), point.position.getY(), new Rotation2d())).collect(Collectors.toList()));
+				poses.addAll(path.getAllPathPoints().stream().map( point -> 
+					new Pose2d(point.position.getX(), point.position.getY(), 
+					new Rotation2d())).collect(Collectors.toList())
+				);
 			}
 			driveSubsystem.postTrajectoryToField(poses);
 		} catch (Exception e) {

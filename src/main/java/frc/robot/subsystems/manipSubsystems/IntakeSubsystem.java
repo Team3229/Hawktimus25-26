@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 
 import com.ctre.phoenix6.configs.FeedbackConfigs;
@@ -49,6 +50,8 @@ public class IntakeSubsystem extends SubsystemBase {
 	private static DigitalInput homeLimitSwitch;
 	private static DigitalInput extendLimitSwitch;
 
+	private static GravityTypeValue gravityTypeValue = GravityTypeValue.Arm_Cosine;
+
 	// private static Angle softLimitUp = Rotations.of(-0.07);
 	// private static Angle softLimitDown = Rotations.of(0.37);
 	
@@ -63,7 +66,7 @@ public class IntakeSubsystem extends SubsystemBase {
 	private static final Current CURRENT_LIMIT = Amps.of(40);
 	
 	public static final Angle HOME_ANGLE = Rotations.of(0);
-	public static final Angle STOW_ANGLE = Rotations.of(0.097);
+	public static final Angle STOW_ANGLE = Rotations.of(0.166666); //TODO: set back to 0.097
 	public static final Angle COLLECTION_POINT = Rotations.of(0.347);
 	
 	private static double sensorToMechanismRatio = 25;
@@ -71,13 +74,13 @@ public class IntakeSubsystem extends SubsystemBase {
 	private Angle requestedAngle;
 	private double requestedVelocity;
 	
-	private static final double aP = 4.8;
+	private static final double aP = 7.5;
 	private static final double aI = 0; 
 	private static final double aD = 0.1; 
 	private static final double aV = 0.12;
 	private static final double aA = 0.01;
 	private static final double aS = 0.25;
-
+	private static final double aG = 1.75;
 
 	private static final double rP = 0.1; 
 	private static final double rV = 0.13; 
@@ -104,8 +107,8 @@ public class IntakeSubsystem extends SubsystemBase {
 
 		armMotorConfig = new TalonFXConfiguration()
 		.withMotorOutput(
-		new MotorOutputConfigs()
-		.withNeutralMode(NeutralModeValue.Brake)
+			new MotorOutputConfigs()
+			.withNeutralMode(NeutralModeValue.Brake)
 		)
 		.withCurrentLimits(
 			new CurrentLimitsConfigs()
@@ -116,6 +119,8 @@ public class IntakeSubsystem extends SubsystemBase {
 			new FeedbackConfigs()
 			.withSensorToMechanismRatio(sensorToMechanismRatio)
 		);
+			
+		armMotorConfig.Slot0.GravityType = gravityTypeValue;
 						
 		armMotorConfig.Slot0.kP = aP;
 		armMotorConfig.Slot0.kI = aI;
@@ -123,7 +128,8 @@ public class IntakeSubsystem extends SubsystemBase {
 		armMotorConfig.Slot0.kV = aV;
 		armMotorConfig.Slot0.kA = aA;
 		armMotorConfig.Slot0.kS = aS;
-		armMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+		armMotorConfig.Slot0.kG = aG;
+		armMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 		
 		armMotorConfig.MotionMagic
 		.withMotionMagicCruiseVelocity(motionMagicCruiseVelocity)
@@ -153,7 +159,7 @@ public class IntakeSubsystem extends SubsystemBase {
 		armMotorConfig2.Slot0.kV = aV;
 		armMotorConfig2.Slot0.kA = aA;
 		armMotorConfig2.Slot0.kS = aS;
-		armMotorConfig2.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+		armMotorConfig2.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
 		armMotorConfig2.MotionMagic
 		.withMotionMagicCruiseVelocity(motionMagicCruiseVelocity)
@@ -285,6 +291,10 @@ public class IntakeSubsystem extends SubsystemBase {
 		return rotateTo(STOW_ANGLE);
 	}
 
+
+	public Command goHome() {
+		return rotateTo(HOME_ANGLE);
+	}
 	/**
 	 * creates a command that pulls the intake arm back to the
 	 * home point in order to move the fuel in storage.

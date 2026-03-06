@@ -20,9 +20,10 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -30,6 +31,8 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -70,6 +73,8 @@ public class DriveSubsystem extends SubsystemBase {
 
     private static final Pose2d startingBluePose = new Pose2d(2, 4, new Rotation2d(0));
     private static final Pose2d startingRedPose = new Pose2d(2, 4, new Rotation2d(Math.PI));
+
+	private static final Pose2d hubPose = new Pose2d(Units.inchesToMeters(54*12)/2, Units.inchesToMeters(27*12)/2, new Rotation2d());
 
 	// Standard PID
     private static final PIDConstants TRANSLATION_CONSTANTS =
@@ -173,7 +178,7 @@ public class DriveSubsystem extends SubsystemBase {
 		swerveDrive.setAngularVelocityCompensation(
 			true,
 			true,
-			0.1 //TODO: we need to change this later
+			0.1
 		);
 		
 		swerveDrive.chassisVelocityCorrection = false; //does nothing set to true and test later
@@ -225,12 +230,11 @@ public class DriveSubsystem extends SubsystemBase {
 		}
 	}
 
-		@Override
+	@Override
 	public void periodic() {
-		
 		updateOdometry();
-
 	}
+	
 	public void setIMUYaw(Rotation2d yaw) {
 		getIMU().setYaw(yaw.getMeasure());
 		swerveDrive.resetOdometry(new Pose2d(getPose().getX(), getPose().getY(), yaw));
@@ -248,25 +252,26 @@ public class DriveSubsystem extends SubsystemBase {
 		return getIMU().getAngularVelocityZWorld().getValue();
 	}
 
+
 	/**
-	* Updates the drivetrain odometry object to the robot's current position on the
-	* field.
-	* 
-	* @return The new updated pose of the robot.
-	*/
-	public void updateOdometry() {
+   * Updates the drivetrain odometry object to the robot's current position on the
+   * field.
+   * 
+   * @return The new updated pose of the robot.
+   */
+  public void updateOdometry() {
 
-		for (String side : new String[] {"left", "right"}) { //TODO: Name the limelights
+    for (String side : new String[] {"left", "right"}) {
 
-			LimelightHelpers.SetRobotOrientation("limelight-" + side, getIMUYaw().getDegrees(), getIMUYawRate().in(DegreesPerSecond), 0, 0, 0, 0);
-			LimelightHelpers.PoseEstimate estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-" + side);
+    	LimelightHelpers.SetRobotOrientation(
+			"limelight-" + side, getIMUYaw().getDegrees(), 
+			getIMUYawRate().in(DegreesPerSecond), 
+			0, 0, 0, 0
+		);
 
-			if (estimate != null && estimate.tagCount > 0) {
-				@SuppressWarnings("unused")
-				double tagID = LimelightHelpers.getFiducialID("limelight-" + side);
-			}
-		}
-  	}
+    }
+
+  }
 
 
     /**
@@ -342,15 +347,16 @@ public class DriveSubsystem extends SubsystemBase {
 
 		return runOnce(
 			() -> {
-				Rotation2d mt1 = new Rotation2d();
-				mt1 = VisionSubsystem.getMT1Rotation();
 
-				if (Alliance.getAlliance() == AllianceColor.Red) {
-					mt1.rotateBy(new Rotation2d(Math.PI));
-				}
-				
-				if (mt1 != null) {
-					swerveDrive.setGyro(new Rotation3d(mt1));
+				Rotation2d mt1_left = VisionSubsystem.getMT1Rotation("left");
+
+				if (mt1_left != null) {
+					if (Alliance.getAlliance() == AllianceColor.Red) {
+						setIMUYaw(mt1_left);
+					} else {
+						setIMUYaw(mt1_left);
+						System.out.println("my eyes!!!");
+					}
 				}
 			}
 		);
@@ -416,5 +422,51 @@ public class DriveSubsystem extends SubsystemBase {
 		};
 		out.addRequirements(this);
 		return out;
+	}
+
+	/*
+	* Returns the angle from the robot to the hub (in radians)
+	*/
+	public double angleFromHub() {
+		return Math.atan2(hubPose.getY() - getPose().getY(), hubPose.getX() - getPose().getX());
+	}
+	
+	/*
+	* Returns the distance from the robot to the hub 
+	*/
+	public double distanceFromHub() {
+		System.out.println("distance is running... better go catch it!");
+		var relativePose = getPose().relativeTo(hubPose);
+		// System.out.println(Math.sqrt(Math.pow(getHubPose().getX() - getPose().getX(), 2) + Math.pow(getHubPose().getY() - getPose().getY(), 2)));
+		return Math.sqrt(Math.pow(relativePose.getX(), 2) + Math.pow(relativePose.getY(), 2));
+	}
+	
+	/**Rotates the bot to be facing the hub*/
+    public Command alignToHub() {
+		Command out = new Command() {
+			@Override
+			public void execute() {
+				driveToPose(() -> {
+					return new Pose2d(
+						getPose().getX(),
+						getPose().getY(),
+						new Rotation2d(angleFromHub())
+					);
+				});
+			};
+		};
+
+		return out;
+		
+	};
+
+		public void initSendable() {
+		SmartDashboard.putData("Drive", new Sendable() {
+			@Override 
+			public void initSendable(SendableBuilder builder) {
+				builder.addDoubleProperty("PoseX", () -> getPose().getX(), null);
+				builder.addDoubleProperty("PoseY", () -> getPose().getY(), null);
+				}
+		});
 	}
 }

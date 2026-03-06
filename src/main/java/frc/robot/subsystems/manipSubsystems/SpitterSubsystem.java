@@ -18,10 +18,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.drive.DriveSubsystem;
 
 import static edu.wpi.first.units.Units.Amps;
 
 public class SpitterSubsystem extends SubsystemBase {
+    private static DriveSubsystem driveSubsystem;
     private static double requestedShooterVelocity = 25;
     private static double requestedFeederVelocity = 35;
 
@@ -30,6 +32,11 @@ public class SpitterSubsystem extends SubsystemBase {
     private static double kI = 0;
     private static double kD = 0;
     private static double kV = 0.13;
+
+    private static double fP = 0.2;
+    private static double fI = 0;
+    private static double fD = 0;
+    private static double fV = 0.13;
 
     private static final int LS_CAN_ID = 10;
     private TalonFX leftSpitter;
@@ -46,7 +53,9 @@ public class SpitterSubsystem extends SubsystemBase {
     // change amp limit
     private static final Current CURRENT_LIMIT = Amps.of(40);
 
-    public SpitterSubsystem() {
+    public SpitterSubsystem(DriveSubsystem drive) {
+        driveSubsystem = drive;
+
         // initializes shooting motor
         leftSpitter = new TalonFX(LS_CAN_ID, CANBus.roboRIO()); 
         LSMotorConfig = new TalonFXConfiguration()
@@ -92,10 +101,10 @@ public class SpitterSubsystem extends SubsystemBase {
                     .withSupplyVoltageTimeConstant(0)
             );
 
-        RSMotorConfig.Slot0.kP = (kP);
-        RSMotorConfig.Slot0.kI = (kI);
-        RSMotorConfig.Slot0.kD = (kD);
-        RSMotorConfig.Slot0.kV = (kV);
+        RSMotorConfig.Slot0.kP = kP;
+        RSMotorConfig.Slot0.kI = kI;
+        RSMotorConfig.Slot0.kD = kD;
+        RSMotorConfig.Slot0.kV = kV;
         RSMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         rightSpitter.getConfigurator().apply(RSMotorConfig);
 
@@ -118,10 +127,10 @@ public class SpitterSubsystem extends SubsystemBase {
                     .withSupplyVoltageTimeConstant(0)
             );
         
-        feederMotorConfig.Slot0.kP = (kP);
-        feederMotorConfig.Slot0.kI = (kI);
-        feederMotorConfig.Slot0.kD = (kD);
-        feederMotorConfig.Slot0.kV = (kV);
+        feederMotorConfig.Slot0.kP = fP;
+        feederMotorConfig.Slot0.kI = fI;
+        feederMotorConfig.Slot0.kD = fD;
+        feederMotorConfig.Slot0.kV = fV;
         feederMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         feeder.getConfigurator().apply(feederMotorConfig);
     }
@@ -232,7 +241,6 @@ public class SpitterSubsystem extends SubsystemBase {
         }
     }
 
-
      private void upSRPS() {
         requestedShooterVelocity = Math.min(requestedShooterVelocity + 1, 100);
     }
@@ -277,24 +285,21 @@ public class SpitterSubsystem extends SubsystemBase {
         });
     }
 
-    public void setFeederSpeed(double distanceFromHub) {
-        requestedFeederVelocity = 0.3048 * (0.5 * distanceFromHub + 33);
+    public void setFeederSpeed() {
+        requestedFeederVelocity = 0.5 * driveSubsystem.distanceFromHub() + 45;
     }
 
-    public void setShooterSpeed(double distanceFromHub) {
-        requestedShooterVelocity = 0.3048 * (1.5 * distanceFromHub + 17);
+    public void setShooterSpeed() {
+        requestedShooterVelocity = 1.5 * driveSubsystem.distanceFromHub() + 17;
     }
 
-    public Command setSpitterSpeed(double distanceFromHub) {
+    public Command setSpitterSpeed() {
         return runOnce(() -> {
-            setFeederSpeed(distanceFromHub);
-            setShooterSpeed(distanceFromHub);
+            setFeederSpeed();   
+            setShooterSpeed();
+            System.out.println("spitter speed has been set to " + requestedShooterVelocity + " feeder speed has been set to " + requestedFeederVelocity);
         });
     }
 
-    @Override
-    public void periodic() {
-
-    }
 }
  
