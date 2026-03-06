@@ -40,7 +40,7 @@ public class ManipSubsystem extends SubsystemBase {
      * 
      * @return Runs the extend storage command
      */
-    public Command extendStorage() {
+    public Command intakeArmOut() {
         return runOnce(() -> System.out.println("WE HAVE BEGUN THE PROCESS OF EXTENDING"))
         .andThen(intakeSubsystem.extendIntake())
         .andThen(runOnce(() -> System.out.println("WE ARE SO DONE WITH EXTENDING")));

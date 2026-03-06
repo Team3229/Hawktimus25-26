@@ -158,7 +158,7 @@ public class RobotContainer {
 		);
 
 		manipController.b_5().onTrue(
-			manipSubsystem.extendStorage()
+			manipSubsystem.intakeArmOut()
 		);
 
 		manipController.b_12().onTrue(

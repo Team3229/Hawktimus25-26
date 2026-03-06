@@ -20,11 +20,11 @@ public class PathPlannerCommands extends SubsystemBase {
     }
 
     public Command pathExtendStorage() {
-        return manipSubsystem.extendStorage().withTimeout(3);
+        return manipSubsystem.intakeArmOut().withTimeout(3);
     }
 
     public Command pathSpinUp() {
-        return manipSubsystem.extendStorage().withTimeout(3);
+        return manipSubsystem.intakeArmOut().withTimeout(3);
     }
 
     public Command pathShoot() {
