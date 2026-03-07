@@ -66,23 +66,6 @@ public class ManipSubsystem extends SubsystemBase {
             spitterSubsystem.shoot(),
             indexSubsystem.index(indexSubsystem.forwards)
         ));
-
-        //     Command out = new Command() {
-        //         @Override
-        //         public void initialize() {
-        //         }
-                
-        //         @Override 
-        //         public void execute() {
-        //         System.out.println("is executing");
-
-        //         if(shooterIsReady()) {
-        //             System.out.println("shooter is ready and index should start");
-        //         }
-        //     }
-        // };
-        // out.addRequirements(this);
-        // return out;
     }
 
     /** reverses the intake to blast out balls from intake

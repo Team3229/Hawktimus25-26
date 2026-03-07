@@ -169,7 +169,7 @@ public class SpitterSubsystem extends SubsystemBase {
     }
 
     public Command lowPass() {
-        return passShoot(30, 75);
+        return passShoot(30, 70);
     }
 
     public Command midPass() {
@@ -177,7 +177,7 @@ public class SpitterSubsystem extends SubsystemBase {
     }
 
     public Command highPass() {
-         return passShoot(40, 85);
+         return passShoot(40, 90);
     }
 
     public Command passShoot(double srps, double frps) {
@@ -227,7 +227,7 @@ public class SpitterSubsystem extends SubsystemBase {
         if(requestedFeederVelocity == 0) {
             return false;
         } else {
-            return Math.abs(requestedFeederVelocity - feederVelocity) <= deadBand;
+            return Math.abs(0.5 * requestedFeederVelocity - feederVelocity) <= deadBand;
         }
     }
 
@@ -280,7 +280,7 @@ public class SpitterSubsystem extends SubsystemBase {
     }
 
     public void setShooterSpeed() {
-        requestedShooterVelocity = 1.5 * driveSubsystem.distanceFromHub() + 17;
+        requestedShooterVelocity = 2 * (1.5 * driveSubsystem.distanceFromHub() + 17);
     }
 
     public Command setSpitterSpeed() {
