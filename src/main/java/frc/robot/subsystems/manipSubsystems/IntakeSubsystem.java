@@ -317,9 +317,9 @@ public class IntakeSubsystem extends SubsystemBase {
 	}
 
 	/**
-	 * Command to return to a safe angle after hitting limit
+	 * Command to return to a safe angle 
 	 */
-	public Command emergencyStow() {
+	public Command stow() {
 		return rodSpin(ROD_CW_SPEED, STOW_ANGLE);
 	}
 

@@ -26,7 +26,7 @@ public class ManipSubsystem extends SubsystemBase {
 
     public Command stow() {
         return runOnce(() -> System.out.println("SSTOOOOOOOOWWWWWWWWWWWWWW"))
-        .andThen(intakeSubsystem.emergencyStow())
+        .andThen(intakeSubsystem.stow())
         .andThen(runOnce(() -> System.out.println("WE ARE DONE WITH STOWING")));
     }
 
