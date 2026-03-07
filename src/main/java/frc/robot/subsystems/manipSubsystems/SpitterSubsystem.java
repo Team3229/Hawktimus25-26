@@ -47,7 +47,7 @@ public class SpitterSubsystem extends SubsystemBase {
     private TalonFX feeder;
     private TalonFXConfiguration feederMotorConfig;
 
-    private static double sensorToMechanismRatio = 25;
+    private static double sensorToMechanismRatio = 2.5;
 
     private static final Current CURRENT_LIMIT = Amps.of(40);
 

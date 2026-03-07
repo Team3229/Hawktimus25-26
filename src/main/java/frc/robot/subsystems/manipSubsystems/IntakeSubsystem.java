@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -66,7 +67,7 @@ public class IntakeSubsystem extends SubsystemBase {
 	private static final Current CURRENT_LIMIT = Amps.of(40);
 	
 	public static final Angle HOME_ANGLE = Rotations.of(0);
-	public static final Angle STOW_ANGLE = Rotations.of(0.097);
+	public static final Angle STOW_ANGLE = Rotations.of(0.06); // was 0.097
 	public static final Angle COLLECTION_POINT = Rotations.of(0.347);
 	
 	private static double sensorToMechanismRatio = 25;
@@ -74,9 +75,9 @@ public class IntakeSubsystem extends SubsystemBase {
 	private Angle requestedAngle;
 	private double requestedVelocity;
 	
-	private static final double aP = 7.5;
+	private static final double aP = 8.5;
 	private static final double aI = 0; 
-	private static final double aD = 0.1; 
+	private static final double aD = 0.00; 
 	private static final double aV = 0.12;
 	private static final double aA = 0.01;
 	private static final double aS = 0.25;
@@ -319,7 +320,9 @@ public class IntakeSubsystem extends SubsystemBase {
 	 * Command to return to a safe angle after hitting limit
 	 */
 	public Command emergencyStow() {
-		return rotateTo(STOW_ANGLE);
+		return new ParallelCommandGroup(
+			rotateTo(STOW_ANGLE)
+		);
 	}
 
 
