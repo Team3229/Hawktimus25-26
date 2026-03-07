@@ -57,7 +57,7 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 public class DriveSubsystem extends SubsystemBase {
     
-    public static  LinearVelocity MAX_VELOCITY = MetersPerSecond.of(5.0);
+    public static  LinearVelocity MAX_VELOCITY = MetersPerSecond.of(4.0); // was 5
     
     private static final Distance TRANS_ERR_TOL = Meters.of(0.025); //TODO: Test this with a setpoint
 	private static final LinearVelocity TRANS_VEL_TOL = MetersPerSecond.of(0.1);
@@ -319,26 +319,31 @@ public class DriveSubsystem extends SubsystemBase {
 	 * This will zero (calibrate) the robot to assume the current position is facing
 	 * forward
 	 * <p>
-	 * If red alliance rotate the robot 180 after the drivebase zero command
+	 * If red alliance rotate the robot 180 after the drivebase zero command 
+	 * this command is useless/actively harmful
 	 */
-	public void zeroGyroWithAlliance() {
-		if (Alliance.getAlliance() == AllianceColor.Red) {
-			setIMUYaw(new Rotation2d(Math.PI));
-		} else {
-			zeroGyro();
-		}
-	}
+	// public void zeroGyroWithAlliance() {
+	// 	if (Alliance.getAlliance() == AllianceColor.Red) {
+	// 		setIMUYaw(new Rotation2d(Math.PI));
+	// 	} else {
+	// 		zeroGyro();
+	// 	}
+	// }
 
 	public void zeroGyro() {
 		getIMU().setYaw(0);
 		swerveDrive.resetOdometry(new Pose2d(getPose().getX(), getPose().getY(), new Rotation2d()));
 	}
 
-	public Command zeroGyroWithAllianceCommand() {
-		return runOnce(
-			this::zeroGyroWithAlliance
-		);
+	public Command zeroGyroCommand() {
+		return runOnce(() -> zeroGyro());
 	}
+
+	// public Command zeroGyroWithAllianceCommand() {
+	// 	return runOnce(
+	// 		this::zeroGyroWithAlliance
+	// 	);
+	// }
 
 	/**
 	 * Zeros the gyro with the lime light based on 2d april tags
@@ -351,11 +356,7 @@ public class DriveSubsystem extends SubsystemBase {
 				Rotation2d mt1_left = VisionSubsystem.getMT1Rotation("left");
 
 				if (mt1_left != null) {
-					if (Alliance.getAlliance() == AllianceColor.Red) {
-						setIMUYaw(mt1_left.rotateBy(new Rotation2d(Math.PI)));
-					} else {
-						setIMUYaw(mt1_left);
-					}
+					setIMUYaw(mt1_left);
 				}
 			}
 		);
