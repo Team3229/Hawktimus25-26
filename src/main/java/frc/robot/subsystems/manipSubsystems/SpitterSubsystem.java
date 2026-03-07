@@ -25,8 +25,8 @@ import static edu.wpi.first.units.Units.Amps;
 
 public class SpitterSubsystem extends SubsystemBase {
     private static DriveSubsystem driveSubsystem;
-    private static double requestedShooterVelocity = 27;
-    private static double requestedFeederVelocity = 40;
+    private static double requestedShooterVelocity = 26;
+    private static double requestedFeederVelocity = 38;
 
     // change PID (if needed)
     private static double kP = 0.1;

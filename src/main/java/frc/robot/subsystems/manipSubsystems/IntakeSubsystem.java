@@ -58,8 +58,8 @@ public class IntakeSubsystem extends SubsystemBase {
 	private static final int ARM_R_CAN_ID = 16; 
 	private static final int ARM_L_CAN_ID = 5; 
 	
-	private static final int HOME_LIMIT_PORT = 1; 
-	private static final int EXTEND_LIMIT_PORT = 0;
+	private static final int HOME_LIMIT_PORT = 0; 
+	private static final int EXTEND_LIMIT_PORT = 1;
 	
 	private static final int ROD_CAN_ID = 17; 
 	
@@ -330,7 +330,7 @@ public class IntakeSubsystem extends SubsystemBase {
 	public Command goHome() {
 		return rotateTo(HOME_ANGLE);
 	}
-	
+
 	/**
 	 * creates a command that pulls the intake arm back to the
 	 * home point in order to move the fuel in storage.

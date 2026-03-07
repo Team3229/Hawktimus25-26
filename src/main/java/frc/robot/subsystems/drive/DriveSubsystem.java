@@ -57,7 +57,7 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 public class DriveSubsystem extends SubsystemBase {
     
-    public static  LinearVelocity MAX_VELOCITY = MetersPerSecond.of(4.0); // was 5
+    public static LinearVelocity MAX_VELOCITY = MetersPerSecond.of(4.0); // was 5
     
     private static final Distance TRANS_ERR_TOL = Meters.of(0.025); //TODO: Test this with a setpoint
 	private static final LinearVelocity TRANS_VEL_TOL = MetersPerSecond.of(0.1);
@@ -75,6 +75,8 @@ public class DriveSubsystem extends SubsystemBase {
 
 	private static final Pose2d redHubPose = new Pose2d(Inches.of(468.56), Inches.of(158.32), new Rotation2d());
 	private static final Pose2d blueHubPose = new Pose2d(Inches.of(152.56), Inches.of(158.32), new Rotation2d());
+
+	private static boolean slowDrive = false;
 
 	// Standard PID
     private static final PIDConstants TRANSLATION_CONSTANTS =
@@ -233,6 +235,7 @@ public class DriveSubsystem extends SubsystemBase {
 	@Override
 	public void periodic() {
 		updateOdometry();
+		initSendable();
 	}
 	
 	public void setIMUYaw(Rotation2d yaw) {
@@ -408,21 +411,36 @@ public class DriveSubsystem extends SubsystemBase {
 				() -> xTranslationPID.atGoal() && yTranslationPID.atGoal() && rotationPID.atGoal()
 			);
     }
-	public Command slowDrive(){
-		Command out = new Command() {
-			@Override 
-			public void execute(){
-				MAX_VELOCITY = MetersPerSecond.of(2.5);
-			}
 
-			@Override
-			public void end(boolean interrupted) {
-				MAX_VELOCITY = MetersPerSecond.of(5);
-			}
-		};
-		out.addRequirements(this);
-		return out;
+	public void slowToggle() {
+		if(slowDrive == true) {
+			slowDrive = false;
+			MAX_VELOCITY.times(2);
+		} else {
+			slowDrive = true;
+			MAX_VELOCITY.div(2);
+		}
 	}
+
+	public Command slowToggleCommand() {
+		return runOnce(() -> slowToggle());
+	}
+	
+	// public Command slowDrive(){
+	// 	Command out = new Command() {
+	// 		@Override 
+	// 		public void initialize() {
+	// 			MAX_VELOCITY = MetersPerSecond.of(2.5);
+	// 		}
+
+	// 		@Override
+	// 		public void end(boolean interrupted) {
+	// 			MAX_VELOCITY = MetersPerSecond.of(5);
+	// 		}
+	// 	};
+	// 	out.addRequirements(this);
+	// 	return out;
+	// }
 
 	public Pose2d getHubPose() {
 		return Alliance.getAlliance().equals(AllianceColor.Red) ? redHubPose : blueHubPose;
@@ -471,6 +489,7 @@ public class DriveSubsystem extends SubsystemBase {
 			public void initSendable(SendableBuilder builder) {
 				builder.addDoubleProperty("PoseX", () -> getPose().getX(), null);
 				builder.addDoubleProperty("PoseY", () -> getPose().getY(), null);
+				builder.addBooleanProperty("SlowToggle", () -> slowDrive, null);
 			}
 		});
 	}
