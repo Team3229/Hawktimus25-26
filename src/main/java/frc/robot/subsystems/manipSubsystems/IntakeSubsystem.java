@@ -24,7 +24,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -264,7 +263,7 @@ public class IntakeSubsystem extends SubsystemBase {
 	
 	}
 
-	public Command rodSpin(double speedSetpoint) {
+	public Command rodSpin(double speedSetpoint, Angle desiredAngle) {
 		Command out = new Command() {
 			@Override 
 			public void initialize() {
@@ -275,7 +274,7 @@ public class IntakeSubsystem extends SubsystemBase {
 				rodMotor.setControl(new VelocityVoltage(speedSetpoint).withSlot(0));
 				
 				if(speedSetpoint < 0) {
-					armMotorLeft.setControl(rotateRequest.withPosition(COLLECTION_POINT));
+					armMotorLeft.setControl(rotateRequest.withPosition(desiredAngle));
 				}
 
 				System.out.println("rod is being spun");
@@ -288,13 +287,14 @@ public class IntakeSubsystem extends SubsystemBase {
 		out.addRequirements(this);
 		return out;
 	}
+
 	/**
 	* creates a command to collect the fuel by spinning the rod
 	* 
 	* @return Command to spin rod
 	*/
 	public Command intake() {
-	   return rodSpin(ROD_CW_SPEED);
+	   return rodSpin(ROD_CW_SPEED, COLLECTION_POINT);
 	}
 	  /**
 	 * creates a command to reverse the intake to put the fuel into the human player
@@ -303,7 +303,7 @@ public class IntakeSubsystem extends SubsystemBase {
 	 * @return Command to spin the rod in reverse
 	 */ 
 	public Command extake() {
-		return rodSpin(ROD_CCW_SPEED);
+		return rodSpin(ROD_CCW_SPEED, COLLECTION_POINT);
 	}
 
 	/**
@@ -320,11 +320,8 @@ public class IntakeSubsystem extends SubsystemBase {
 	 * Command to return to a safe angle after hitting limit
 	 */
 	public Command emergencyStow() {
-		return new ParallelCommandGroup(
-			rotateTo(STOW_ANGLE)
-		);
+		return rodSpin(ROD_CW_SPEED, STOW_ANGLE);
 	}
-
 
 	public Command goHome() {
 		return rotateTo(HOME_ANGLE);
