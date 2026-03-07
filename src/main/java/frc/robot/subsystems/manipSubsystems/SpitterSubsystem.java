@@ -25,8 +25,8 @@ import static edu.wpi.first.units.Units.Amps;
 
 public class SpitterSubsystem extends SubsystemBase {
     private static DriveSubsystem driveSubsystem;
-    private static double requestedShooterVelocity = 25;
-    private static double requestedFeederVelocity = 35;
+    private static double requestedShooterVelocity = 26;
+    private static double requestedFeederVelocity = 37;
 
     // change PID (if needed)
     private static double kP = 0.1;
@@ -178,6 +178,15 @@ public class SpitterSubsystem extends SubsystemBase {
 
     public Command highPass() {
          return passShoot(40, 90);
+    }
+
+    private void resetToMid() {
+        requestedShooterVelocity = 26;
+        requestedFeederVelocity = 74;
+    }
+
+    public Command midReset() {
+        return runOnce(() -> resetToMid());
     }
 
     public Command passShoot(double srps, double frps) {

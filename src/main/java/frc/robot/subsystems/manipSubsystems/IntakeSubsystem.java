@@ -87,8 +87,8 @@ public class IntakeSubsystem extends SubsystemBase {
 	private static final double rD = 0.0; 
 	private static final double rV = 0.13; 
 	
-	private static final double ROD_CW_SPEED = 80; 
-	private static final double ROD_CCW_SPEED = -80;
+	private static final double ROD_CW_SPEED = 100; 
+	private static final double ROD_CCW_SPEED = -100;
 
 	private static final Angle angleDeadBand = Rotations.of(0.01);
 	
