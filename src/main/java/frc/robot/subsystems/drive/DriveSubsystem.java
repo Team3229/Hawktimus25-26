@@ -469,13 +469,13 @@ public class DriveSubsystem extends SubsystemBase {
 		
 	};
 
-		public void initSendable() {
+	public void initSendable() {
 		SmartDashboard.putData("Drive", new Sendable() {
 			@Override 
 			public void initSendable(SendableBuilder builder) {
 				builder.addDoubleProperty("PoseX", () -> getPose().getX(), null);
 				builder.addDoubleProperty("PoseY", () -> getPose().getY(), null);
-				}
+			}
 		});
 	}
 }

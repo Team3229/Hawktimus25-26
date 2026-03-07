@@ -62,10 +62,10 @@ public class ManipSubsystem extends SubsystemBase {
         return spitterSubsystem.setSpitterSpeed()
         .andThen(indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1))
         .andThen(new ParallelCommandGroup(
+            intakeSubsystem.agitateFuel(),
             spitterSubsystem.shoot(),
             indexSubsystem.index(indexSubsystem.forwards)
         ));
-        // intakeSubsystem.agitateFuel();
 
         //     Command out = new Command() {
         //         @Override
@@ -97,22 +97,25 @@ public class ManipSubsystem extends SubsystemBase {
     public Command lowPass() {
         return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
         .andThen(new ParallelCommandGroup(
+            intakeSubsystem.agitateFuel(),
             spitterSubsystem.lowPass(),
             indexSubsystem.index(indexSubsystem.forwards)
         ));
     }
 
     public Command midPass() {
-     return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
+        return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
         .andThen(new ParallelCommandGroup(
+            intakeSubsystem.agitateFuel(),
             spitterSubsystem.midPass(),
             indexSubsystem.index(indexSubsystem.forwards)
         ));
     }
 
     public Command highPass() {
-     return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
+        return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
         .andThen(new ParallelCommandGroup(
+            intakeSubsystem.agitateFuel(),
             spitterSubsystem.highPass(),
             indexSubsystem.index(indexSubsystem.forwards)
         ));

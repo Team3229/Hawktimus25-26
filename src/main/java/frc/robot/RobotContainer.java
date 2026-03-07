@@ -160,9 +160,9 @@ public class RobotContainer {
 			manipSubsystem.extendStorage()
 		);
 
-		manipController.b_12().onTrue(
-			manipSubsystem.home()
-		);
+		// manipController.b_12().onTrue(
+		// 	manipSubsystem.home()
+		// );
 
 		manipController.b_7().whileTrue(
 			manipSubsystem.lowPass()

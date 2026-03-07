@@ -2,7 +2,7 @@ package frc.robot.subsystems.manipSubsystems;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-
+import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -16,6 +16,7 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.units.measure.Current;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
 
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -66,7 +67,7 @@ public class IntakeSubsystem extends SubsystemBase {
 	private static final Current CURRENT_LIMIT = Amps.of(40);
 	
 	public static final Angle HOME_ANGLE = Rotations.of(0);
-	public static final Angle STOW_ANGLE = Rotations.of(0.166666); //TODO: set back to 0.097
+	public static final Angle STOW_ANGLE = Rotations.of(0.097);
 	public static final Angle COLLECTION_POINT = Rotations.of(0.347);
 	
 	private static double sensorToMechanismRatio = 25;
@@ -83,10 +84,12 @@ public class IntakeSubsystem extends SubsystemBase {
 	private static final double aG = 1.75;
 
 	private static final double rP = 0.1; 
+	private static final double rI = 0.0; 
+	private static final double rD = 0.0; 
 	private static final double rV = 0.13; 
 	
-	private static final double ROD_CW_SPEED = 25; 
-	private static final double ROD_CCW_SPEED = -25;
+	private static final double ROD_CW_SPEED = 80; 
+	private static final double ROD_CCW_SPEED = -80;
 
 	private static final Angle angleDeadBand = Rotations.of(0.01);
 	
@@ -118,6 +121,12 @@ public class IntakeSubsystem extends SubsystemBase {
 		.withFeedback(
 			new FeedbackConfigs()
 			.withSensorToMechanismRatio(sensorToMechanismRatio)
+		)
+		.withVoltage(
+			new VoltageConfigs()
+				.withPeakForwardVoltage(12)
+				.withPeakReverseVoltage(-12)
+				.withSupplyVoltageTimeConstant(0)
 		);
 			
 		armMotorConfig.Slot0.GravityType = gravityTypeValue;
@@ -135,7 +144,7 @@ public class IntakeSubsystem extends SubsystemBase {
 		.withMotionMagicCruiseVelocity(motionMagicCruiseVelocity)
 		.withMotionMagicAcceleration(motionMagicAcceleration)
 		.withMotionMagicJerk(motionMagicJerk);
-
+		
 		armMotorRight.getConfigurator().apply(armMotorConfig);
 		
 		armMotorConfig2 = new TalonFXConfiguration()
@@ -150,8 +159,14 @@ public class IntakeSubsystem extends SubsystemBase {
 		)
 		.withFeedback(
 			new FeedbackConfigs()
-			.withSensorToMechanismRatio(sensorToMechanismRatio)
-		);
+				.withSensorToMechanismRatio(sensorToMechanismRatio)
+		)
+		.withVoltage(
+			new VoltageConfigs()
+				.withPeakForwardVoltage(12)
+				.withPeakReverseVoltage(-12)
+				.withSupplyVoltageTimeConstant(0)
+        );
 
 		armMotorConfig2.Slot0.kP = aP;
 		armMotorConfig2.Slot0.kI = aI;
@@ -159,6 +174,8 @@ public class IntakeSubsystem extends SubsystemBase {
 		armMotorConfig2.Slot0.kV = aV;
 		armMotorConfig2.Slot0.kA = aA;
 		armMotorConfig2.Slot0.kS = aS;
+		armMotorConfig2.Slot0.kG = aG;
+		armMotorConfig2.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
 		armMotorConfig2.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
 		armMotorConfig2.MotionMagic
@@ -179,10 +196,20 @@ public class IntakeSubsystem extends SubsystemBase {
 				new CurrentLimitsConfigs()
 					.withStatorCurrentLimit(CURRENT_LIMIT)
 					.withStatorCurrentLimitEnable(true)
-			);
+			)
+			.withVoltage(
+                new VoltageConfigs()
+                    .withPeakForwardVoltage(12)
+                    .withPeakReverseVoltage(-12)
+                    .withSupplyVoltageTimeConstant(0)
+            );
 
-		rodMotorConfig.Slot0.kP = (rP);
-		rodMotorConfig.Slot0.kV = (rV);
+		rodMotorConfig.Slot0.kP = rP;
+		rodMotorConfig.Slot0.kI = rI;
+		rodMotorConfig.Slot0.kD = rD;
+		rodMotorConfig.Slot0.kV = rV;
+
+		rodMotor.getConfigurator().apply(rodMotorConfig);
 
 		extendLimit().onTrue(
 			Commands.runOnce(() -> {
@@ -213,8 +240,8 @@ public class IntakeSubsystem extends SubsystemBase {
 			@Override
 			public void execute() {
 				System.out.println("Rotating to " + setpoint.toShortString());
-				
-				armMotorLeft.setControl(rotateRequest.withPosition(setpoint));
+
+				armMotorLeft.setControl(new MotionMagicDutyCycle(setpoint).withSlot(0));
 
 			}
 
@@ -224,10 +251,10 @@ public class IntakeSubsystem extends SubsystemBase {
 				return armIsReady();
 			}
 
-			// @Override
-			// public void end(boolean interrupted) {
-			//     armMotorLeft.set(0);
-			// }
+			@Override
+			public void end(boolean interrupted) {
+			    armMotorLeft.set(0);
+			}
 		};
 
 		initSendable();
@@ -239,19 +266,24 @@ public class IntakeSubsystem extends SubsystemBase {
 
 	public Command rodSpin(double speedSetpoint) {
 		Command out = new Command() {
-			 @Override 
-			 public void initialize() {
-				 requestedVelocity = speedSetpoint;
-			 }
-			 @Override
-			 public void execute() {
+			@Override 
+			public void initialize() {
+				requestedVelocity = speedSetpoint;
+			}
+			@Override
+			public void execute() {
 				rodMotor.setControl(new VelocityVoltage(speedSetpoint).withSlot(0));
+				
+				if(speedSetpoint < 0) {
+					armMotorLeft.setControl(new MotionMagicDutyCycle(COLLECTION_POINT).withSlot(0));
+				}
 
-			 }
-			 @Override
-			 public void end(boolean interrupted) {
+				System.out.println("rod is being spun");
+			}
+			@Override
+			public void end(boolean interrupted) {
 				rodMotor.setControl(new VelocityVoltage(0).withSlot(0));
-			 }
+			}
 		};
 		out.addRequirements(this);
 		return out;
@@ -262,7 +294,7 @@ public class IntakeSubsystem extends SubsystemBase {
 	* @return Command to spin rod
 	*/
 	public Command intake() {
-	   return rodSpin(ROD_CCW_SPEED);
+	   return rodSpin(ROD_CW_SPEED);
 	}
 	  /**
 	 * creates a command to reverse the intake to put the fuel into the human player
@@ -271,7 +303,7 @@ public class IntakeSubsystem extends SubsystemBase {
 	 * @return Command to spin the rod in reverse
 	 */ 
 	public Command extake() {
-		return rodSpin(ROD_CW_SPEED);
+		return rodSpin(ROD_CCW_SPEED);
 	}
 
 	/**

@@ -4,6 +4,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -50,7 +51,8 @@ public class SpitterSubsystem extends SubsystemBase {
     private TalonFX feeder;
     private TalonFXConfiguration feederMotorConfig;
 
-    // change amp limit
+    private static double sensorToMechanismRatio = 25;
+
     private static final Current CURRENT_LIMIT = Amps.of(40);
 
     public SpitterSubsystem(DriveSubsystem drive) {
@@ -125,7 +127,11 @@ public class SpitterSubsystem extends SubsystemBase {
                     .withPeakForwardVoltage(12)
                     .withPeakReverseVoltage(-12)
                     .withSupplyVoltageTimeConstant(0)
-            );
+            )
+            .withFeedback(
+                new FeedbackConfigs()
+                    .withSensorToMechanismRatio(sensorToMechanismRatio)
+		    );
         
         feederMotorConfig.Slot0.kP = fP;
         feederMotorConfig.Slot0.kI = fI;
@@ -286,11 +292,11 @@ public class SpitterSubsystem extends SubsystemBase {
     }
 
     public void setFeederSpeed() {
-        requestedFeederVelocity = 0.5 * driveSubsystem.distanceFromHub() + 75;
+        requestedFeederVelocity = 0.5 * driveSubsystem.distanceFromHub() + 45;
     }
 
     public void setShooterSpeed() {
-        requestedShooterVelocity = 1.5 * driveSubsystem.distanceFromHub() + 18;
+        requestedShooterVelocity = 1.5 * driveSubsystem.distanceFromHub() + 17;
     }
 
     public Command setSpitterSpeed() {
