@@ -16,7 +16,6 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.units.measure.Current;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
 
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -241,7 +240,7 @@ public class IntakeSubsystem extends SubsystemBase {
 			public void execute() {
 				System.out.println("Rotating to " + setpoint.toShortString());
 
-				armMotorLeft.setControl(new MotionMagicDutyCycle(setpoint).withSlot(0));
+				armMotorLeft.setControl(rotateRequest.withPosition(setpoint));
 
 			}
 
@@ -275,7 +274,7 @@ public class IntakeSubsystem extends SubsystemBase {
 				rodMotor.setControl(new VelocityVoltage(speedSetpoint).withSlot(0));
 				
 				if(speedSetpoint < 0) {
-					armMotorLeft.setControl(new MotionMagicDutyCycle(COLLECTION_POINT).withSlot(0));
+					armMotorLeft.setControl(rotateRequest.withPosition(COLLECTION_POINT));
 				}
 
 				System.out.println("rod is being spun");
