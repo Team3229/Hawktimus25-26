@@ -1,21 +1,25 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.Orchestra;
+import com.ctre.phoenix6.hardware.TalonFX;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
 
-public class MusicSubsystem extends SubsystemBase {
-    SpitterSubsystem spitterSubsystem;
+public class MusicSubsystem {
 
-    public MusicSubsystem() {
-        spitterSubsystem = new SpitterSubsystem();
-    }
     Orchestra m_orchestra = new Orchestra();
+    
+    public MusicSubsystem(TalonFX talon) {
+        
+        m_orchestra.addInstrument(talon);
 
-    public static void musicSubsystem() {
+        var music = m_orchestra.loadMusic("src/main/deploy/ImperialMarch.chrp");
 
-        m_orchestra.addInstrument(leftSpitter);
+        if(!status.isOK()) {
+            System.out.println("Failed to load music: " + status.toString());
+        } else {
+            m_orchestra.play();
+        }
 
     }
+    
 }
