@@ -30,13 +30,9 @@ public class SpitterSubsystem extends SubsystemBase {
 
     // change PID (if needed)
     private static double kP = 0.1;
-    private static double kI = 0;
-    private static double kD = 0;
     private static double kV = 0.13;
 
     private static double fP = 0.3;
-    private static double fI = 0;
-    private static double fD = 0;
     private static double fV = 0.13;
 
     private static final int LS_CAN_ID = 10;
@@ -78,8 +74,6 @@ public class SpitterSubsystem extends SubsystemBase {
             );
 
         LSMotorConfig.Slot0.kP = kP;
-        LSMotorConfig.Slot0.kI = kI;
-        LSMotorConfig.Slot0.kD = kD;
         LSMotorConfig.Slot0.kV = kV;
         
         LSMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -104,8 +98,6 @@ public class SpitterSubsystem extends SubsystemBase {
             );
 
         RSMotorConfig.Slot0.kP = kP;
-        RSMotorConfig.Slot0.kI = kI;
-        RSMotorConfig.Slot0.kD = kD;
         RSMotorConfig.Slot0.kV = kV;
         RSMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         rightSpitter.getConfigurator().apply(RSMotorConfig);
@@ -134,8 +126,6 @@ public class SpitterSubsystem extends SubsystemBase {
 		    );
         
         feederMotorConfig.Slot0.kP = fP;
-        feederMotorConfig.Slot0.kI = fI;
-        feederMotorConfig.Slot0.kD = fD;
         feederMotorConfig.Slot0.kV = fV;
         feederMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         feeder.getConfigurator().apply(feederMotorConfig);
@@ -143,11 +133,6 @@ public class SpitterSubsystem extends SubsystemBase {
 
     public Command shoot() {
         Command out = new Command() {
-            @Override
-            public void initialize() {
-
-            }
-            
             @Override
             public void execute() {
                 leftSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0).withFeedForward(0.12));
@@ -161,7 +146,6 @@ public class SpitterSubsystem extends SubsystemBase {
                 rightSpitter.setControl(new VelocityVoltage(0).withSlot(0));
                 feeder.setControl(new VelocityVoltage(0).withSlot(0));
             }
-            
         };
 
      
@@ -185,18 +169,18 @@ public class SpitterSubsystem extends SubsystemBase {
     }
 
     public Command lowPass() {
-        return shoot(30, 75);
+        return passShoot(30, 75);
     }
 
     public Command midPass() {
-        return shoot(35, 80);
+        return passShoot(35, 80);
     }
 
     public Command highPass() {
-         return shoot(40, 85);
+         return passShoot(40, 85);
     }
 
-    public Command shoot(double srps, double frps) {
+    public Command passShoot(double srps, double frps) {
         Command out = new Command() {
             @Override
             public void initialize() {
