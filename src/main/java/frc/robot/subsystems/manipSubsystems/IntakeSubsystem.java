@@ -273,7 +273,7 @@ public class IntakeSubsystem extends SubsystemBase {
 			public void execute() {
 				rodMotor.setControl(new VelocityVoltage(speedSetpoint).withSlot(0));
 				
-				if(speedSetpoint < 0) {
+				if(speedSetpoint != 0) {
 					armMotorLeft.setControl(rotateRequest.withPosition(desiredAngle));
 				}
 
@@ -316,6 +316,10 @@ public class IntakeSubsystem extends SubsystemBase {
 		return rotateTo(COLLECTION_POINT);
 	}
 
+	public Command stopSpin() {
+		return rodSpin(0, armMotorLeft.getPosition().getValue());
+	}
+
 	/**
 	 * Command to return to a safe angle 
 	 */
@@ -326,6 +330,7 @@ public class IntakeSubsystem extends SubsystemBase {
 	public Command goHome() {
 		return rotateTo(HOME_ANGLE);
 	}
+	
 	/**
 	 * creates a command that pulls the intake arm back to the
 	 * home point in order to move the fuel in storage.

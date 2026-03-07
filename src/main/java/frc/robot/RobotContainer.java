@@ -141,7 +141,7 @@ public class RobotContainer {
 			manipSubsystem.shoot()
 		);
 
-		manipController.b_Hazard().onTrue(
+		manipController.b_11().onTrue(
 			Commands.runOnce(() -> {
 				manipSubsystem.getCurrentCommand().cancel(); // TODO: currently crashes bot
 				// cancels ALL manipING on manip controller
@@ -176,7 +176,7 @@ public class RobotContainer {
 			manipSubsystem.highPass()
 		);
 
-		manipController.b_8().onTrue(
+		manipController.b_Hazard().onTrue(
 			manipSubsystem.stow()
 		);
 
