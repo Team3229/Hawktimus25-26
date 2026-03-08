@@ -78,7 +78,7 @@ public class RobotContainer {
 	}
 
 	public void autoInit() {
-		driveSubsystem.zeroGyro();
+		driveSubsystem.zeroGyroCommand();
 	}
 
 	private void configDriveControls() {
@@ -98,7 +98,7 @@ public class RobotContainer {
 			.cubeTranslationControllerAxis(true)
 			.scaleTranslation(0.8)
 			.scaleRotation(0.9)
-			.allianceRelativeControl(true);
+			.allianceRelativeControl(false); //TODO: TYPICALLY TRUE THIS COULD BE BAD OR REALLY GOOD
 
 		driveSubsystem.setDefaultCommand(
 			driveSubsystem.driveFieldOriented(
@@ -112,10 +112,6 @@ public class RobotContainer {
 
 		driverController.b_11().onTrue(
 			driveSubsystem.zeroGyroCommand()
-		);
-
-		driverController.b_3().onTrue(
-			driveSubsystem.zeroGyroWithLimelight()
 		);
 
 		driverController.b_Hazard().onTrue(

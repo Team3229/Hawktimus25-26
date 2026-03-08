@@ -83,8 +83,10 @@ public class ManipSubsystem extends SubsystemBase {
      * @return Runs the extake command
      */
     public Command extake() {
-        return runOnce(() -> intakeSubsystem.extake())
-        .andThen(indexSubsystem.index(indexSubsystem.reverse));
+        return new ParallelCommandGroup(
+            indexSubsystem.index(indexSubsystem.reverse),
+            intakeSubsystem.extake()
+        );
     }
 
     public Command lowPass() {
