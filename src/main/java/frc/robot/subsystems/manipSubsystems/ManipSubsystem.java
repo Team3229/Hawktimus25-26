@@ -61,19 +61,19 @@ public class ManipSubsystem extends SubsystemBase {
      * @return moves the index and then runs the intake motor on the shooter
      */
     public Command shoot() {
-        return spitterSubsystem.setSpitterSpeed()
-        .andThen(indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1))
-        .andThen(new ParallelCommandGroup(
-            intakeSubsystem.agitateFuel(),
-            spitterSubsystem.shoot(),
-            indexSubsystem.index(indexSubsystem.forwards)
-        ));
-        // return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
+        // return spitterSubsystem.setSpitterSpeed()
+        // .andThen(indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1))
         // .andThen(new ParallelCommandGroup(
         //     intakeSubsystem.agitateFuel(),
         //     spitterSubsystem.shoot(),
         //     indexSubsystem.index(indexSubsystem.forwards)
         // ));
+        return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
+        .andThen(new ParallelCommandGroup(
+            intakeSubsystem.agitateFuel(),
+            spitterSubsystem.shoot(),
+            indexSubsystem.index(indexSubsystem.forwards)
+        ));
     }
 
     public Command midReset() {
