@@ -263,18 +263,19 @@ public class IntakeSubsystem extends SubsystemBase {
 	
 	}
 
-	public Command rodSpin(double speedSetpoint, Angle desiredAngle) {
+	public Command rodSpin(double speedSetpoint) {
 		Command out = new Command() {
 			@Override 
 			public void initialize() {
 				requestedVelocity = speedSetpoint;
+				// armMotorLeft.set(0.1);
 			}
 			@Override
 			public void execute() {
 				rodMotor.setControl(new VelocityVoltage(speedSetpoint).withSlot(0));
 				
 				if(speedSetpoint != 0) {
-					armMotorLeft.setControl(rotateRequest.withPosition(desiredAngle));
+					armMotorLeft.setControl(rotateRequest.withPosition(COLLECTION_POINT.plus(Rotations.of(0.139))));
 				}
 
 				System.out.println("rod is being spun");
@@ -294,7 +295,7 @@ public class IntakeSubsystem extends SubsystemBase {
 	* @return Command to spin rod
 	*/
 	public Command intake() {
-	   return rodSpin(ROD_CW_SPEED, COLLECTION_POINT);
+	   return rodSpin(ROD_CW_SPEED);
 	}
 	  /**
 	 * creates a command to reverse the intake to put the fuel into the human player
@@ -303,7 +304,7 @@ public class IntakeSubsystem extends SubsystemBase {
 	 * @return Command to spin the rod in reverse
 	 */ 
 	public Command extake() {
-		return rodSpin(ROD_CCW_SPEED, COLLECTION_POINT);
+		return rodSpin(ROD_CCW_SPEED);
 	}
 
 	/**
@@ -317,14 +318,14 @@ public class IntakeSubsystem extends SubsystemBase {
 	}
 
 	public Command stopSpin() {
-		return rodSpin(0, armMotorLeft.getPosition().getValue());
+		return rodSpin(0);
 	}
 
 	/**
 	 * Command to return to a safe angle 
 	 */
 	public Command stow() {
-		return rodSpin(ROD_CW_SPEED, STOW_ANGLE);
+		return rotateTo(STOW_ANGLE);
 	}
 
 	public Command goHome() {

@@ -144,9 +144,9 @@ public class RobotContainer {
 			})
 		);
 
-		driverController.b_6().onTrue(
-			driveSubsystem.slowToggleCommand()
-		);
+		// driverController.b_6().onTrue(
+		// 	driveSubsystem.slowToggleCommand()
+		// );
 
 		driverController.b_Trigger().onTrue(
 			driveSubsystem.alignToHub()

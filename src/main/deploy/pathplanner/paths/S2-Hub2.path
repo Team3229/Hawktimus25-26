@@ -8,19 +8,19 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.7795124574398544,
-        "y": 3.9459672669756243
+        "x": 3.789638554216867,
+        "y": 3.958506024096385
       },
       "isLocked": false,
       "linkedName": "S2"
     },
     {
       "anchor": {
-        "x": 2.532951807228916,
+        "x": 2.1723373493975906,
         "y": 3.948
       },
       "prevControl": {
-        "x": 2.86028990462432,
+        "x": 2.499675446792995,
         "y": 3.9554503184380883
       },
       "nextControl": null,
@@ -28,7 +28,12 @@
       "linkedName": "Hub2"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": 90.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -47,8 +52,8 @@
   "reversed": false,
   "folder": null,
   "idealStartingState": {
-    "velocity": 0,
-    "rotation": 180.0
+    "velocity": 0.0,
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

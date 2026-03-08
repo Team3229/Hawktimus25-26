@@ -24,11 +24,11 @@ public class PathPlannerCommands extends SubsystemBase {
     }
 
     public Command pathSpinUp() {
-        return manipSubsystem.intakeArmOut().withTimeout(3);
+        return manipSubsystem.intakeArmOut().withTimeout(6);
     }
 
     public Command pathShoot() {
-        return manipSubsystem.shoot().withTimeout(3);
+        return manipSubsystem.shoot().withTimeout(5);
     }
 
     public Command pathExtake() {
