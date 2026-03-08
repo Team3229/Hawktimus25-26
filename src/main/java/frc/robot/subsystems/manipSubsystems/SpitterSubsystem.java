@@ -285,11 +285,11 @@ public class SpitterSubsystem extends SubsystemBase {
     }
 
     public void setFeederSpeed() {
-        requestedFeederVelocity = 0.5 * driveSubsystem.distanceFromHub() + 45;
+        requestedFeederVelocity = driveSubsystem.distanceFromHub() + 35;
     }
 
     public void setShooterSpeed() {
-        requestedShooterVelocity = 2 * (1.5 * driveSubsystem.distanceFromHub() + 17);
+        requestedShooterVelocity = 1.7 * driveSubsystem.distanceFromHub() + 15;
     }
 
     public Command setSpitterSpeed() {

@@ -39,7 +39,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.hawklibraries.utilities.Alliance;
-import frc.hawklibraries.utilities.Alliance.AllianceColor;	
+import frc.hawklibraries.utilities.Alliance.AllianceColor;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.utilities.LimelightHelpers;
 
@@ -202,6 +202,7 @@ public class DriveSubsystem extends SubsystemBase {
 				builder.addDoubleProperty("PoseX", () -> getPose().getX(), null);
 				builder.addDoubleProperty("PoseY", () -> getPose().getY(), null);
 				builder.addBooleanProperty("SlowToggle", () -> slowDrive, null);
+				builder.addDoubleProperty("Distance from hub", () -> distanceFromHub(), null);
 			}
 		};
 		SmartDashboard.putData("Drive", driveSendable);
@@ -315,7 +316,8 @@ public class DriveSubsystem extends SubsystemBase {
 
 	public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
 		return run(() -> {
-			swerveDrive.driveFieldOriented(velocity.get());
+			// swerveDrive.driveFieldOriented(velocity.get()); //Field relative is relying on odemtry instead of IMUYaw
+			swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(velocity.get(), getIMUYaw()));
 		}).ignoringDisable(false);
 	}
 
@@ -471,7 +473,6 @@ public class DriveSubsystem extends SubsystemBase {
 	* Returns the distance from the robot to the hub 
 	*/
 	public double distanceFromHub() {
-		System.out.println("distance is running... better go catch it!");
 		var relativePose = getPose().relativeTo(getHubPose());
 		// System.out.println(Math.sqrt(Math.pow(getHubPose().getX() - getPose().getX(), 2) + Math.pow(getHubPose().getY() - getPose().getY(), 2)));
 		return Math.sqrt(Math.pow(relativePose.getX(), 2) + Math.pow(relativePose.getY(), 2));
