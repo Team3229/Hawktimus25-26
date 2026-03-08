@@ -233,20 +233,16 @@ public class IntakeSubsystem extends SubsystemBase {
 			@Override
 			public void initialize() {
 				requestedAngle = setpoint;
-				System.out.println("Rotate initialize print");
 			}
 
 			@Override
 			public void execute() {
-				System.out.println("Rotating to " + setpoint.toShortString());
-
 				armMotorLeft.setControl(rotateRequest.withPosition(setpoint));
 
 			}
 
 			@Override
 			public boolean isFinished() {
-				System.out.println("Checking done for rotate!!!!!!!!!!!!!!!!!!!!!!!!!");
 				return armIsReady();
 			}
 
@@ -268,17 +264,16 @@ public class IntakeSubsystem extends SubsystemBase {
 			@Override 
 			public void initialize() {
 				requestedVelocity = speedSetpoint;
-				// armMotorLeft.set(0.1);
 			}
 			@Override
 			public void execute() {
 				rodMotor.setControl(new VelocityVoltage(speedSetpoint).withSlot(0));
 				
-				if(speedSetpoint != 0) {
-					armMotorLeft.setControl(rotateRequest.withPosition(COLLECTION_POINT.plus(Rotations.of(0.139))));
+				if(speedSetpoint != 0 && extendLimitSwitch() == false) {
+					// armMotorLeft.setControl(rotateRequest.withPosition(COLLECTION_POINT.plus(Rotations.of(0))));
+					armMotorLeft.setControl(new VelocityVoltage(0.2).withSlot(0));
 				}
 
-				System.out.println("rod is being spun");
 			}
 			@Override
 			public void end(boolean interrupted) {
