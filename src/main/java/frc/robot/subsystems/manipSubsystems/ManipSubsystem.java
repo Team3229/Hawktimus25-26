@@ -53,7 +53,7 @@ public class ManipSubsystem extends SubsystemBase {
     public Command spinUp() {
         // return spitterSubsystem.setSpitterSpeed()
         // .andThen(spitterSubsystem.shoot());
-        return spitterSubsystem.shoot();
+        return spitterSubsystem.manualShoot();
     }
 
     /**moves the fuel forward and then takes it into the shooter
@@ -63,7 +63,7 @@ public class ManipSubsystem extends SubsystemBase {
     public Command shoot() {
         // return spitterSubsystem.setSpitterSpeed()
         // .andThen(indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1))
-        // .andThen(new ParallelCommandGroup(
+        // .andThen(new ParallelCommandGroup        
         //     intakeSubsystem.agitateFuel(),
         //     spitterSubsystem.shoot(),
         //     indexSubsystem.index(indexSubsystem.forwards)
@@ -71,7 +71,7 @@ public class ManipSubsystem extends SubsystemBase {
         return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
         .andThen(new ParallelCommandGroup(
             intakeSubsystem.agitateFuel(),
-            spitterSubsystem.shoot(),
+            spitterSubsystem.manualShoot(),
             indexSubsystem.index(indexSubsystem.forwards)
         ));
     }

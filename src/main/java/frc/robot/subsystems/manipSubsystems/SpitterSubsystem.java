@@ -18,6 +18,7 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.drive.DriveSubsystem;
 
@@ -148,8 +149,6 @@ public class SpitterSubsystem extends SubsystemBase {
             }
         };
 
-     
-
         SmartDashboard.putData("Shooter", new Sendable() {
             @Override
             public void initSendable(SendableBuilder builder) {
@@ -168,6 +167,10 @@ public class SpitterSubsystem extends SubsystemBase {
         return out;
     }
 
+    public Command manualShoot() {
+        return passShoot(26, 38);
+    }
+
     public Command lowPass() {
         return passShoot(30, 70);
     }
@@ -182,7 +185,7 @@ public class SpitterSubsystem extends SubsystemBase {
 
     private void resetToMid() {
         requestedShooterVelocity = 26;
-        requestedFeederVelocity = 74;
+        requestedFeederVelocity = 38;
     }
 
     public Command midReset() {
