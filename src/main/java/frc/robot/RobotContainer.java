@@ -21,8 +21,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.hawklibraries.utilities.Alliance;
-import frc.hawklibraries.utilities.Alliance.AllianceColor;
 import frc.robot.inputs.ButtonBoard;
 import frc.robot.inputs.FlightStick;
 import frc.robot.subsystems.VisualizerSubsystem;
@@ -46,8 +44,6 @@ public class RobotContainer {
 
 	private SendableChooser<Command> autoChooser;
 	private Command autoCommand;
-
-	private SwerveInputStream driveAngularVelocity;
 
 	public RobotContainer() {
 
@@ -92,20 +88,7 @@ public class RobotContainer {
 		NamedCommands.registerCommand("WheelSpinUp", pathPlannerCommands.pathSpinUp());
 		NamedCommands.registerCommand("Shoot", pathPlannerCommands.pathShoot());
 
-		if(Alliance.getAlliance() == AllianceColor.Red) {
-			driveAngularVelocity = driveSubsystem.getInputStream(
-			() -> driverController.a_Y(),
-			() -> driverController.a_X(),
-			() -> -driverController.a_Z()
-		)
-			.deadband(0.1)
-			.cubeRotationControllerAxis(true)
-			.cubeTranslationControllerAxis(true)
-			.scaleTranslation(0.8)
-			.scaleRotation(0.9)
-			.allianceRelativeControl(true);
-		} else {
-			driveAngularVelocity = driveSubsystem.getInputStream(
+		SwerveInputStream driveAngularVelocity = driveSubsystem.getInputStream(
 			() -> -driverController.a_Y(),
 			() -> -driverController.a_X(),
 			() -> -driverController.a_Z()
@@ -116,8 +99,6 @@ public class RobotContainer {
 			.scaleTranslation(0.8)
 			.scaleRotation(0.9)
 			.allianceRelativeControl(true);
-		}
-		
 
 		driveSubsystem.setDefaultCommand(
 			driveSubsystem.driveFieldOriented(
@@ -143,10 +124,6 @@ public class RobotContainer {
 				// cancels ALL DRIVING on driver controller
 			})
 		);
-
-		// driverController.b_6().onTrue(
-		// 	driveSubsystem.slowToggleCommand()
-		// );
 
 		driverController.b_Trigger().onTrue(
 			driveSubsystem.alignToHub()

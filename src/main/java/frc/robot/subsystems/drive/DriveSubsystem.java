@@ -76,6 +76,8 @@ public class DriveSubsystem extends SubsystemBase {
 	private static final Pose2d redHubPose = new Pose2d(Inches.of(468.56), Inches.of(158.32), new Rotation2d());
 	private static final Pose2d blueHubPose = new Pose2d(Inches.of(152.56), Inches.of(158.32), new Rotation2d());
 
+	private static Sendable driveSendable;
+
 	private static boolean slowDrive = false;
 
 	// Standard PID
@@ -192,7 +194,19 @@ public class DriveSubsystem extends SubsystemBase {
 		
 		SmartDashboard.putData("XPID", xTranslationPID);
 		SmartDashboard.putData("YPID", yTranslationPID);
-		SmartDashboard.putData("RPID", rotationPID);      
+		SmartDashboard.putData("RPID", rotationPID);  
+		
+		driveSendable = new Sendable() {
+			@Override 
+			public void initSendable(SendableBuilder builder) {
+				builder.addDoubleProperty("PoseX", () -> getPose().getX(), null);
+				builder.addDoubleProperty("PoseY", () -> getPose().getY(), null);
+				builder.addBooleanProperty("SlowToggle", () -> slowDrive, null);
+			}
+		};
+		SmartDashboard.putData("Drive", driveSendable);
+
+
 	}
 
 	public void setupPathPlanner() {
@@ -235,7 +249,6 @@ public class DriveSubsystem extends SubsystemBase {
 	@Override
 	public void periodic() {
 		updateOdometry();
-		initSendable();
 	}
 	
 	public void setIMUYaw(Rotation2d yaw) {
@@ -483,14 +496,4 @@ public class DriveSubsystem extends SubsystemBase {
 		
 	};
 
-	public void initSendable() {
-		SmartDashboard.putData("Drive", new Sendable() {
-			@Override 
-			public void initSendable(SendableBuilder builder) {
-				builder.addDoubleProperty("PoseX", () -> getPose().getX(), null);
-				builder.addDoubleProperty("PoseY", () -> getPose().getY(), null);
-				builder.addBooleanProperty("SlowToggle", () -> slowDrive, null);
-			}
-		});
-	}
 }
