@@ -15,30 +15,35 @@ public class ManipSubsystem extends SubsystemBase {
         spitterSubsystem = new SpitterSubsystem(drive);
         indexSubsystem = new IndexSubsystem(spitterSubsystem);
     }
-    /**Command that runs intaking
-     * 
-     * @return Prints Intaking then it intakes and waits 2 seconds
+
+    /**
+     * runs intake roller
      */
     public Command intake() {
         return runOnce(() -> System.out.println("Intaking..."))
         .andThen(intakeSubsystem.intake());
     }
 
+    /**
+     * moves intake arm to be vertical
+     */
     public Command stow() {
         return runOnce(() -> System.out.println("SSTOOOOOOOOWWWWWWWWWWWWWW"))
         .andThen(intakeSubsystem.stow())
         .andThen(runOnce(() -> System.out.println("WE ARE DONE WITH STOWING")));
     }
 
+    /**
+     * moves intake arm to be at the home limit
+     */
     public Command home() {
         return runOnce(() -> System.out.println("Returning to home"))
         .andThen(intakeSubsystem.goHome())
         .andThen(runOnce(() -> System.out.println("At home!")));
     }
 
-    /**Extends storage
-     * 
-     * @return Runs the extend storage command
+    /**
+     * moves the intake arm out
      */
     public Command intakeArmOut() {
         return runOnce(() -> System.out.println("WE HAVE BEGUN THE PROCESS OF EXTENDING"))
@@ -46,43 +51,51 @@ public class ManipSubsystem extends SubsystemBase {
         .andThen(runOnce(() -> System.out.println("WE ARE SO DONE WITH EXTENDING")));
     }
 
-    /**Spins the shooter wheel
-     * 
-     * @return Runs the Spit command from
+    /**
+     * Spins the shooter wheel
      */
     public Command spinUp() {
         // return spitterSubsystem.setSpitterSpeed()
         // .andThen(spitterSubsystem.shoot());
-        return spitterSubsystem.manualShoot();
+
+        return spitterSubsystem.shoot();
+
+        // return spitterSubsystem.manualShoot();
     }
 
-    /**moves the fuel forward and then takes it into the shooter
+    /**
      * 
-     * @return moves the index and then runs the intake motor on the shooter
+     * runs intake and fires the balls
      */
     public Command shoot() {
+        //AUTOSHOOT
         // return spitterSubsystem.setSpitterSpeed()
         // .andThen(indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1))
-        // .andThen(new ParallelCommandGroup        
+        // .andThen(new ParallelCommandGroup(
         //     intakeSubsystem.agitateFuel(),
         //     spitterSubsystem.shoot(),
         //     indexSubsystem.index(indexSubsystem.forwards)
         // ));
+
+        //MANUAL ADJUSTABLE SHOOT
         return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
         .andThen(new ParallelCommandGroup(
             intakeSubsystem.agitateFuel(),
-            spitterSubsystem.manualShoot(),
+            spitterSubsystem.shoot(),
             indexSubsystem.index(indexSubsystem.forwards)
         ));
-    }
 
-    public Command midReset() {
-        return spitterSubsystem.midReset();
+        //MANUAL SHOOT
+        // return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
+        // .andThen(new ParallelCommandGroup(
+        //     intakeSubsystem.agitateFuel(),
+        //     spitterSubsystem.manualShoot(),
+        //     indexSubsystem.index(indexSubsystem.forwards)
+        // ));
     }
-
-    /** reverses the intake to blast out balls from intake
-     * 
-     * @return Runs the extake command
+    
+    /** 
+     * reverses the intake to blast out balls from intake
      */
     public Command extake() {
         return new ParallelCommandGroup(
@@ -91,6 +104,9 @@ public class ManipSubsystem extends SubsystemBase {
         );
     }
 
+    /**
+     * pass within a close range
+     */
     public Command lowPass() {
         return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
         .andThen(new ParallelCommandGroup(
@@ -100,6 +116,9 @@ public class ManipSubsystem extends SubsystemBase {
         ));
     }
 
+    /**
+     * pass from a decent distance
+     */
     public Command midPass() {
         return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
         .andThen(new ParallelCommandGroup(
@@ -109,6 +128,9 @@ public class ManipSubsystem extends SubsystemBase {
         ));
     }
 
+    /**
+     * pass from far away
+     */
     public Command highPass() {
         return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
         .andThen(new ParallelCommandGroup(
@@ -138,7 +160,17 @@ public class ManipSubsystem extends SubsystemBase {
         return spitterSubsystem.downFRPSCommand();
     }
 
+    /**
+     * sets the spitter speed to spin up to based on distance from hub
+     */
     public Command setSpitterSpeed() {
         return spitterSubsystem.setSpitterSpeed();
+    }
+
+    /**
+     * resets the shoot back to (26, 38) for manual shoot
+     */
+    public Command midReset() {
+        return spitterSubsystem.midReset();
     }
 }

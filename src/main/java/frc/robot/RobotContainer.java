@@ -98,8 +98,7 @@ public class RobotContainer {
 			.cubeTranslationControllerAxis(true)
 			.scaleTranslation(0.8)
 			.scaleRotation(0.9)
-			.allianceRelativeControl(false); //TODO: TYPICALLY TRUE THIS COULD BE BAD OR REALLY GOOD
-
+			.allianceRelativeControl(false); // seems like it runs the same or better with this off
 		driveSubsystem.setDefaultCommand(
 			driveSubsystem.driveFieldOriented(
 				driveAngularVelocity
@@ -128,16 +127,14 @@ public class RobotContainer {
 	}
 
 	private void configManipControls() {
-		
+		// CURRENTLY AVAILABLE: 6, 11, slider
+
 		manipController.b_Trigger().whileTrue(
 			manipSubsystem.shoot()
 		);
 
-		manipController.b_11().onTrue(
-			Commands.runOnce(() -> {
-				manipSubsystem.getCurrentCommand().cancel(); // TODO: currently crashes bot
-				// cancels ALL manipING on manip controller
-			})
+		manipController.b_Hazard().onTrue(
+			manipSubsystem.stow()
 		);
 
 		manipController.b_3().whileTrue(
@@ -152,10 +149,6 @@ public class RobotContainer {
 			manipSubsystem.intakeArmOut()
 		);
 
-		manipController.b_12().onTrue(
-			manipSubsystem.midReset()
-		);
-
 		manipController.b_7().whileTrue(
 			manipSubsystem.lowPass()
 		);
@@ -168,8 +161,11 @@ public class RobotContainer {
 			manipSubsystem.extake()
 		);
 
-		manipController.b_Hazard().onTrue(
-			manipSubsystem.stow()
+		manipController.b_12().onTrue(
+			Commands.runOnce(() -> {
+				manipSubsystem.getCurrentCommand().cancel(); // TODO: currently crashes bot
+				// cancels ALL manipING on manip controller
+			})
 		);
 
 		manipController.p_Up().onTrue(
@@ -186,10 +182,6 @@ public class RobotContainer {
 
 		manipController.p_Left().onTrue(
 			manipSubsystem.downFRPSCommand()
-		);
-
-		manipController.b_6().onTrue(
-			manipSubsystem.setSpitterSpeed()
 		);
 
 	}
