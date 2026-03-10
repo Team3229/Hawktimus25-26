@@ -26,7 +26,7 @@ public class ManipSubsystem extends SubsystemBase {
 
     public Command stow() {
         return runOnce(() -> System.out.println("SSTOOOOOOOOWWWWWWWWWWWWWW"))
-        .andThen(intakeSubsystem.emergencyStow())
+        .andThen(intakeSubsystem.stow())
         .andThen(runOnce(() -> System.out.println("WE ARE DONE WITH STOWING")));
     }
 
@@ -51,7 +51,9 @@ public class ManipSubsystem extends SubsystemBase {
      * @return Runs the Spit command from
      */
     public Command spinUp() {
-        return spitterSubsystem.shoot();
+        // return spitterSubsystem.setSpitterSpeed()
+        // .andThen(spitterSubsystem.shoot());
+        return spitterSubsystem.manualShoot();
     }
 
     /**moves the fuel forward and then takes it into the shooter
@@ -59,30 +61,23 @@ public class ManipSubsystem extends SubsystemBase {
      * @return moves the index and then runs the intake motor on the shooter
      */
     public Command shoot() {
-        return spitterSubsystem.setSpitterSpeed()
-        .andThen(indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1))
+        // return spitterSubsystem.setSpitterSpeed()
+        // .andThen(indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1))
+        // .andThen(new ParallelCommandGroup        
+        //     intakeSubsystem.agitateFuel(),
+        //     spitterSubsystem.shoot(),
+        //     indexSubsystem.index(indexSubsystem.forwards)
+        // ));
+        return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
         .andThen(new ParallelCommandGroup(
             intakeSubsystem.agitateFuel(),
-            spitterSubsystem.shoot(),
+            spitterSubsystem.manualShoot(),
             indexSubsystem.index(indexSubsystem.forwards)
         ));
+    }
 
-        //     Command out = new Command() {
-        //         @Override
-        //         public void initialize() {
-        //         }
-                
-        //         @Override 
-        //         public void execute() {
-        //         System.out.println("is executing");
-
-        //         if(shooterIsReady()) {
-        //             System.out.println("shooter is ready and index should start");
-        //         }
-        //     }
-        // };
-        // out.addRequirements(this);
-        // return out;
+    public Command midReset() {
+        return spitterSubsystem.midReset();
     }
 
     /** reverses the intake to blast out balls from intake
@@ -90,10 +85,12 @@ public class ManipSubsystem extends SubsystemBase {
      * @return Runs the extake command
      */
     public Command extake() {
-        return runOnce(() -> intakeSubsystem.extake())
-        .andThen(indexSubsystem.index(indexSubsystem.reverse));
+        return new ParallelCommandGroup(
+            indexSubsystem.index(indexSubsystem.reverse),
+            intakeSubsystem.extake()
+        );
     }
-   
+
     public Command lowPass() {
         return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
         .andThen(new ParallelCommandGroup(

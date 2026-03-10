@@ -78,7 +78,7 @@ public class RobotContainer {
 	}
 
 	public void autoInit() {
-		driveSubsystem.zeroGyroWithAlliance();
+		driveSubsystem.zeroGyroCommand();
 	}
 
 	private void configDriveControls() {
@@ -98,7 +98,7 @@ public class RobotContainer {
 			.cubeTranslationControllerAxis(true)
 			.scaleTranslation(0.8)
 			.scaleRotation(0.9)
-			.allianceRelativeControl(true);
+			.allianceRelativeControl(false); //TODO: TYPICALLY TRUE THIS COULD BE BAD OR REALLY GOOD
 
 		driveSubsystem.setDefaultCommand(
 			driveSubsystem.driveFieldOriented(
@@ -111,11 +111,7 @@ public class RobotContainer {
 		);
 
 		driverController.b_11().onTrue(
-			driveSubsystem.zeroGyroWithAllianceCommand()
-		);
-
-		driverController.b_3().onTrue(
-			driveSubsystem.zeroGyroWithLimelight()
+			driveSubsystem.zeroGyroCommand()
 		);
 
 		driverController.b_Hazard().onTrue(
@@ -123,10 +119,6 @@ public class RobotContainer {
 				driveSubsystem.getCurrentCommand().cancel();
 				// cancels ALL DRIVING on driver controller
 			})
-		);
-
-		driverController.b_6().onTrue(
-			driveSubsystem.slowDrive()
 		);
 
 		driverController.b_Trigger().onTrue(
@@ -141,7 +133,7 @@ public class RobotContainer {
 			manipSubsystem.shoot()
 		);
 
-		manipController.b_Hazard().onTrue(
+		manipController.b_11().onTrue(
 			Commands.runOnce(() -> {
 				manipSubsystem.getCurrentCommand().cancel(); // TODO: currently crashes bot
 				// cancels ALL manipING on manip controller
@@ -160,9 +152,9 @@ public class RobotContainer {
 			manipSubsystem.intakeArmOut()
 		);
 
-		// manipController.b_12().onTrue(
-		// 	manipSubsystem.home()
-		// );
+		manipController.b_12().onTrue(
+			manipSubsystem.midReset()
+		);
 
 		manipController.b_7().whileTrue(
 			manipSubsystem.lowPass()
@@ -173,10 +165,10 @@ public class RobotContainer {
 		);
 
 		manipController.b_10().whileTrue(
-			manipSubsystem.highPass()
+			manipSubsystem.extake()
 		);
 
-		manipController.b_8().onTrue(
+		manipController.b_Hazard().onTrue(
 			manipSubsystem.stow()
 		);
 

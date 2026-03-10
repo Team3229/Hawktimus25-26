@@ -18,6 +18,7 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.drive.DriveSubsystem;
 
@@ -25,18 +26,14 @@ import static edu.wpi.first.units.Units.Amps;
 
 public class SpitterSubsystem extends SubsystemBase {
     private static DriveSubsystem driveSubsystem;
-    private static double requestedShooterVelocity = 25;
-    private static double requestedFeederVelocity = 35;
+    private static double requestedShooterVelocity = 26;
+    private static double requestedFeederVelocity = 38;
 
     // change PID (if needed)
     private static double kP = 0.1;
-    private static double kI = 0;
-    private static double kD = 0;
     private static double kV = 0.13;
 
     private static double fP = 0.3;
-    private static double fI = 0;
-    private static double fD = 0;
     private static double fV = 0.13;
 
     private static final int LS_CAN_ID = 10;
@@ -51,7 +48,7 @@ public class SpitterSubsystem extends SubsystemBase {
     private TalonFX feeder;
     private TalonFXConfiguration feederMotorConfig;
 
-    private static double sensorToMechanismRatio = 25;
+    private static double sensorToMechanismRatio = 2.5;
 
     private static final Current CURRENT_LIMIT = Amps.of(40);
 
@@ -78,8 +75,6 @@ public class SpitterSubsystem extends SubsystemBase {
             );
 
         LSMotorConfig.Slot0.kP = kP;
-        LSMotorConfig.Slot0.kI = kI;
-        LSMotorConfig.Slot0.kD = kD;
         LSMotorConfig.Slot0.kV = kV;
         
         LSMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -104,8 +99,6 @@ public class SpitterSubsystem extends SubsystemBase {
             );
 
         RSMotorConfig.Slot0.kP = kP;
-        RSMotorConfig.Slot0.kI = kI;
-        RSMotorConfig.Slot0.kD = kD;
         RSMotorConfig.Slot0.kV = kV;
         RSMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         rightSpitter.getConfigurator().apply(RSMotorConfig);
@@ -134,8 +127,6 @@ public class SpitterSubsystem extends SubsystemBase {
 		    );
         
         feederMotorConfig.Slot0.kP = fP;
-        feederMotorConfig.Slot0.kI = fI;
-        feederMotorConfig.Slot0.kD = fD;
         feederMotorConfig.Slot0.kV = fV;
         feederMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         feeder.getConfigurator().apply(feederMotorConfig);
@@ -143,11 +134,6 @@ public class SpitterSubsystem extends SubsystemBase {
 
     public Command shoot() {
         Command out = new Command() {
-            @Override
-            public void initialize() {
-
-            }
-            
             @Override
             public void execute() {
                 leftSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0).withFeedForward(0.12));
@@ -161,10 +147,7 @@ public class SpitterSubsystem extends SubsystemBase {
                 rightSpitter.setControl(new VelocityVoltage(0).withSlot(0));
                 feeder.setControl(new VelocityVoltage(0).withSlot(0));
             }
-            
         };
-
-     
 
         SmartDashboard.putData("Shooter", new Sendable() {
             @Override
@@ -184,19 +167,32 @@ public class SpitterSubsystem extends SubsystemBase {
         return out;
     }
 
+    public Command manualShoot() {
+        return passShoot(26, 38);
+    }
+
     public Command lowPass() {
-        return shoot(30, 75);
+        return passShoot(30, 70);
     }
 
     public Command midPass() {
-        return shoot(35, 80);
+        return passShoot(35, 80);
     }
 
     public Command highPass() {
-         return shoot(40, 85);
+         return passShoot(40, 90);
     }
 
-    public Command shoot(double srps, double frps) {
+    private void resetToMid() {
+        requestedShooterVelocity = 26;
+        requestedFeederVelocity = 38;
+    }
+
+    public Command midReset() {
+        return runOnce(() -> resetToMid());
+    }
+
+    public Command passShoot(double srps, double frps) {
         Command out = new Command() {
             @Override
             public void initialize() {
@@ -243,7 +239,7 @@ public class SpitterSubsystem extends SubsystemBase {
         if(requestedFeederVelocity == 0) {
             return false;
         } else {
-            return Math.abs(requestedFeederVelocity - feederVelocity) <= deadBand;
+            return Math.abs(0.5 * requestedFeederVelocity - feederVelocity) <= deadBand;
         }
     }
 
@@ -292,11 +288,11 @@ public class SpitterSubsystem extends SubsystemBase {
     }
 
     public void setFeederSpeed() {
-        requestedFeederVelocity = 0.5 * driveSubsystem.distanceFromHub() + 45;
+        requestedFeederVelocity = driveSubsystem.distanceFromHub() + 35;
     }
 
     public void setShooterSpeed() {
-        requestedShooterVelocity = 1.5 * driveSubsystem.distanceFromHub() + 17;
+        requestedShooterVelocity = 1.7 * driveSubsystem.distanceFromHub() + 15;
     }
 
     public Command setSpitterSpeed() {

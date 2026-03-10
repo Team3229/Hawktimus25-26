@@ -76,7 +76,6 @@ public class IndexSubsystem extends SubsystemBase {
         Command out = new Command() {
             @Override
             public void initialize() {
-                System.out.println("Indexing");
                 requestedSpeed = rps;
             }
 

@@ -16,7 +16,6 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.units.measure.Current;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
 
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -59,15 +58,15 @@ public class IntakeSubsystem extends SubsystemBase {
 	private static final int ARM_R_CAN_ID = 16; 
 	private static final int ARM_L_CAN_ID = 5; 
 	
-	private static final int HOME_LIMIT_PORT = 1; 
-	private static final int EXTEND_LIMIT_PORT = 0;
+	private static final int HOME_LIMIT_PORT = 0; 
+	private static final int EXTEND_LIMIT_PORT = 1;
 	
 	private static final int ROD_CAN_ID = 17; 
 	
 	private static final Current CURRENT_LIMIT = Amps.of(40);
 	
 	public static final Angle HOME_ANGLE = Rotations.of(0);
-	public static final Angle STOW_ANGLE = Rotations.of(0.097);
+	public static final Angle STOW_ANGLE = Rotations.of(0.06); // was 0.097
 	public static final Angle COLLECTION_POINT = Rotations.of(0.347);
 	
 	private static double sensorToMechanismRatio = 25;
@@ -75,9 +74,9 @@ public class IntakeSubsystem extends SubsystemBase {
 	private Angle requestedAngle;
 	private double requestedVelocity;
 	
-	private static final double aP = 7.5;
+	private static final double aP = 8.5;
 	private static final double aI = 0; 
-	private static final double aD = 0.1; 
+	private static final double aD = 0.00; 
 	private static final double aV = 0.12;
 	private static final double aA = 0.01;
 	private static final double aS = 0.25;
@@ -88,8 +87,8 @@ public class IntakeSubsystem extends SubsystemBase {
 	private static final double rD = 0.0; 
 	private static final double rV = 0.13; 
 	
-	private static final double ROD_CW_SPEED = 80; 
-	private static final double ROD_CCW_SPEED = -80;
+	private static final double ROD_CW_SPEED = 100; 
+	private static final double ROD_CCW_SPEED = -100;
 
 	private static final Angle angleDeadBand = Rotations.of(0.01);
 	
@@ -234,20 +233,16 @@ public class IntakeSubsystem extends SubsystemBase {
 			@Override
 			public void initialize() {
 				requestedAngle = setpoint;
-				System.out.println("Rotate initialize print");
 			}
 
 			@Override
 			public void execute() {
-				System.out.println("Rotating to " + setpoint.toShortString());
-
-				armMotorLeft.setControl(new MotionMagicDutyCycle(setpoint).withSlot(0));
+				armMotorLeft.setControl(rotateRequest.withPosition(setpoint));
 
 			}
 
 			@Override
 			public boolean isFinished() {
-				System.out.println("Checking done for rotate!!!!!!!!!!!!!!!!!!!!!!!!!");
 				return armIsReady();
 			}
 
@@ -274,11 +269,11 @@ public class IntakeSubsystem extends SubsystemBase {
 			public void execute() {
 				rodMotor.setControl(new VelocityVoltage(speedSetpoint).withSlot(0));
 				
-				if(speedSetpoint < 0) {
-					armMotorLeft.setControl(new MotionMagicDutyCycle(COLLECTION_POINT).withSlot(0));
+				if(speedSetpoint != 0 && extendLimitSwitch() == false) {
+					// armMotorLeft.setControl(rotateRequest.withPosition(COLLECTION_POINT.plus(Rotations.of(0))));
+					armMotorLeft.setControl(new VelocityVoltage(0.2).withSlot(0));
 				}
 
-				System.out.println("rod is being spun");
 			}
 			@Override
 			public void end(boolean interrupted) {
@@ -288,6 +283,7 @@ public class IntakeSubsystem extends SubsystemBase {
 		out.addRequirements(this);
 		return out;
 	}
+
 	/**
 	* creates a command to collect the fuel by spinning the rod
 	* 
@@ -316,17 +312,21 @@ public class IntakeSubsystem extends SubsystemBase {
 		return rotateTo(COLLECTION_POINT);
 	}
 
-	/**
-	 * Command to return to a safe angle after hitting limit
-	 */
-	public Command emergencyStow() {
-		return rotateTo(STOW_ANGLE);
+	public Command stopSpin() {
+		return rodSpin(0);
 	}
 
+	/**
+	 * Command to return to a safe angle 
+	 */
+	public Command stow() {
+		return rotateTo(STOW_ANGLE);
+	}
 
 	public Command goHome() {
 		return rotateTo(HOME_ANGLE);
 	}
+
 	/**
 	 * creates a command that pulls the intake arm back to the
 	 * home point in order to move the fuel in storage.
