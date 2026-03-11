@@ -10,7 +10,6 @@ import static edu.wpi.first.units.Units.Milliseconds;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Inches;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -21,6 +20,8 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.measure.Angle;
@@ -73,8 +74,14 @@ public class DriveSubsystem extends SubsystemBase {
     private static final Pose2d startingBluePose = new Pose2d(2, 4, new Rotation2d(0));
     private static final Pose2d startingRedPose = new Pose2d(2, 4, new Rotation2d(Math.PI));
 
-	private static final Pose2d redHubPose = new Pose2d(Inches.of(468.56), Inches.of(158.32), new Rotation2d());
-	private static final Pose2d blueHubPose = new Pose2d(Inches.of(152.56), Inches.of(158.32), new Rotation2d());
+	// private static final Pose2d redHubPose = new Pose2d(Inches.of(468.56), Inches.of(158.32), new Rotation2d());
+	// private static final Pose2d blueHubPose = new Pose2d(Inches.of(152.56), Inches.of(158.32), new Rotation2d());
+
+	public static final Translation2d BLUE_HUB_CENTER = new Translation2d(4.6116, 4.0213);
+	public static final Translation2d BLUE_HUB_BACK = new Translation2d(5.2342, 4.0213);
+
+	public static final Translation2d RED_HUB_CENTER = new Translation2d(11.9014, 4.0213);
+	public static final Translation2d RED_HUB_BACK = new Translation2d(11.3044, 4.0213);
 
 	private static Sendable driveSendable;
 
@@ -286,9 +293,27 @@ public class DriveSubsystem extends SubsystemBase {
 			0, 0, 0, 0
 		);
 
+		LimelightHelpers.PoseEstimate estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-" + side);
+
+		if (estimate != null && estimate.tagCount > 0) {
+			
+			double tagID = LimelightHelpers.getFiducialID("limelight-" + side);
+
+				Translation3d aprilTagPosition = LimelightHelpers.getTargetPose3d_RobotSpace("limelight-" + side).getTranslation();
+
+				if (Math.hypot(aprilTagPosition.getX(), aprilTagPosition.getZ()) <= 3.5) {
+					
+				swerveDrive.addVisionMeasurement(new Pose2d(estimate.pose.getX(), estimate.pose.getY(), getIMUYaw()), estimate.timestampSeconds);
+					
+				}
+				
+			}
+
+      }
+
     }
 
-  }
+  
 
 
     /**
@@ -441,31 +466,16 @@ public class DriveSubsystem extends SubsystemBase {
 		return runOnce(() -> slowToggle());
 	}
 	
-	// public Command slowDrive(){
-	// 	Command out = new Command() {
-	// 		@Override 
-	// 		public void initialize() {
-	// 			MAX_VELOCITY = MetersPerSecond.of(2.5);
-	// 		}
 
-	// 		@Override
-	// 		public void end(boolean interrupted) {
-	// 			MAX_VELOCITY = MetersPerSecond.of(5);
-	// 		}
-	// 	};
-	// 	out.addRequirements(this);
-	// 	return out;
-	// }
-
-	public Pose2d getHubPose() {
-		return Alliance.getAlliance().equals(AllianceColor.Red) ? redHubPose : blueHubPose;
+	public Translation2d getHubTranslation() {
+		return Alliance.getAlliance().equals(AllianceColor.Red) ? RED_HUB_CENTER : BLUE_HUB_CENTER;
 	}
 
 	/*
 	* Returns the angle from the robot to the hub (in radians)
 	*/
 	public double angleFromHub() {
-		Pose2d hubPose = getHubPose();
+		Translation2d hubPose = getHubTranslation();
 		return Math.atan2(hubPose.getY() - getPose().getY(), hubPose.getX() - getPose().getX());
 	}
 	
@@ -473,9 +483,7 @@ public class DriveSubsystem extends SubsystemBase {
 	* Returns the distance from the robot to the hub 
 	*/
 	public double distanceFromHub() {
-		var relativePose = getPose().relativeTo(getHubPose());
-		// System.out.println(Math.sqrt(Math.pow(getHubPose().getX() - getPose().getX(), 2) + Math.pow(getHubPose().getY() - getPose().getY(), 2)));
-		return Math.sqrt(Math.pow(relativePose.getX(), 2) + Math.pow(relativePose.getY(), 2));
+		return getPose().getTranslation().getDistance(getHubTranslation());
 	}
 	
 	/**Rotates the bot to be facing the hub*/

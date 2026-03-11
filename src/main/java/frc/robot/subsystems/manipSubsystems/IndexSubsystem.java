@@ -44,7 +44,7 @@ public class IndexSubsystem extends SubsystemBase {
     //change indexSpeed
     
     // variables are halved when ran for some reason :(
-    public final int forwards = 30;
+    public final int forwards = 40;
     public final int reverse = -20;
 
     public IndexSubsystem(SpitterSubsystem spit) {

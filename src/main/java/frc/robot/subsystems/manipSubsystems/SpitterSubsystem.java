@@ -11,8 +11,14 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.configs.VoltageConfigs;
 
 import com.ctre.phoenix6.CANBus;
+
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
+import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.util.sendable.Sendable;
+
+import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -32,7 +38,7 @@ public class SpitterSubsystem extends SubsystemBase {
     private static double kP = 0.1;
     private static double kV = 0.13;
 
-    private static double fP = 0.3;
+    private static double fP = 0.1;
     private static double fV = 0.13;
 
     private static final int LS_CAN_ID = 10;
@@ -50,6 +56,27 @@ public class SpitterSubsystem extends SubsystemBase {
     private static double sensorToMechanismRatio = 2.5;
 
     private static final Current CURRENT_LIMIT = Amps.of(40);
+
+    public record SpitterParams(double srps, double frps, double timeOfFlight) {}
+
+    public static final InterpolatingTreeMap<Double, SpitterParams> SPITTER_MAP = new InterpolatingTreeMap<>(
+        InverseInterpolator.forDouble(), 
+        (start, end, t) -> new SpitterParams(
+            MathUtil.interpolate(start.srps, end.srps, t), 
+            MathUtil.interpolate(start.frps, end.frps, t), 
+            MathUtil.interpolate(start.timeOfFlight, end.timeOfFlight, t)
+        )
+    );
+
+    static {
+        // SPITTER_MAP.put(1.782, new SpitterParams(1, 1, 1));
+        SPITTER_MAP.put(2.745, new SpitterParams(28, 40, 1));
+        // SPITTER_MAP.put(3.6576, new SpitterParams());
+        // SPITTER_MAP.put(4.5720, new SpitterParams());
+        // SPITTER_MAP.put(5.4864, new SpitterParams());
+    }
+
+    private static Sendable spitterSendable;
 
     public SpitterSubsystem(DriveSubsystem drive) {
         driveSubsystem = drive;
@@ -119,16 +146,31 @@ public class SpitterSubsystem extends SubsystemBase {
                     .withPeakForwardVoltage(12)
                     .withPeakReverseVoltage(-12)
                     .withSupplyVoltageTimeConstant(0)
-            )
-            .withFeedback(
-                new FeedbackConfigs()
-                    .withSensorToMechanismRatio(sensorToMechanismRatio)
-		    );
+            );
+            // .withFeedback(
+            //     new FeedbackConfigs()
+            //         .withSensorToMechanismRatio(sensorToMechanismRatio)
+		    // );
         
         feederMotorConfig.Slot0.kP = fP;
         feederMotorConfig.Slot0.kV = fV;
         feederMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         feeder.getConfigurator().apply(feederMotorConfig);
+
+        spitterSendable = new Sendable() {
+            @Override
+            public void initSendable(SendableBuilder builder) {
+                builder.addDoubleProperty("LSpitterVelocity", () -> leftSpitter.getVelocity().getValueAsDouble(), null);
+                builder.addDoubleProperty("RSpitterVelocity", () -> rightSpitter.getVelocity().getValueAsDouble(), null);
+                builder.addDoubleProperty("KickerVelocity", () -> feeder.getVelocity().getValueAsDouble(), null);
+                builder.addDoubleProperty("SRPS", () -> requestedShooterVelocity, null);
+                builder.addDoubleProperty("FRPS", () -> requestedFeederVelocity, null);
+                builder.addBooleanProperty("Ready to Shoot", () -> shooterIsReady(), null);
+                builder.addBooleanProperty("Feeder is ready", () -> feederIsReady(), null);
+                
+            };
+        };
+		SmartDashboard.putData("Spitter", spitterSendable);
     }
 
     public Command shoot() {
@@ -148,19 +190,6 @@ public class SpitterSubsystem extends SubsystemBase {
             }
         };
 
-        SmartDashboard.putData("Shooter", new Sendable() {
-            @Override
-            public void initSendable(SendableBuilder builder) {
-                builder.addDoubleProperty("LSpitterVelocity", () -> leftSpitter.getVelocity().getValueAsDouble(), null);
-                builder.addDoubleProperty("RSpitterVelocity", () -> rightSpitter.getVelocity().getValueAsDouble(), null);
-                builder.addDoubleProperty("KickerVelocity", () -> feeder.getVelocity().getValueAsDouble(), null);
-                builder.addDoubleProperty("SRPS", () -> requestedShooterVelocity, null);
-                builder.addDoubleProperty("FRPS", () -> requestedFeederVelocity, null);
-                builder.addBooleanProperty("Ready to Shoot", () -> shooterIsReady(), null);
-                builder.addBooleanProperty("Is a Fed", () -> feederIsReady(), null);
-                
-            }
-        });
         out.addRequirements(this);
 
         return out;
@@ -238,7 +267,7 @@ public class SpitterSubsystem extends SubsystemBase {
         if(requestedFeederVelocity == 0) {
             return false;
         } else {
-            return Math.abs(0.5 * requestedFeederVelocity - feederVelocity) <= deadBand;
+            return Math.abs(requestedFeederVelocity - feederVelocity) <= deadBand;
         }
     }
 
@@ -286,18 +315,19 @@ public class SpitterSubsystem extends SubsystemBase {
         });
     }
 
-    public void setFeederSpeed() {
-        requestedFeederVelocity = driveSubsystem.distanceFromHub() + 35;
-    }
+    public void setFeederSpeed(double distanceMeters) {
+		requestedFeederVelocity = SPITTER_MAP.get(distanceMeters).frps();
+	}
 
-    public void setShooterSpeed() {
-        requestedShooterVelocity = 1.7 * driveSubsystem.distanceFromHub() + 15;
+    public void setShooterSpeed(double distanceMeters) {
+        requestedShooterVelocity = SPITTER_MAP.get(distanceMeters).srps();
     }
 
     public Command setSpitterSpeed() {
         return runOnce(() -> {
-            setFeederSpeed();   
-            setShooterSpeed();
+            double distanceFromHub = driveSubsystem.distanceFromHub();
+            setFeederSpeed(distanceFromHub);   
+            setShooterSpeed(distanceFromHub);
             System.out.println("spitter speed has been set to " + requestedShooterVelocity + " feeder speed has been set to " + requestedFeederVelocity);
         });
     }
