@@ -3,6 +3,7 @@ package frc.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
@@ -20,10 +21,12 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -37,6 +40,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.hawklibraries.utilities.Alliance;
@@ -49,6 +53,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+
+import org.dyn4j.geometry.Transform;
 
 import swervelib.SwerveDrive;
 import swervelib.SwerveInputStream;
@@ -85,7 +91,11 @@ public class DriveSubsystem extends SubsystemBase {
 
 	private static Sendable driveSendable;
 
-	private static boolean slowDrive = false;
+	private static Transform2d SPITTER_OFFSET = new Transform2d(0, Units.inchesToMeters(-10), Rotation2d.k180deg);
+
+	private static boolean hubAlign = false;
+
+	public double distanceToTarget; 
 
 	// Standard PID
     private static final PIDConstants TRANSLATION_CONSTANTS =
@@ -208,7 +218,7 @@ public class DriveSubsystem extends SubsystemBase {
 			public void initSendable(SendableBuilder builder) {
 				builder.addDoubleProperty("PoseX", () -> getPose().getX(), null);
 				builder.addDoubleProperty("PoseY", () -> getPose().getY(), null);
-				builder.addBooleanProperty("SlowToggle", () -> slowDrive, null);
+				builder.addBooleanProperty("Align to Hub", () -> hubAlign, null);
 				builder.addDoubleProperty("Distance from hub", () -> distanceFromHub(), null);
 			}
 		};
@@ -314,8 +324,6 @@ public class DriveSubsystem extends SubsystemBase {
 
     }
 
-  
-
 
     /**
 	 * Resets odometry to the given pose. Gyro angle and module positions do not
@@ -342,8 +350,29 @@ public class DriveSubsystem extends SubsystemBase {
 
 	public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
 		return run(() -> {
+			if(hubAlign) {
+				// overrides velocity on the z axis to align to the hub
+				Pose2d currentPose = swerveDrive.getPose();
+				ChassisSpeeds currentSpeed = swerveDrive.getFieldVelocity();
+				
+				Translation2d robotTranslation = currentPose.getTranslation();
+				Translation2d spitterTranslation = robotTranslation.rotateBy(Rotation2d.k180deg); // our spitter is on the back of the bot
+				
+				Translation2d botVelocity = 
+					new Translation2d(
+						currentSpeed.vxMetersPerSecond,
+						currentSpeed.vyMetersPerSecond
+					);
+				
+				Translation2d tangentialVelocity = 
+					new Translation2d(
+						-currentSpeed.omegaRadiansPerSecond * SPITTER_OFFSET.getY(),
+						currentSpeed.omegaRadiansPerSecond * SPITTER_OFFSET.getX()
+					);
+			}
 			// swerveDrive.driveFieldOriented(velocity.get()); //Field relative is relying on odemtry instead of IMUYaw
 			swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(velocity.get(), getIMUYaw()));
+			distanceToTarget = distanceFromHub();
 		}).ignoringDisable(false);
 	}
 
@@ -382,12 +411,6 @@ public class DriveSubsystem extends SubsystemBase {
 	public Command zeroGyroCommand() {
 		return runOnce(() -> zeroGyro());
 	}
-
-	// public Command zeroGyroWithAllianceCommand() {
-	// 	return runOnce(
-	// 		this::zeroGyroWithAlliance
-	// 	);
-	// }
 
 	/**
 	 * Zeros the gyro with the lime light based on 2d april tags
@@ -452,22 +475,7 @@ public class DriveSubsystem extends SubsystemBase {
 				() -> xTranslationPID.atGoal() && yTranslationPID.atGoal() && rotationPID.atGoal()
 			);
     }
-
-	public void slowToggle() {
-		if(slowDrive == true) {
-			slowDrive = false;
-			MAX_VELOCITY.times(2);
-		} else {
-			slowDrive = true;
-			MAX_VELOCITY.div(2);
-		}
-	}
-
-	public Command slowToggleCommand() {
-		return runOnce(() -> slowToggle());
-	}
 	
-
 	public Translation2d getHubTranslation() {
 		return Alliance.getAlliance().equals(AllianceColor.Red) ? RED_HUB_CENTER : BLUE_HUB_CENTER;
 	}
@@ -483,27 +491,15 @@ public class DriveSubsystem extends SubsystemBase {
 	/*
 	* Returns the distance from the robot to the hub 
 	*/
-	public double distanceFromHub() {
+	private double distanceFromHub() {
 		return getPose().getTranslation().getDistance(getHubTranslation());
 	}
 	
-	/**Rotates the bot to be facing the hub*/
-    public Command alignToHub() {
-		Command out = new Command() {
-			@Override
-			public void execute() {
-				driveToPose(() -> {
-					return new Pose2d(
-						getPose().getX(),
-						getPose().getY(),
-						new Rotation2d(angleFromHub())
-					);
-				});
-			};
-		};
-
-		return out;
-		
-	};
+	/**
+	 * Toggles the bot to align to the hub 
+	 */
+	public Command toggleHubAlign() {
+		return Commands.runOnce(() -> hubAlign = !hubAlign);
+	}
 
 }

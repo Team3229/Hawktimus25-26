@@ -288,18 +288,10 @@ public class SpitterSubsystem extends SubsystemBase {
     }
 
     public void setSpitterSpeeds() {
-        double distanceFromHub = driveSubsystem.distanceFromHub();
+        double distanceFromHub = driveSubsystem.distanceToTarget;
         setFeederSpeed(distanceFromHub);   
         setShooterSpeed(distanceFromHub);
     }
-
-    // public Command setSpitterSpeed() {
-    //     return runOnce(() -> {
-    //         double distanceFromHub = driveSubsystem.distanceFromHub();
-    //         setFeederSpeed(distanceFromHub);   
-    //         setShooterSpeed(distanceFromHub);
-    //     });
-    // }
 
 }
  

@@ -99,6 +99,7 @@ public class RobotContainer {
 			.scaleTranslation(0.8)
 			.scaleRotation(0.9)
 			.allianceRelativeControl(false); // seems like it runs the same or better with this off
+			
 		driveSubsystem.setDefaultCommand(
 			driveSubsystem.driveFieldOriented(
 				driveAngularVelocity
@@ -121,7 +122,7 @@ public class RobotContainer {
 		);
 
 		driverController.b_Trigger().onTrue(
-			driveSubsystem.alignToHub()
+			driveSubsystem.toggleHubAlign()
 		);
 
 	}
