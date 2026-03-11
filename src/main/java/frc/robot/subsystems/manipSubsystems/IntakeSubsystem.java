@@ -60,7 +60,7 @@ public class IntakeSubsystem extends SubsystemBase {
 	
 	private static final int HOME_LIMIT_PORT = 0; 
 	private static final int EXTEND_LIMIT_PORT = 1;
-	
+
 	private static final int ROD_CAN_ID = 17; 
 	
 	private static final Current CURRENT_LIMIT = Amps.of(40);
@@ -91,6 +91,8 @@ public class IntakeSubsystem extends SubsystemBase {
 	private static final double ROD_CCW_SPEED = -100;
 
 	private static final Angle angleDeadBand = Rotations.of(0.01);
+
+	private static Sendable intakeSendable;
 	
 	public IntakeSubsystem() {
 		super();
@@ -165,7 +167,7 @@ public class IntakeSubsystem extends SubsystemBase {
 				.withPeakForwardVoltage(12)
 				.withPeakReverseVoltage(-12)
 				.withSupplyVoltageTimeConstant(0)
-        );
+		);
 
 		armMotorConfig2.Slot0.kP = aP;
 		armMotorConfig2.Slot0.kI = aI;
@@ -188,20 +190,20 @@ public class IntakeSubsystem extends SubsystemBase {
 
 		rodMotorConfig = new TalonFXConfiguration()
 		.withMotorOutput(
-				new MotorOutputConfigs()
-						.withNeutralMode(NeutralModeValue.Coast)
-			)
-			.withCurrentLimits(
-				new CurrentLimitsConfigs()
-					.withStatorCurrentLimit(CURRENT_LIMIT)
-					.withStatorCurrentLimitEnable(true)
-			)
-			.withVoltage(
-                new VoltageConfigs()
-                    .withPeakForwardVoltage(12)
-                    .withPeakReverseVoltage(-12)
-                    .withSupplyVoltageTimeConstant(0)
-            );
+			new MotorOutputConfigs()
+				.withNeutralMode(NeutralModeValue.Coast)
+		)
+		.withCurrentLimits(
+			new CurrentLimitsConfigs()
+				.withStatorCurrentLimit(CURRENT_LIMIT)
+				.withStatorCurrentLimitEnable(true)
+		)
+		.withVoltage(
+			new VoltageConfigs()
+				.withPeakForwardVoltage(12)
+				.withPeakReverseVoltage(-12)
+				.withSupplyVoltageTimeConstant(0)
+		);
 
 		rodMotorConfig.Slot0.kP = rP;
 		rodMotorConfig.Slot0.kI = rI;
@@ -225,6 +227,23 @@ public class IntakeSubsystem extends SubsystemBase {
 
 		setHome();
 
+		intakeSendable = new Sendable() {
+		@Override 
+		public void initSendable(SendableBuilder builder) {
+			builder.addDoubleProperty("PositionL", () -> armMotorLeft.getPosition().getValueAsDouble(), null);
+			builder.addDoubleProperty("PositionR", () -> armMotorRight.getPosition().getValueAsDouble(), null);
+			builder.addDoubleProperty("VelocityL", () -> armMotorLeft.getVelocity().getValueAsDouble(), null);
+			builder.addDoubleProperty("VelocityR", () -> armMotorRight.getVelocity().getValueAsDouble(), null);
+			builder.addDoubleProperty("VoltageL", ()-> armMotorLeft.getMotorVoltage().getValueAsDouble(), null); 
+			builder.addDoubleProperty("VoltageR", ()-> armMotorRight.getMotorVoltage().getValueAsDouble(), null); 
+			builder.addBooleanProperty("Arm is ready", () -> armIsReady(), null);
+			builder.addBooleanProperty("Intaking", () -> rodIsReady(), null);
+			builder.addDoubleProperty("VelocityRod", () -> rodMotor.getVelocity().getValueAsDouble(), null);
+			builder.addBooleanProperty("Intaking", ()-> rodIsReady(), null); 
+			}
+		};
+		SmartDashboard.putData("Intake", intakeSendable);
+
 	}
 	
 	/** rotates the arm to the angle, finishes when armIsReady returns true */
@@ -238,7 +257,6 @@ public class IntakeSubsystem extends SubsystemBase {
 			@Override
 			public void execute() {
 				armMotorLeft.setControl(rotateRequest.withPosition(setpoint));
-
 			}
 
 			@Override
@@ -251,8 +269,6 @@ public class IntakeSubsystem extends SubsystemBase {
 			    armMotorLeft.set(0);
 			}
 		};
-
-		initSendable();
 
 		out.addRequirements(this);
 		return out;
@@ -310,10 +326,6 @@ public class IntakeSubsystem extends SubsystemBase {
 	 */
 	public Command extendIntake() {
 		return rotateTo(COLLECTION_POINT);
-	}
-
-	public Command stopSpin() {
-		return rodSpin(0);
 	}
 
 	/**
@@ -388,25 +400,6 @@ public class IntakeSubsystem extends SubsystemBase {
 
 	private boolean homeLimitSwitch() {
 		return homeLimitSwitch.get();
-	}
-
-	public void initSendable() {
-		SmartDashboard.putData("Intake", new Sendable() {
-			@Override 
-			public void initSendable(SendableBuilder builder) {
-				builder.addDoubleProperty("PositionL", () -> armMotorLeft.getPosition().getValueAsDouble(), null);
-				builder.addDoubleProperty("PositionR", () -> armMotorRight.getPosition().getValueAsDouble(), null);
-				builder.addDoubleProperty("VelocityL", () -> armMotorLeft.getVelocity().getValueAsDouble(), null);
-				builder.addDoubleProperty("VelocityR", () -> armMotorRight.getVelocity().getValueAsDouble(), null);
-				builder.addDoubleProperty("VoltageL", ()-> armMotorLeft.getMotorVoltage().getValueAsDouble(), null); 
-				builder.addDoubleProperty("VoltageR", ()-> armMotorRight.getMotorVoltage().getValueAsDouble(), null); 
-				builder.addBooleanProperty("Arm is ready", () -> armIsReady(), null);
-				builder.addBooleanProperty("Intaking", () -> rodIsReady(), null);
-				builder.addDoubleProperty("Velocity", () -> rodMotor.getVelocity().getValueAsDouble(), null);
-				builder.addBooleanProperty("Intaking", ()-> rodIsReady(), null); 
-
-				}
-		});
 	}
 
 	public void setHome() {

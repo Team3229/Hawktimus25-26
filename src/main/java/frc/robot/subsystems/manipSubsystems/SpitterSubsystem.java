@@ -33,6 +33,7 @@ public class SpitterSubsystem extends SubsystemBase {
     private static DriveSubsystem driveSubsystem;
     private static double requestedShooterVelocity = 26;
     private static double requestedFeederVelocity = 38;
+    private static double deadBand = 2;
 
     // change PID (if needed)
     private static double kP = 0.1;
@@ -194,63 +195,26 @@ public class SpitterSubsystem extends SubsystemBase {
 
         return out;
     }
-
-    public Command manualShoot() {
-        return passShoot(26, 38);
+    
+    public Command passShoot(double srps, double frps) {
+        requestedShooterVelocity = srps;
+        requestedFeederVelocity = frps;
+        return shoot();
     }
 
     public Command lowPass() {
-        return passShoot(30, 70);
+        return passShoot(26, 38);
     }
 
     public Command midPass() {
-        return passShoot(35, 80);
+        return passShoot(35, 50);
     }
 
     public Command highPass() {
-         return passShoot(40, 90);
-    }
-
-    private void resetToMid() {
-        requestedShooterVelocity = 26;
-        requestedFeederVelocity = 38;
-    }
-
-    public Command midReset() {
-        return runOnce(() -> resetToMid());
-    }
-
-    public Command passShoot(double srps, double frps) {
-        Command out = new Command() {
-            @Override
-            public void initialize() {
-                requestedShooterVelocity = srps;
-                requestedFeederVelocity = frps;
-            }
-            
-            @Override
-            public void execute() {
-                leftSpitter.setControl(new VelocityVoltage(srps).withSlot(0));
-                rightSpitter.setControl(new VelocityVoltage(srps).withSlot(0));
-                feeder.setControl(new VelocityVoltage(frps).withSlot(0));
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                leftSpitter.setControl(new VelocityVoltage(0).withSlot(0));
-                rightSpitter.setControl(new VelocityVoltage(0).withSlot(0));
-                feeder.setControl(new VelocityVoltage(0).withSlot(0));
-            }
-            
-        };
-
-        out.addRequirements(this);
-
-        return out;
+         return passShoot(40, 60);
     }
 
     public boolean shooterIsReady() {
-        double deadBand = 2;
         double leftVelocity = leftSpitter.getVelocity().getValueAsDouble();
         double rightVelocity = rightSpitter.getVelocity().getValueAsDouble();
         if(requestedShooterVelocity == 0) {
@@ -262,7 +226,6 @@ public class SpitterSubsystem extends SubsystemBase {
     }
    
     public boolean feederIsReady() {
-        double deadBand = 2;
         double feederVelocity = feeder.getVelocity().getValueAsDouble();
         if(requestedFeederVelocity == 0) {
             return false;
@@ -278,7 +241,7 @@ public class SpitterSubsystem extends SubsystemBase {
     public Command upSRPSCommand() {
         return runOnce(() -> {
             upSRPS(); 
-            System.out.println("WE UPPED SRPS TO: " + requestedShooterVelocity);
+            System.out.println("We lowered SRPS: " + requestedShooterVelocity);
         });
     }
 
@@ -289,7 +252,7 @@ public class SpitterSubsystem extends SubsystemBase {
     public Command downSRPSCommand() {
         return runOnce(() -> {
             downSRPS(); 
-            System.out.println("WE lowered SRSPS to:" + requestedShooterVelocity);
+            System.out.println("WE lowered SRPS to: " + requestedShooterVelocity);
         });
     }
 
@@ -300,7 +263,7 @@ public class SpitterSubsystem extends SubsystemBase {
     public Command upFRPSCommand() { 
         return runOnce(() -> {
             upFRPS(); 
-            System.out.println("WE raised FRSPS to:" + requestedFeederVelocity);
+            System.out.println("WE raised FRPS to: " + requestedFeederVelocity);
         });
     }
 
@@ -311,7 +274,7 @@ public class SpitterSubsystem extends SubsystemBase {
     public Command downFRPSCommand() {
         return runOnce(() -> {
             downFRPS(); 
-            System.out.println("WE lowered FRSPS to:" + requestedFeederVelocity);
+            System.out.println("WE lowered FRPS to: " + requestedFeederVelocity);
         });
     }
 

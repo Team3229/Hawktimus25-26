@@ -297,6 +297,7 @@ public class DriveSubsystem extends SubsystemBase {
 
 		if (estimate != null && estimate.tagCount > 0) {
 			
+			@SuppressWarnings("unused")
 			double tagID = LimelightHelpers.getFiducialID("limelight-" + side);
 
 				Translation3d aprilTagPosition = LimelightHelpers.getTargetPose3d_RobotSpace("limelight-" + side).getTranslation();

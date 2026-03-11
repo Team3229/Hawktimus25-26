@@ -167,10 +167,4 @@ public class ManipSubsystem extends SubsystemBase {
         return spitterSubsystem.setSpitterSpeed();
     }
 
-    /**
-     * resets the shoot back to (26, 38) for manual shoot
-     */
-    public Command midReset() {
-        return spitterSubsystem.midReset();
-    }
 }
