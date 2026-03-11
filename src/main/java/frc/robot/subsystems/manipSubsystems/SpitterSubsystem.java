@@ -288,7 +288,7 @@ public class SpitterSubsystem extends SubsystemBase {
 
     public Command setSpitterSpeed() {
         return runOnce(() -> {
-            double distanceFromHub = driveSubsystem.distanceFromHub();
+            double distanceFromHub = driveSubsystem.distanceToTarget;
             setFeederSpeed(distanceFromHub);   
             setShooterSpeed(distanceFromHub);
             System.out.println("spitter speed has been set to " + requestedShooterVelocity + " feeder speed has been set to " + requestedFeederVelocity);
