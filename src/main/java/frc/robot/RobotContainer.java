@@ -98,7 +98,8 @@ public class RobotContainer {
 			.cubeTranslationControllerAxis(true)
 			.scaleTranslation(0.8)
 			.scaleRotation(0.9)
-			.allianceRelativeControl(false); // seems like it runs the same or better with this off
+			.allianceRelativeControl(true);
+			
 		driveSubsystem.setDefaultCommand(
 			driveSubsystem.driveFieldOriented(
 				driveAngularVelocity
@@ -120,8 +121,8 @@ public class RobotContainer {
 			})
 		);
 
-		driverController.b_Trigger().onTrue(
-			driveSubsystem.alignToHub()
+		driverController.b_Trigger().whileTrue(
+			driveSubsystem.toggleHubAlign()
 		);
 
 	}
@@ -147,14 +148,6 @@ public class RobotContainer {
 
 		manipController.b_5().onTrue(
 			manipSubsystem.intakeArmOut()
-		);
-
-		manipController.b_7().whileTrue(
-			manipSubsystem.lowPass()
-		);
-
-		manipController.b_9().whileTrue(
-			manipSubsystem.midPass()
 		);
 
 		manipController.b_10().whileTrue(

@@ -2,8 +2,8 @@ package frc.robot.subsystems.manipSubsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.drive.DriveSubsystem;
 
@@ -11,11 +11,13 @@ public class ManipSubsystem extends SubsystemBase {
     IntakeSubsystem intakeSubsystem;
     IndexSubsystem indexSubsystem;
     SpitterSubsystem spitterSubsystem;
+    DriveSubsystem driveSubsystem;
     
     public ManipSubsystem(DriveSubsystem drive) {
         intakeSubsystem = new IntakeSubsystem();
         spitterSubsystem = new SpitterSubsystem(drive);
         indexSubsystem = new IndexSubsystem(spitterSubsystem);
+        driveSubsystem = drive;
     }
 
     /**
@@ -25,12 +27,7 @@ public class ManipSubsystem extends SubsystemBase {
         return runOnce(() -> System.out.println("Intaking..."))
         .andThen(new ParallelCommandGroup(
             intakeSubsystem.intake(),
-            new SequentialCommandGroup (
-                Commands.waitSeconds(0.2),
-                indexSubsystem.index(indexSubsystem.forwards).withTimeout(0.1),
-                Commands.waitSeconds(0.2),
-                indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
-            ).repeatedly()
+            new ConditionalCommand(indexSubsystem.jitterIndex(), Commands.none(), () -> !spitterSubsystem.shooterIsReady())
         ));
     }
 
@@ -98,42 +95,6 @@ public class ManipSubsystem extends SubsystemBase {
             indexSubsystem.index(indexSubsystem.reverse),
             intakeSubsystem.extake()
         );
-    }
-
-    /**
-     * pass within a close range
-     */
-    public Command lowPass() {
-        return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
-        .andThen(new ParallelCommandGroup(
-            intakeSubsystem.agitateFuel(),
-            spitterSubsystem.lowPass(),
-            indexSubsystem.index(indexSubsystem.forwards)
-        ));
-    }
-
-    /**
-     * pass from a decent distance
-     */
-    public Command midPass() {
-        return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
-        .andThen(new ParallelCommandGroup(
-            intakeSubsystem.agitateFuel(),
-            spitterSubsystem.midPass(),
-            indexSubsystem.index(indexSubsystem.forwards)
-        ));
-    }
-
-    /**
-     * pass from far away
-     */
-    public Command highPass() {
-        return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
-        .andThen(new ParallelCommandGroup(
-            intakeSubsystem.agitateFuel(),
-            spitterSubsystem.highPass(),
-            indexSubsystem.index(indexSubsystem.forwards)
-        ));
     }
 
     public boolean shooterIsReady() {

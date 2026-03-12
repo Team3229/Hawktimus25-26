@@ -4,7 +4,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -18,7 +17,6 @@ import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.util.sendable.Sendable;
 
-import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -33,7 +31,7 @@ public class SpitterSubsystem extends SubsystemBase {
     private static DriveSubsystem driveSubsystem;
     private static double requestedShooterVelocity = 26;
     private static double requestedFeederVelocity = 38;
-    private static double deadBand = 2;
+    private static double deadBand = 2.5;
 
     // change PID (if needed)
     private static double kP = 0.1;
@@ -53,8 +51,6 @@ public class SpitterSubsystem extends SubsystemBase {
     private static final int Feeder_CAN_ID = 11;
     private TalonFX feeder;
     private TalonFXConfiguration feederMotorConfig;
-
-    private static double sensorToMechanismRatio = 2.5;
 
     private static final Current CURRENT_LIMIT = Amps.of(40);
 
@@ -76,6 +72,8 @@ public class SpitterSubsystem extends SubsystemBase {
         SPITTER_MAP.put(4.44, new SpitterParams(35, 41, 1.43));
         SPITTER_MAP.put(5.33, new SpitterParams(39, 43, 1.2));
     }
+
+    public static final double SYSTEM_LATENCY_SECONDS = 0.3;
 
     private static Sendable spitterSendable;
 
@@ -196,24 +194,6 @@ public class SpitterSubsystem extends SubsystemBase {
 
         return out;
     }
-    
-    public Command passShoot(double srps, double frps) {
-        requestedShooterVelocity = srps;
-        requestedFeederVelocity = frps;
-        return shoot();
-    }
-
-    public Command lowPass() {
-        return passShoot(26, 38);
-    }
-
-    public Command midPass() {
-        return passShoot(35, 50);
-    }
-
-    public Command highPass() {
-         return passShoot(40, 60);
-    }
 
     public boolean shooterIsReady() {
         double leftVelocity = leftSpitter.getVelocity().getValueAsDouble();
@@ -288,18 +268,10 @@ public class SpitterSubsystem extends SubsystemBase {
     }
 
     public void setSpitterSpeeds() {
-        double distanceFromHub = driveSubsystem.distanceFromHub();
+        double distanceFromHub = driveSubsystem.distanceToTarget;
         setFeederSpeed(distanceFromHub);   
         setShooterSpeed(distanceFromHub);
     }
-
-    // public Command setSpitterSpeed() {
-    //     return runOnce(() -> {
-    //         double distanceFromHub = driveSubsystem.distanceFromHub();
-    //         setFeederSpeed(distanceFromHub);   
-    //         setShooterSpeed(distanceFromHub);
-    //     });
-    // }
 
 }
  
