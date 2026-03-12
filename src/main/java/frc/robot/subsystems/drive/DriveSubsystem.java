@@ -95,6 +95,14 @@ public class DriveSubsystem extends SubsystemBase {
 	public static final Translation2d RED_HUB_CENTER = new Translation2d(11.9014, 4.0213);
 	public static final Translation2d RED_HUB_BACK = new Translation2d(11.3044, 4.0213);
 
+	public static final Translation2d RED_TARGET_LEFT = new Translation2d(16.54048, 5.101844);
+	public static final Translation2d RED_TARGET_RIGHT = new Translation2d(16.54048 ,1.266444);
+	
+	public static final Translation2d BLUE_TARGET_LEFT = new Translation2d(0,5.101844);
+	public static final Translation2d BLUE_TARGET_RIGHT = new Translation2d(0,1.266444);
+
+	public static final Distance CENTER_FIELD_Y = Meters.of(4.021328);
+
 	private static Sendable driveSendable;
 
 	private static Transform2d SPITTER_OFFSET = new Transform2d(0, Units.inchesToMeters(-10), Rotation2d.k180deg);
@@ -512,9 +520,31 @@ public class DriveSubsystem extends SubsystemBase {
 				() -> xTranslationPID.atGoal() && yTranslationPID.atGoal() && rotationPID.atGoal()
 			);
     }
-	
+	/**Takes the robots pose and selects a target based on where it is.
+	 * Walks through your logic and sees if you are in the center field or the alliance zone then selects a target.
+	 * @return Selected target Translation
+	 */
 	public Translation2d getTargetTranslation() {
-		return Alliance.getAlliance().equals(AllianceColor.Red) ? RED_HUB_CENTER : BLUE_HUB_CENTER;
+		Pose2d robotPose = getPose();
+		if(Alliance.getAlliance().equals(AllianceColor.Red) ) {
+		
+			if(robotPose.getMeasureX().gt(RED_HUB_CENTER.getMeasureX())) {
+				return RED_HUB_CENTER;
+			}
+			if(robotPose.getMeasureY().gt(CENTER_FIELD_Y)) {
+				return RED_TARGET_LEFT;
+			}	
+			return RED_TARGET_RIGHT;
+
+		}
+		
+		if(robotPose.getMeasureX().lt(BLUE_HUB_CENTER.getMeasureX())) {
+			return BLUE_HUB_CENTER;
+		}
+		if(robotPose.getMeasureY().gt(CENTER_FIELD_Y)){
+			return BLUE_TARGET_LEFT;
+		}
+		return BLUE_TARGET_RIGHT;
 	}
 
 	/*

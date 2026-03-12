@@ -150,14 +150,6 @@ public class RobotContainer {
 			manipSubsystem.intakeArmOut()
 		);
 
-		manipController.b_7().whileTrue(
-			manipSubsystem.lowPass()
-		);
-
-		manipController.b_9().whileTrue(
-			manipSubsystem.midPass()
-		);
-
 		manipController.b_10().whileTrue(
 			manipSubsystem.extake()
 		);

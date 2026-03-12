@@ -198,24 +198,6 @@ public class SpitterSubsystem extends SubsystemBase {
 
         return out;
     }
-    
-    public Command passShoot(double srps, double frps) {
-        requestedShooterVelocity = srps;
-        requestedFeederVelocity = frps;
-        return shoot();
-    }
-
-    public Command lowPass() {
-        return passShoot(26, 38);
-    }
-
-    public Command midPass() {
-        return passShoot(35, 50);
-    }
-
-    public Command highPass() {
-         return passShoot(40, 60);
-    }
 
     public boolean shooterIsReady() {
         double leftVelocity = leftSpitter.getVelocity().getValueAsDouble();

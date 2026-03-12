@@ -99,42 +99,6 @@ public class ManipSubsystem extends SubsystemBase {
         );
     }
 
-    /**
-     * pass within a close range
-     */
-    public Command lowPass() {
-        return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
-        .andThen(new ParallelCommandGroup(
-            intakeSubsystem.agitateFuel(),
-            spitterSubsystem.lowPass(),
-            indexSubsystem.index(indexSubsystem.forwards)
-        ));
-    }
-
-    /**
-     * pass from a decent distance
-     */
-    public Command midPass() {
-        return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
-        .andThen(new ParallelCommandGroup(
-            intakeSubsystem.agitateFuel(),
-            spitterSubsystem.midPass(),
-            indexSubsystem.index(indexSubsystem.forwards)
-        ));
-    }
-
-    /**
-     * pass from far away
-     */
-    public Command highPass() {
-        return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
-        .andThen(new ParallelCommandGroup(
-            intakeSubsystem.agitateFuel(),
-            spitterSubsystem.highPass(),
-            indexSubsystem.index(indexSubsystem.forwards)
-        ));
-    }
-
     public boolean shooterIsReady() {
         return spitterSubsystem.shooterIsReady();
     }
