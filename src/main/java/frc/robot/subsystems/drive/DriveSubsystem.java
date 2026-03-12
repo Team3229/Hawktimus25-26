@@ -112,6 +112,10 @@ public class DriveSubsystem extends SubsystemBase {
 
 	public double distanceToTarget; 
 
+	private Translation2d currentTarget = BLUE_HUB_CENTER;
+	private double targetAngleRot;
+	private double currentAngleRot;
+
 	// Standard PID
     private static final PIDConstants TRANSLATION_CONSTANTS =
 		new PIDConstants(
@@ -122,7 +126,7 @@ public class DriveSubsystem extends SubsystemBase {
 
 	private static final PIDConstants ROTATION_CONSTANTS =
 		new PIDConstants(
-			7.0,
+			2.0,
 			0.0,
 			0.0
 		);
@@ -235,7 +239,11 @@ public class DriveSubsystem extends SubsystemBase {
 				builder.addDoubleProperty("PoseY", () -> getPose().getY(), null);
 				builder.addBooleanProperty("Align to Hub", () -> hubAlign, null);
 				builder.addBooleanProperty("Is Aimed", () -> isAimed, null);
-				builder.addDoubleProperty("Distance from hub", () -> distanceFromHub(), null);
+				builder.addDoubleProperty("Distance from hub", () -> distanceToTarget, null);
+				builder.addDoubleProperty("TargetX", () -> currentTarget.getX(), null);
+				builder.addDoubleProperty("TargetY", () -> currentTarget.getY(), null);
+				builder.addDoubleProperty("TargetRot", () -> targetAngleRot, null);
+				builder.addDoubleProperty("CurrentRot", () -> currentAngleRot, null);
 			}
 		};
 		SmartDashboard.putData("Drive", driveSendable);
@@ -388,6 +396,7 @@ public class DriveSubsystem extends SubsystemBase {
 				
 				Translation2d effectiveShooterVelocity = botVelocity.plus(tangentialVelocity);
 				Translation2d virtualTarget = getTargetTranslation();
+				currentTarget = virtualTarget;
 
 				// measures distance to our target in meters
 				double predictedDistance = spitterTranslation.getDistance(virtualTarget);
@@ -402,7 +411,7 @@ public class DriveSubsystem extends SubsystemBase {
 				virtualTarget = virtualTarget.minus(predictedOffset);
 
 				// Set distance for use in other commands
-				distanceToTarget = spitterTranslation.getDistance(virtualTarget);
+				distanceToTarget = robotTranslation.getDistance(virtualTarget);
 
 				/* Calculate needed angle to target */
 				double targetAngleRad = Math.atan2(
@@ -410,7 +419,13 @@ public class DriveSubsystem extends SubsystemBase {
 					virtualTarget.getX() - robotTranslation.getX()
 				);
 
+				targetAngleRad += Math.PI; // trying to get back of bot to face forwards
+				
+				targetAngleRot = targetAngleRad / (2 * Math.PI);
+
 				double currentAngleRad = currentPose.getRotation().getRadians();
+
+				currentAngleRot = currentAngleRad / (2 * Math.PI);
 
 				double angularSpeedRps = rotationPID.calculate(currentAngleRad, targetAngleRad);
 				
@@ -524,7 +539,7 @@ public class DriveSubsystem extends SubsystemBase {
 	 * Walks through your logic and sees if you are in the center field or the alliance zone then selects a target.
 	 * @return Selected target Translation
 	 */
-	public Translation2d getTargetTranslation() {
+	 public Translation2d getTargetTranslation() {
 		Pose2d robotPose = getPose();
 		if(Alliance.getAlliance().equals(AllianceColor.Red) ) {
 		

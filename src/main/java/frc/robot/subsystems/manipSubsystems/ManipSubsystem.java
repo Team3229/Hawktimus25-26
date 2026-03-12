@@ -76,8 +76,7 @@ public class ManipSubsystem extends SubsystemBase {
         .andThen(new ParallelCommandGroup(
             // intakeSubsystem.agitateFuel(),
             spitterSubsystem.shoot(),
-            new ConditionalCommand(indexSubsystem.index(indexSubsystem.forwards), Commands.none(), 
-            () -> (driveSubsystem.hubAlign && driveSubsystem.isAimed) || !driveSubsystem.hubAlign)
+            indexSubsystem.index(indexSubsystem.forwards)
         ));
 
         // //MANUAL ADJUSTABLE SHOOT
