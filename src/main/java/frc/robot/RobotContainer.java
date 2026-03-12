@@ -121,7 +121,7 @@ public class RobotContainer {
 			})
 		);
 
-		driverController.b_Trigger().onTrue(
+		driverController.b_Trigger().whileTrue(
 			driveSubsystem.toggleHubAlign()
 		);
 

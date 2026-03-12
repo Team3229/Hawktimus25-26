@@ -12,11 +12,13 @@ public class ManipSubsystem extends SubsystemBase {
     IntakeSubsystem intakeSubsystem;
     IndexSubsystem indexSubsystem;
     SpitterSubsystem spitterSubsystem;
+    DriveSubsystem driveSubsystem;
     
     public ManipSubsystem(DriveSubsystem drive) {
         intakeSubsystem = new IntakeSubsystem();
         spitterSubsystem = new SpitterSubsystem(drive);
         indexSubsystem = new IndexSubsystem(spitterSubsystem);
+        driveSubsystem = drive;
     }
 
     /**
@@ -74,7 +76,8 @@ public class ManipSubsystem extends SubsystemBase {
         .andThen(new ParallelCommandGroup(
             // intakeSubsystem.agitateFuel(),
             spitterSubsystem.shoot(),
-            indexSubsystem.index(indexSubsystem.forwards)
+            new ConditionalCommand(indexSubsystem.index(indexSubsystem.forwards), Commands.none(), 
+            () -> (driveSubsystem.hubAlign && driveSubsystem.isAimed) || !driveSubsystem.hubAlign)
         ));
 
         // //MANUAL ADJUSTABLE SHOOT

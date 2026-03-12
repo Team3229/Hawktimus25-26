@@ -99,8 +99,8 @@ public class DriveSubsystem extends SubsystemBase {
 
 	private static Transform2d SPITTER_OFFSET = new Transform2d(0, Units.inchesToMeters(-10), Rotation2d.k180deg);
 
-	private static boolean hubAlign = false;
-	private static boolean isAimed = false;
+	public boolean hubAlign = false;
+	public boolean isAimed = false;
 
 	public double distanceToTarget; 
 
@@ -534,7 +534,18 @@ public class DriveSubsystem extends SubsystemBase {
 	 * Toggles the bot to align to the hub 
 	 */
 	public Command toggleHubAlign() {
-		return Commands.runOnce(() -> hubAlign = !hubAlign);
+		return new Command() {
+			@Override
+			public void initialize() {
+				hubAlign = true;
+			}
+			
+			@Override
+			public void end(boolean interrupted) {
+				hubAlign = false;
+			}
+		};
+		// return Commands.runOnce(() -> hubAlign = !hubAlign);
 	}
 
 }
