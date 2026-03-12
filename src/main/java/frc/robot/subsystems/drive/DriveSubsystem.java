@@ -13,17 +13,22 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.fasterxml.jackson.databind.introspect.VirtualAnnotatedMember;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
+import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
@@ -46,6 +51,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.hawklibraries.utilities.Alliance;
 import frc.hawklibraries.utilities.Alliance.AllianceColor;
 import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
 import frc.robot.utilities.LimelightHelpers;
 
 import java.io.File;
@@ -94,6 +100,7 @@ public class DriveSubsystem extends SubsystemBase {
 	private static Transform2d SPITTER_OFFSET = new Transform2d(0, Units.inchesToMeters(-10), Rotation2d.k180deg);
 
 	private static boolean hubAlign = false;
+	private static boolean isAimed = false;
 
 	public double distanceToTarget; 
 
@@ -369,14 +376,55 @@ public class DriveSubsystem extends SubsystemBase {
 						-currentSpeed.omegaRadiansPerSecond * SPITTER_OFFSET.getY(),
 						currentSpeed.omegaRadiansPerSecond * SPITTER_OFFSET.getX()
 					);
+				
+				Translation2d effectiveShooterVelocity = botVelocity.plus(tangentialVelocity);
+				Translation2d virtualTarget = getTargetTranslation();
+
+				// measures distance to our target in meters
+				double predictedDistance = spitterTranslation.getDistance(virtualTarget);
+
+				// time of flight, includes mechanical/system latency
+				double timeOfFlight = getToF(predictedDistance) + SpitterSubsystem.SYSTEM_LATENCY_SECONDS;
+
+				// calculate the distance the ball will drift
+				Translation2d predictedOffset = effectiveShooterVelocity.times(timeOfFlight);
+
+				// Shifts aim to be ahead of drift
+				virtualTarget = virtualTarget.minus(predictedOffset);
+
+				// Set distance for use in other commands
+				distanceToTarget = spitterTranslation.getDistance(virtualTarget);
+
+				/* Calculate needed angle to target */
+				double targetAngleRad = Math.atan2(
+					virtualTarget.getY() - robotTranslation.getY(),
+					virtualTarget.getX() - robotTranslation.getX()
+				);
+
+				double currentAngleRad = currentPose.getRotation().getRadians();
+
+				// will finish if the bot is correctly facing target
+				isAimed = rotationPID.atSetpoint();	
+				
+				// overrides the drivers Z input with the calculated angle 
+				ChassisSpeeds driverSpeed = velocity.get();
+				ChassisSpeeds newVelocity = new ChassisSpeeds(driverSpeed.vxMetersPerSecond, driverSpeed.vyMetersPerSecond, currentAngleRad);
+				
+				// running the bot in robot relative with the new calculated angle
+				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(newVelocity, getIMUYaw()));		
+			} else {
+				distanceToTarget = distanceFromHub();
+				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(velocity.get(), getIMUYaw()));
+				// swerveDrive.driveFieldOriented(velocity.get()); //Field relative is relying on odemtry instead of IMUYaw
 			}
-			// swerveDrive.driveFieldOriented(velocity.get()); //Field relative is relying on odemtry instead of IMUYaw
-			swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(velocity.get(), getIMUYaw()));
-			distanceToTarget = distanceFromHub();
 		}).ignoringDisable(false);
 	}
 
-		/**
+	public double getToF(double distanceMeters) {
+		return SpitterSubsystem.SPITTER_MAP.get(distanceMeters).timeOfFlight();
+	}
+
+	/**
 	 * Gets the current pose (position and rotation) of the robot, as reported by
 	 * odometry.
 	 *
@@ -388,20 +436,6 @@ public class DriveSubsystem extends SubsystemBase {
 		}
 		return swerveDrive.getPose();
 	}
-	/**
-	 * This will zero (calibrate) the robot to assume the current position is facing
-	 * forward
-	 * <p>
-	 * If red alliance rotate the robot 180 after the drivebase zero command 
-	 * this command is useless/actively harmful
-	 */
-	// public void zeroGyroWithAlliance() {
-	// 	if (Alliance.getAlliance() == AllianceColor.Red) {
-	// 		setIMUYaw(new Rotation2d(Math.PI));
-	// 	} else {
-	// 		zeroGyro();
-	// 	}
-	// }
 
 	public void zeroGyro() {
 		getIMU().setYaw(0);
@@ -476,7 +510,7 @@ public class DriveSubsystem extends SubsystemBase {
 			);
     }
 	
-	public Translation2d getHubTranslation() {
+	public Translation2d getTargetTranslation() {
 		return Alliance.getAlliance().equals(AllianceColor.Red) ? RED_HUB_CENTER : BLUE_HUB_CENTER;
 	}
 
@@ -484,7 +518,7 @@ public class DriveSubsystem extends SubsystemBase {
 	* Returns the angle from the robot to the hub (in radians)
 	*/
 	public double angleFromHub() {
-		Translation2d hubPose = getHubTranslation();
+		Translation2d hubPose = getTargetTranslation();
 		return Math.atan2(hubPose.getY() - getPose().getY(), hubPose.getX() - getPose().getX());
 	}
 	
@@ -492,7 +526,7 @@ public class DriveSubsystem extends SubsystemBase {
 	* Returns the distance from the robot to the hub 
 	*/
 	private double distanceFromHub() {
-		return getPose().getTranslation().getDistance(getHubTranslation());
+		return getPose().getTranslation().getDistance(getTargetTranslation());
 	}
 	
 	/**

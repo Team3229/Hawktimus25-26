@@ -77,6 +77,8 @@ public class SpitterSubsystem extends SubsystemBase {
         SPITTER_MAP.put(5.33, new SpitterParams(39, 43, 1.2));
     }
 
+    public static final double SYSTEM_LATENCY_SECONDS = 0.3;
+
     private static Sendable spitterSendable;
 
     public SpitterSubsystem(DriveSubsystem drive) {
