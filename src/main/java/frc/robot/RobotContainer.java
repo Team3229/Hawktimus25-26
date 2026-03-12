@@ -98,7 +98,7 @@ public class RobotContainer {
 			.cubeTranslationControllerAxis(true)
 			.scaleTranslation(0.8)
 			.scaleRotation(0.9)
-			.allianceRelativeControl(true); // seems like it runs the same or better with this off
+			.allianceRelativeControl(true);
 			
 		driveSubsystem.setDefaultCommand(
 			driveSubsystem.driveFieldOriented(
