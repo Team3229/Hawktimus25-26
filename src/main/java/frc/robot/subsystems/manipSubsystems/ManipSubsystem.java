@@ -1,7 +1,9 @@
 package frc.robot.subsystems.manipSubsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.drive.DriveSubsystem;
 
@@ -21,7 +23,15 @@ public class ManipSubsystem extends SubsystemBase {
      */
     public Command intake() {
         return runOnce(() -> System.out.println("Intaking..."))
-        .andThen(intakeSubsystem.intake());
+        .andThen(new ParallelCommandGroup(
+            intakeSubsystem.intake(),
+            new SequentialCommandGroup (
+                Commands.waitSeconds(0.2),
+                indexSubsystem.index(indexSubsystem.forwards).withTimeout(0.1),
+                Commands.waitSeconds(0.2),
+                indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
+            ).repeatedly()
+        ));
     }
 
     /**
@@ -55,12 +65,7 @@ public class ManipSubsystem extends SubsystemBase {
      * Spins the shooter wheel
      */
     public Command spinUp() {
-        // return spitterSubsystem.setSpitterSpeed()
-        // .andThen(spitterSubsystem.shoot());
-
         return spitterSubsystem.shoot();
-
-        // return spitterSubsystem.manualShoot();
     }
 
     /**
@@ -69,27 +74,18 @@ public class ManipSubsystem extends SubsystemBase {
      */
     public Command shoot() {
         //AUTOSHOOT
-        // return spitterSubsystem.setSpitterSpeed()
-        // .andThen(indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1))
-        // .andThen(new ParallelCommandGroup(
-        //     intakeSubsystem.agitateFuel(),
-        //     spitterSubsystem.shoot(),
-        //     indexSubsystem.index(indexSubsystem.forwards)
-        // ));
-
-        //MANUAL ADJUSTABLE SHOOT
         return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
         .andThen(new ParallelCommandGroup(
-            intakeSubsystem.agitateFuel(),
+            // intakeSubsystem.agitateFuel(),
             spitterSubsystem.shoot(),
             indexSubsystem.index(indexSubsystem.forwards)
         ));
 
-        //MANUAL SHOOT
+        // //MANUAL ADJUSTABLE SHOOT
         // return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
         // .andThen(new ParallelCommandGroup(
-        //     intakeSubsystem.agitateFuel(),
-        //     spitterSubsystem.manualShoot(),
+        //     // intakeSubsystem.agitateFuel(),
+        //     spitterSubsystem.shoot(),
         //     indexSubsystem.index(indexSubsystem.forwards)
         // ));
     }
@@ -158,13 +154,6 @@ public class ManipSubsystem extends SubsystemBase {
 
     public Command downFRPSCommand() {
         return spitterSubsystem.downFRPSCommand();
-    }
-
-    /**
-     * sets the spitter speed to spin up to based on distance from hub
-     */
-    public Command setSpitterSpeed() {
-        return spitterSubsystem.setSpitterSpeed();
     }
 
 }

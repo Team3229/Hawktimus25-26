@@ -72,9 +72,9 @@ public class SpitterSubsystem extends SubsystemBase {
     static {
         // SPITTER_MAP.put(1.782, new SpitterParams(1, 1, 1));
         SPITTER_MAP.put(2.745, new SpitterParams(28, 40, 1));
-        // SPITTER_MAP.put(3.6576, new SpitterParams());
-        // SPITTER_MAP.put(4.5720, new SpitterParams());
-        // SPITTER_MAP.put(5.4864, new SpitterParams());
+        SPITTER_MAP.put(3.6576, new SpitterParams(31, 41, 0.9));
+        SPITTER_MAP.put(4.44, new SpitterParams(35, 41, 1.43));
+        SPITTER_MAP.put(5.33, new SpitterParams(39, 43, 1.2));
     }
 
     private static Sendable spitterSendable;
@@ -178,6 +178,7 @@ public class SpitterSubsystem extends SubsystemBase {
         Command out = new Command() {
             @Override
             public void execute() {
+                setSpitterSpeeds(); // REMOVE FOR MANUAL
                 leftSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0).withFeedForward(0.12));
                 rightSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0).withFeedForward(0.12));
                 feeder.setControl(new VelocityVoltage(requestedFeederVelocity).withSlot(0));
@@ -286,14 +287,19 @@ public class SpitterSubsystem extends SubsystemBase {
         requestedShooterVelocity = SPITTER_MAP.get(distanceMeters).srps();
     }
 
-    public Command setSpitterSpeed() {
-        return runOnce(() -> {
-            double distanceFromHub = driveSubsystem.distanceFromHub();
-            setFeederSpeed(distanceFromHub);   
-            setShooterSpeed(distanceFromHub);
-            System.out.println("spitter speed has been set to " + requestedShooterVelocity + " feeder speed has been set to " + requestedFeederVelocity);
-        });
+    public void setSpitterSpeeds() {
+        double distanceFromHub = driveSubsystem.distanceFromHub();
+        setFeederSpeed(distanceFromHub);   
+        setShooterSpeed(distanceFromHub);
     }
+
+    // public Command setSpitterSpeed() {
+    //     return runOnce(() -> {
+    //         double distanceFromHub = driveSubsystem.distanceFromHub();
+    //         setFeederSpeed(distanceFromHub);   
+    //         setShooterSpeed(distanceFromHub);
+    //     });
+    // }
 
 }
  
