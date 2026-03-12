@@ -404,12 +404,14 @@ public class DriveSubsystem extends SubsystemBase {
 
 				double currentAngleRad = currentPose.getRotation().getRadians();
 
+				double angularSpeedRps = rotationPID.calculate(currentAngleRad, targetAngleRad);
+				
 				// will finish if the bot is correctly facing target
 				isAimed = rotationPID.atSetpoint();	
 				
 				// overrides the drivers Z input with the calculated angle 
 				ChassisSpeeds driverSpeed = velocity.get();
-				ChassisSpeeds newVelocity = new ChassisSpeeds(driverSpeed.vxMetersPerSecond, driverSpeed.vyMetersPerSecond, currentAngleRad);
+				ChassisSpeeds newVelocity = new ChassisSpeeds(driverSpeed.vxMetersPerSecond, driverSpeed.vyMetersPerSecond, angularSpeedRps);
 				
 				// running the bot in robot relative with the new calculated angle
 				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(newVelocity, getIMUYaw()));		
@@ -539,7 +541,7 @@ public class DriveSubsystem extends SubsystemBase {
 			public void initialize() {
 				hubAlign = true;
 			}
-			
+
 			@Override
 			public void end(boolean interrupted) {
 				hubAlign = false;
