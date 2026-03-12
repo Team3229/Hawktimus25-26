@@ -2,6 +2,7 @@ package frc.robot.subsystems.manipSubsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -25,12 +26,7 @@ public class ManipSubsystem extends SubsystemBase {
         return runOnce(() -> System.out.println("Intaking..."))
         .andThen(new ParallelCommandGroup(
             intakeSubsystem.intake(),
-            new SequentialCommandGroup (
-                Commands.waitSeconds(0.2),
-                indexSubsystem.index(indexSubsystem.forwards).withTimeout(0.1),
-                Commands.waitSeconds(0.2),
-                indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
-            ).repeatedly()
+            new ConditionalCommand(indexSubsystem.jitterIndex(), Commands.none(), () -> !spitterSubsystem.shooterIsReady())
         ));
     }
 

@@ -226,6 +226,7 @@ public class DriveSubsystem extends SubsystemBase {
 				builder.addDoubleProperty("PoseX", () -> getPose().getX(), null);
 				builder.addDoubleProperty("PoseY", () -> getPose().getY(), null);
 				builder.addBooleanProperty("Align to Hub", () -> hubAlign, null);
+				builder.addBooleanProperty("Is Aimed", () -> isAimed, null);
 				builder.addDoubleProperty("Distance from hub", () -> distanceFromHub(), null);
 			}
 		};
