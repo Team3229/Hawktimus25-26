@@ -1,35 +1,34 @@
 package frc.robot.subsystems.manipSubsystems;
 
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.configs.VoltageConfigs;
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
-import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.ctre.phoenix6.signals.InvertedValue;
-
-import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.controls.VelocityVoltage;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
-import com.ctre.phoenix6.CANBus;
-import edu.wpi.first.units.measure.Current;
-import com.ctre.phoenix6.controls.Follower;
-
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-
-import edu.wpi.first.units.measure.Angle;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Rotations;
+
+import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.VoltageConfigs;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class IntakeSubsystem extends SubsystemBase {
 
@@ -91,6 +90,8 @@ public class IntakeSubsystem extends SubsystemBase {
 	private static final double ROD_CCW_SPEED = -70;
 
 	private static final Angle angleDeadBand = Rotations.of(0.01);
+
+	private static boolean stowSpin = false;
 
 	private static Sendable intakeSendable;
 	
@@ -257,6 +258,9 @@ public class IntakeSubsystem extends SubsystemBase {
 			@Override
 			public void execute() {
 				armMotorLeft.setControl(rotateRequest.withPosition(setpoint));
+				if(stowSpin) {
+					rodMotor.setControl(new VelocityVoltage(ROD_CW_SPEED).withSlot(0));
+				}
 			}
 
 			@Override
@@ -332,34 +336,30 @@ public class IntakeSubsystem extends SubsystemBase {
 	 * Command to return to a safe angle 
 	 */
 	public Command stow() {
-		return rotateTo(STOW_ANGLE);
+		return new ParallelCommandGroup(
+			rotateTo(STOW_ANGLE)
+		);
+	}
+
+	/**
+	 * Toggles the bot to align to the hub 
+	 */
+	public Command toggleStowSpin() {
+		return new Command() {
+			@Override
+			public void initialize() {
+				stowSpin = true;
+			}
+					//TODO: ASK OWEN WHAT BUTTON HE WANTS THIS ON
+			@Override
+			public void end(boolean interrupted) {
+				stowSpin = false;
+			}
+		};
 	}
 
 	public Command goHome() {
 		return rotateTo(HOME_ANGLE);
-	}
-
-	/**
-	 * creates a command that pulls the intake arm back to the
-	 * home point in order to move the fuel in storage.
-	 * 
-	 * @return Command to pull arm back
-	 */
-	public Command agitateFuel() {
-		Command out = new Command() {
-			@Override
-			public void initialize() {
-				rotateTo(STOW_ANGLE);
-			}
-
-			@Override
-			public void end(boolean interrupted) {
-				rotateTo(COLLECTION_POINT);
-			}
-		};
-
-		out.addRequirements(this);
-		return out;
 	}
 
 	/** returns true when arm is within deadband */
@@ -367,7 +367,6 @@ public class IntakeSubsystem extends SubsystemBase {
 		if (requestedAngle == null) {
 			return false;
 		}
-		// Angle rightArmAngle = armMotorRight.getPosition().getValue();
 
 		Angle leftArmAngle = armMotorLeft.getPosition().getValue();
 

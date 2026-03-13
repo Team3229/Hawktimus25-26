@@ -97,7 +97,7 @@ public class IndexSubsystem extends SubsystemBase {
             @Override 
             public void initSendable(SendableBuilder builder) {
                 builder.addBooleanProperty("Indexing", ()-> isReady(), null);
-                builder.addDoubleProperty("IndexActual", () -> indexMotor.getVelocity().getValueAsDouble(), null);
+                builder.addDoubleProperty("Index Velocity", () -> indexMotor.getVelocity().getValueAsDouble(), null);
 
             }
         });
