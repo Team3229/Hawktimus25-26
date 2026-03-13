@@ -10,7 +10,6 @@ import static edu.wpi.first.units.Units.Milliseconds;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Inches;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -18,11 +17,16 @@ import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -41,6 +45,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.hawklibraries.utilities.Alliance;
 import frc.hawklibraries.utilities.Alliance.AllianceColor;
 import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
 import frc.robot.utilities.LimelightHelpers;
 
 import java.io.File;
@@ -73,12 +78,35 @@ public class DriveSubsystem extends SubsystemBase {
     private static final Pose2d startingBluePose = new Pose2d(2, 4, new Rotation2d(0));
     private static final Pose2d startingRedPose = new Pose2d(2, 4, new Rotation2d(Math.PI));
 
-	private static final Pose2d redHubPose = new Pose2d(Inches.of(468.56), Inches.of(158.32), new Rotation2d());
-	private static final Pose2d blueHubPose = new Pose2d(Inches.of(152.56), Inches.of(158.32), new Rotation2d());
+	// private static final Pose2d redHubPose = new Pose2d(Inches.of(468.56), Inches.of(158.32), new Rotation2d());
+	// private static final Pose2d blueHubPose = new Pose2d(Inches.of(152.56), Inches.of(158.32), new Rotation2d());
+
+	public static final Translation2d BLUE_HUB_CENTER = new Translation2d(4.6116, 4.0213);
+	public static final Translation2d BLUE_HUB_BACK = new Translation2d(5.2342, 4.0213);
+
+	public static final Translation2d RED_HUB_CENTER = new Translation2d(11.9014, 4.0213);
+	public static final Translation2d RED_HUB_BACK = new Translation2d(11.3044, 4.0213);
+
+	public static final Translation2d RED_TARGET_LEFT = new Translation2d(16.54048, 5.101844);
+	public static final Translation2d RED_TARGET_RIGHT = new Translation2d(16.54048 ,1.266444);
+	
+	public static final Translation2d BLUE_TARGET_LEFT = new Translation2d(0,5.101844);
+	public static final Translation2d BLUE_TARGET_RIGHT = new Translation2d(0,1.266444);
+
+	public static final Distance CENTER_FIELD_Y = Meters.of(4.021328);
 
 	private static Sendable driveSendable;
 
-	private static boolean slowDrive = false;
+	private static Transform2d SPITTER_OFFSET = new Transform2d(0, Units.inchesToMeters(-10), Rotation2d.k180deg);
+
+	public boolean hubAlign = false;
+	public boolean isAimed = false;
+
+	public double distanceToTarget; 
+
+	private Translation2d currentTarget = BLUE_HUB_CENTER;
+	private double targetAngleRot;
+	private double currentAngleRot;
 
 	// Standard PID
     private static final PIDConstants TRANSLATION_CONSTANTS =
@@ -90,7 +118,7 @@ public class DriveSubsystem extends SubsystemBase {
 
 	private static final PIDConstants ROTATION_CONSTANTS =
 		new PIDConstants(
-			7.0,
+			2.0,
 			0.0,
 			0.0
 		);
@@ -201,8 +229,13 @@ public class DriveSubsystem extends SubsystemBase {
 			public void initSendable(SendableBuilder builder) {
 				builder.addDoubleProperty("PoseX", () -> getPose().getX(), null);
 				builder.addDoubleProperty("PoseY", () -> getPose().getY(), null);
-				builder.addBooleanProperty("SlowToggle", () -> slowDrive, null);
-				builder.addDoubleProperty("Distance from hub", () -> distanceFromHub(), null);
+				builder.addBooleanProperty("Align to Hub", () -> hubAlign, null);
+				builder.addBooleanProperty("Is Aimed", () -> isAimed, null);
+				builder.addDoubleProperty("Distance from hub", () -> distanceToTarget, null);
+				builder.addDoubleProperty("TargetX", () -> currentTarget.getX(), null);
+				builder.addDoubleProperty("TargetY", () -> currentTarget.getY(), null);
+				builder.addDoubleProperty("TargetRot", () -> targetAngleRot, null);
+				builder.addDoubleProperty("CurrentRot", () -> currentAngleRot, null);
 			}
 		};
 		SmartDashboard.putData("Drive", driveSendable);
@@ -286,9 +319,26 @@ public class DriveSubsystem extends SubsystemBase {
 			0, 0, 0, 0
 		);
 
-    }
+		LimelightHelpers.PoseEstimate estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-" + side);
 
-  }
+		if (estimate != null && estimate.tagCount > 0) {
+			
+			@SuppressWarnings("unused")
+			double tagID = LimelightHelpers.getFiducialID("limelight-" + side);
+
+				Translation3d aprilTagPosition = LimelightHelpers.getTargetPose3d_RobotSpace("limelight-" + side).getTranslation();
+
+				if (Math.hypot(aprilTagPosition.getX(), aprilTagPosition.getZ()) <= 10.5) {
+					
+				swerveDrive.addVisionMeasurement(new Pose2d(estimate.pose.getX(), estimate.pose.getY(), getIMUYaw()), estimate.timestampSeconds);
+					
+				}
+				
+			}
+
+      }
+
+    }
 
 
     /**
@@ -316,12 +366,83 @@ public class DriveSubsystem extends SubsystemBase {
 
 	public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
 		return run(() -> {
-			// swerveDrive.driveFieldOriented(velocity.get()); //Field relative is relying on odemtry instead of IMUYaw
-			swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(velocity.get(), getIMUYaw()));
+			if(hubAlign) {
+				// overrides velocity on the z axis to align to the hub
+				Pose2d currentPose = swerveDrive.getPose();
+				ChassisSpeeds currentSpeed = swerveDrive.getFieldVelocity();
+				
+				Translation2d robotTranslation = currentPose.getTranslation();
+				Translation2d spitterTranslation = robotTranslation.rotateBy(Rotation2d.k180deg); // our spitter is on the back of the bot
+				
+				Translation2d botVelocity = 
+					new Translation2d(
+						currentSpeed.vxMetersPerSecond,
+						currentSpeed.vyMetersPerSecond
+					);
+				
+				Translation2d tangentialVelocity = 
+					new Translation2d(
+						-currentSpeed.omegaRadiansPerSecond * SPITTER_OFFSET.getY(),
+						currentSpeed.omegaRadiansPerSecond * SPITTER_OFFSET.getX()
+					);
+				
+				Translation2d effectiveShooterVelocity = botVelocity.plus(tangentialVelocity);
+				Translation2d virtualTarget = getTargetTranslation();
+				currentTarget = virtualTarget;
+
+				// measures distance to our target in meters
+				double predictedDistance = spitterTranslation.getDistance(virtualTarget);
+
+				// time of flight, includes mechanical/system latency
+				double timeOfFlight = getToF(predictedDistance) + SpitterSubsystem.SYSTEM_LATENCY_SECONDS;
+
+				// calculate the distance the ball will drift
+				Translation2d predictedOffset = effectiveShooterVelocity.times(timeOfFlight);
+
+				// Shifts aim to be ahead of drift
+				virtualTarget = virtualTarget.minus(predictedOffset);
+
+				// Set distance for use in other commands
+				distanceToTarget = robotTranslation.getDistance(virtualTarget);
+
+				/* Calculate needed angle to target */
+				double targetAngleRad = Math.atan2(
+					virtualTarget.getY() - robotTranslation.getY(),
+					virtualTarget.getX() - robotTranslation.getX()
+				);
+
+				targetAngleRad += Math.PI; // trying to get back of bot to face forwards
+				
+				targetAngleRot = targetAngleRad / (2 * Math.PI);
+
+				double currentAngleRad = currentPose.getRotation().getRadians();
+
+				currentAngleRot = currentAngleRad / (2 * Math.PI);
+
+				double angularSpeedRps = rotationPID.calculate(currentAngleRad, targetAngleRad);
+				
+				// will finish if the bot is correctly facing target
+				isAimed = rotationPID.atSetpoint();	
+				
+				// overrides the drivers Z input with the calculated angle 
+				ChassisSpeeds driverSpeed = velocity.get();
+				ChassisSpeeds newVelocity = new ChassisSpeeds(driverSpeed.vxMetersPerSecond, driverSpeed.vyMetersPerSecond, angularSpeedRps);
+				
+				// running the bot in robot relative with the new calculated angle
+				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(newVelocity, getIMUYaw()));		
+			} else {
+				distanceToTarget = distanceFromHub();
+				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(velocity.get(), getIMUYaw()));
+				// swerveDrive.driveFieldOriented(velocity.get()); //Field relative is relying on odemtry instead of IMUYaw
+			}
 		}).ignoringDisable(false);
 	}
 
-		/**
+	public double getToF(double distanceMeters) {
+		return SpitterSubsystem.SPITTER_MAP.get(distanceMeters).timeOfFlight();
+	}
+
+	/**
 	 * Gets the current pose (position and rotation) of the robot, as reported by
 	 * odometry.
 	 *
@@ -333,20 +454,6 @@ public class DriveSubsystem extends SubsystemBase {
 		}
 		return swerveDrive.getPose();
 	}
-	/**
-	 * This will zero (calibrate) the robot to assume the current position is facing
-	 * forward
-	 * <p>
-	 * If red alliance rotate the robot 180 after the drivebase zero command 
-	 * this command is useless/actively harmful
-	 */
-	// public void zeroGyroWithAlliance() {
-	// 	if (Alliance.getAlliance() == AllianceColor.Red) {
-	// 		setIMUYaw(new Rotation2d(Math.PI));
-	// 	} else {
-	// 		zeroGyro();
-	// 	}
-	// }
 
 	public void zeroGyro() {
 		getIMU().setYaw(0);
@@ -356,12 +463,6 @@ public class DriveSubsystem extends SubsystemBase {
 	public Command zeroGyroCommand() {
 		return runOnce(() -> zeroGyro());
 	}
-
-	// public Command zeroGyroWithAllianceCommand() {
-	// 	return runOnce(
-	// 		this::zeroGyroWithAlliance
-	// 	);
-	// }
 
 	/**
 	 * Zeros the gyro with the lime light based on 2d april tags
@@ -426,75 +527,64 @@ public class DriveSubsystem extends SubsystemBase {
 				() -> xTranslationPID.atGoal() && yTranslationPID.atGoal() && rotationPID.atGoal()
 			);
     }
+	/**Takes the robots pose and selects a target based on where it is.
+	 * Walks through your logic and sees if you are in the center field or the alliance zone then selects a target.
+	 * @return Selected target Translation
+	 */
+	 public Translation2d getTargetTranslation() {
+		Pose2d robotPose = getPose();
+		if(Alliance.getAlliance().equals(AllianceColor.Red) ) {
+		
+			if(robotPose.getMeasureX().gt(RED_HUB_CENTER.getMeasureX())) {
+				return RED_HUB_CENTER;
+			}
+			if(robotPose.getMeasureY().gt(CENTER_FIELD_Y)) {
+				return RED_TARGET_LEFT;
+			}	
+			return RED_TARGET_RIGHT;
 
-	public void slowToggle() {
-		if(slowDrive == true) {
-			slowDrive = false;
-			MAX_VELOCITY.times(2);
-		} else {
-			slowDrive = true;
-			MAX_VELOCITY.div(2);
 		}
-	}
-
-	public Command slowToggleCommand() {
-		return runOnce(() -> slowToggle());
-	}
-	
-	// public Command slowDrive(){
-	// 	Command out = new Command() {
-	// 		@Override 
-	// 		public void initialize() {
-	// 			MAX_VELOCITY = MetersPerSecond.of(2.5);
-	// 		}
-
-	// 		@Override
-	// 		public void end(boolean interrupted) {
-	// 			MAX_VELOCITY = MetersPerSecond.of(5);
-	// 		}
-	// 	};
-	// 	out.addRequirements(this);
-	// 	return out;
-	// }
-
-	public Pose2d getHubPose() {
-		return Alliance.getAlliance().equals(AllianceColor.Red) ? redHubPose : blueHubPose;
+		
+		if(robotPose.getMeasureX().lt(BLUE_HUB_CENTER.getMeasureX())) {
+			return BLUE_HUB_CENTER;
+		}
+		if(robotPose.getMeasureY().gt(CENTER_FIELD_Y)){
+			return BLUE_TARGET_LEFT;
+		}
+		return BLUE_TARGET_RIGHT;
 	}
 
 	/*
 	* Returns the angle from the robot to the hub (in radians)
 	*/
 	public double angleFromHub() {
-		Pose2d hubPose = getHubPose();
+		Translation2d hubPose = getTargetTranslation();
 		return Math.atan2(hubPose.getY() - getPose().getY(), hubPose.getX() - getPose().getX());
 	}
 	
 	/*
 	* Returns the distance from the robot to the hub 
 	*/
-	public double distanceFromHub() {
-		var relativePose = getPose().relativeTo(getHubPose());
-		// System.out.println(Math.sqrt(Math.pow(getHubPose().getX() - getPose().getX(), 2) + Math.pow(getHubPose().getY() - getPose().getY(), 2)));
-		return Math.sqrt(Math.pow(relativePose.getX(), 2) + Math.pow(relativePose.getY(), 2));
+	private double distanceFromHub() {
+		return getPose().getTranslation().getDistance(getTargetTranslation());
 	}
 	
-	/**Rotates the bot to be facing the hub*/
-    public Command alignToHub() {
-		Command out = new Command() {
+	/**
+	 * Toggles the bot to align to the hub 
+	 */
+	public Command toggleHubAlign() {
+		return new Command() {
 			@Override
-			public void execute() {
-				driveToPose(() -> {
-					return new Pose2d(
-						getPose().getX(),
-						getPose().getY(),
-						new Rotation2d(angleFromHub())
-					);
-				});
-			};
-		};
+			public void initialize() {
+				hubAlign = true;
+			}
 
-		return out;
-		
-	};
+			@Override
+			public void end(boolean interrupted) {
+				hubAlign = false;
+			}
+		};
+		// return Commands.runOnce(() -> hubAlign = !hubAlign);
+	}
 
 }

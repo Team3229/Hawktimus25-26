@@ -18,6 +18,8 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static edu.wpi.first.units.Units.Amps;
@@ -44,7 +46,7 @@ public class IndexSubsystem extends SubsystemBase {
     //change indexSpeed
     
     // variables are halved when ran for some reason :(
-    public final int forwards = 30;
+    public final int forwards = 40;
     public final int reverse = -20;
 
     public IndexSubsystem(SpitterSubsystem spit) {
@@ -102,6 +104,15 @@ public class IndexSubsystem extends SubsystemBase {
 
         out.addRequirements(this);
         return out;
+    }
+
+    public Command jitterIndex() {
+        return new SequentialCommandGroup (
+            Commands.waitSeconds(0.2),
+            index(forwards).withTimeout(0.1),
+            Commands.waitSeconds(0.2),
+            index(reverse).withTimeout(0.1)
+        ).repeatedly();
     }
     
 
