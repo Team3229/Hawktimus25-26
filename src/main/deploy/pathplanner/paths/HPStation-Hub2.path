@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.4180963855421687,
-        "y": 6.9964096385564805
+        "x": 2.1504819277042695,
+        "y": 0.6583373493989892
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.035626506024096,
-        "y": 6.976542168676962
+        "x": 2.391529391541607,
+        "y": 0.5920341053034897
       },
       "isLocked": false,
-      "linkedName": "S1"
+      "linkedName": "HPStation"
     },
     {
       "anchor": {
-        "x": 0.479,
-        "y": 6.9964096385564805
+        "x": 2.1723373493975906,
+        "y": 3.948
       },
       "prevControl": {
-        "x": 0.7612409638554213,
-        "y": 6.998397590363709
+        "x": 1.9901183965838345,
+        "y": 3.7229355687559846
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Depot Grab Start"
+      "linkedName": "Hub2"
     }
   ],
   "rotationTargets": [],
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 180.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

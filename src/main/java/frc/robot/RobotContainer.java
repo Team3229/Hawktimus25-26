@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Seconds;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,16 +25,22 @@ import frc.robot.inputs.ButtonBoard;
 import frc.robot.inputs.FlightStick;
 import frc.robot.subsystems.VisualizerSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
+import frc.robot.subsystems.manipSubsystems.PathPlannerCommands;
 import swervelib.SwerveInputStream;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 public class RobotContainer {
 
 	FlightStick driverController;
+	FlightStick manipController;
 	ButtonBoard buttonBoard;
 	DriveSubsystem driveSubsystem;
+	ManipSubsystem manipSubsystem;
 
+	
 	VisualizerSubsystem visualizerSubsystem;
+	PathPlannerCommands pathPlannerCommands;
 
 	private SendableChooser<Command> autoChooser;
 	private Command autoCommand;
@@ -44,18 +48,15 @@ public class RobotContainer {
 	public RobotContainer() {
 
 		driverController = new FlightStick(0);
-		buttonBoard = new ButtonBoard(1);
+		manipController = new FlightStick(1);
+
 		driveSubsystem = new DriveSubsystem(
 			"swerve",
 			TelemetryVerbosity.HIGH
 		);
+		manipSubsystem = new ManipSubsystem(driveSubsystem);
 
-		// visualizerSubsystem = new VisualizerSubsystem(
-		// 	() -> coralSubsystem.getElevatorPose().in(Meters),
-		// 	() -> coralSubsystem.getFeederAngle().in(Degrees),
-		// 	() -> climbSubsystem.getCurrentAngle().in(Degrees),
-		// 	() -> algaeSubsystem.getPosition().in(Degrees)
-		// );
+		pathPlannerCommands = new PathPlannerCommands(manipSubsystem);
 
 		configureBindings();
 		initTelemetery();
@@ -67,7 +68,7 @@ public class RobotContainer {
 
 		configDriveControls();
 		configManipControls();
-
+		
 	}
 
 	public void teleopInit() {
@@ -77,10 +78,15 @@ public class RobotContainer {
 	}
 
 	public void autoInit() {
-		driveSubsystem.zeroGyroWithAlliance();
+		driveSubsystem.zeroGyroCommand();
 	}
 
 	private void configDriveControls() {
+
+		NamedCommands.registerCommand("Intake", pathPlannerCommands.pathIntake());
+		NamedCommands.registerCommand("ArmOut", pathPlannerCommands.pathExtendStorage());
+		NamedCommands.registerCommand("WheelSpinUp", pathPlannerCommands.pathSpinUp());
+		NamedCommands.registerCommand("Shoot", pathPlannerCommands.pathShoot());
 
 		SwerveInputStream driveAngularVelocity = driveSubsystem.getInputStream(
 			() -> -driverController.a_Y(),
@@ -93,41 +99,84 @@ public class RobotContainer {
 			.scaleTranslation(0.8)
 			.scaleRotation(0.9)
 			.allianceRelativeControl(true);
-
+			
 		driveSubsystem.setDefaultCommand(
 			driveSubsystem.driveFieldOriented(
 				driveAngularVelocity
 			)
 		);
 
-
-
 		driverController.b_10().onTrue(
 			driveSubsystem.zeroGyroWithLimelight()
 		);
 
 		driverController.b_11().onTrue(
-			driveSubsystem.zeroGyroWithAllianceCommand()
+			driveSubsystem.zeroGyroCommand()
 		);
-
-		driverController.b_3().onTrue(
-			driveSubsystem.zeroGyroWithLimelight()
-		);
-
-
 
 		driverController.b_Hazard().onTrue(
-				Commands.runOnce(() -> {
-					driveSubsystem.getCurrentCommand().cancel();
-					// cancels ALL DRIVING on driver controller
+			Commands.runOnce(() -> {
+				driveSubsystem.getCurrentCommand().cancel();
+				// cancels ALL DRIVING on driver controller
 			})
+		);
+
+		driverController.b_Trigger().whileTrue(
+			driveSubsystem.toggleHubAlign()
 		);
 
 	}
 
 	private void configManipControls() {
+		// CURRENTLY AVAILABLE: 6, 11, slider
 
-		
+		manipController.b_Trigger().whileTrue(
+			manipSubsystem.shoot()
+		);
+
+		manipController.b_Hazard().onTrue(
+			manipSubsystem.stow()
+		);
+
+		manipController.b_3().whileTrue(
+			manipSubsystem.spinUp()
+		);
+
+		manipController.b_4().whileTrue(
+			manipSubsystem.intake()
+		);
+
+		manipController.b_5().onTrue(
+			manipSubsystem.intakeArmOut()
+		);
+
+		manipController.b_10().whileTrue(
+			manipSubsystem.extake()
+		);
+
+		manipController.b_12().onTrue(
+			Commands.runOnce(() -> {
+				manipSubsystem.getCurrentCommand().cancel(); // TODO: currently crashes bot
+				// cancels ALL manipING on manip controller
+			})
+		);
+
+		manipController.p_Up().onTrue(
+			manipSubsystem.upSRPSCommand()
+		);
+
+		manipController.p_Down().onTrue(
+			manipSubsystem.downSRPSCommand()
+		);
+
+		manipController.p_Right().onTrue(
+			manipSubsystem.upFRPSCommand()
+		);
+
+		manipController.p_Left().onTrue(
+			manipSubsystem.downFRPSCommand()
+		);
+
 	}
 
 	public void initTelemetery() {
@@ -153,7 +202,10 @@ public class RobotContainer {
 			pathPlannerPaths = PathPlannerAuto.getPathGroupFromAutoFile(autoName);
 			List<Pose2d> poses = new ArrayList<>();
 			for (PathPlannerPath path : pathPlannerPaths) {
-				poses.addAll(path.getAllPathPoints().stream().map(point -> new Pose2d(point.position.getX(), point.position.getY(), new Rotation2d())).collect(Collectors.toList()));
+				poses.addAll(path.getAllPathPoints().stream().map( point -> 
+					new Pose2d(point.position.getX(), point.position.getY(), 
+					new Rotation2d())).collect(Collectors.toList())
+				);
 			}
 			driveSubsystem.postTrajectoryToField(poses);
 		} catch (Exception e) {

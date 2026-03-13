@@ -5,12 +5,9 @@
 package frc.robot;
 
 import edu.wpi.first.net.WebServer;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.utilities.Elastic;
 
 public class Robot extends TimedRobot {
@@ -37,7 +34,6 @@ public class Robot extends TimedRobot {
     if (m_robotContainer.getAutonomousCommand() != null) {
       m_robotContainer.getAutonomousCommand().cancel();
     }
-    // m_robotContainer.algaeSubsystem.disableAlgaeArm().schedule();
   }
 
   @Override
@@ -51,7 +47,7 @@ public class Robot extends TimedRobot {
     if (m_robotContainer.getAutonomousCommand() != null) {
       m_robotContainer.getAutonomousCommand().schedule();
     }
-    Elastic.selectTab("Autonomous");
+    Elastic.selectTab("Match");
   }
 
   @Override
@@ -62,15 +58,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    Elastic.selectTab("Endgame");
-
-    new Trigger(
-      () -> DriverStation.getMatchTime() < 30
-    ).onTrue(
-      Commands.runOnce(
-        () -> Elastic.selectTab("Endgame")
-      )
-    );
 
     m_robotContainer.teleopInit();
 
