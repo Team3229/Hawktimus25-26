@@ -28,6 +28,6 @@ public class PathPlannerCommands extends SubsystemBase {
     }
 
     public Command pathStow() {
-        return manipSubsystem.stow().withTimeout(1);
+        return manipSubsystem.stow().withTimeout(3);
     }
 }

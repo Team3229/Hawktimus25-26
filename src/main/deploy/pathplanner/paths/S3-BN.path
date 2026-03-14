@@ -88,8 +88,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "ArmOut",
-      "waypointRelativePos": 2.4173789173789118,
+      "name": "Intake",
+      "waypointRelativePos": 2.2635327635327687,
       "endWaypointRelativePos": null,
       "command": null
     }
