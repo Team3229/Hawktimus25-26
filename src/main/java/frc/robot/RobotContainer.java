@@ -103,7 +103,7 @@ public class RobotContainer {
 			.deadband(0.1)
 			.cubeRotationControllerAxis(true)
 			.cubeTranslationControllerAxis(true)
-			.scaleTranslation(0.6)
+			.scaleTranslation(0.8)
 			.scaleRotation(0.9)
 			.allianceRelativeControl(true);
 			
