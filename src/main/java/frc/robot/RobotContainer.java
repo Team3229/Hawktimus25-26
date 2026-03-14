@@ -84,11 +84,7 @@ public class RobotContainer {
 	}
 
 	public void autoInit() {
-		if(DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-			driveSubsystem.zeroGyroCommand();
-		} else {
-			driveSubsystem.zeroWithRedCommand();
-		}
+		driveSubsystem.zeroGyroCommand();
 	}
 
 	private void configDriveControls() {
@@ -109,7 +105,7 @@ public class RobotContainer {
 			.cubeTranslationControllerAxis(true)
 			.scaleTranslation(0.8)
 			.scaleRotation(0.9)
-			.allianceRelativeControl(true);
+			.allianceRelativeControl(false);
 			
 		driveSubsystem.setDefaultCommand(
 			driveSubsystem.driveFieldOriented(
