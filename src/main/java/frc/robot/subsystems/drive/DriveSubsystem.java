@@ -473,9 +473,20 @@ public class DriveSubsystem extends SubsystemBase {
 			() -> {
 
 				Rotation2d mt1_left = VisionSubsystem.getMT1Rotation("left");
+				Rotation2d mt1_right = VisionSubsystem.getMT1Rotation("right");
 
-				if (mt1_left != null) {
+				if (mt1_left != null && mt1_right == null) {
 					setIMUYaw(mt1_left);
+				} else if (mt1_right != null && mt1_left == null) {
+					setIMUYaw(mt1_right);
+				} else if (mt1_left != null && mt1_right != null) {
+					Rotation2d average = new Rotation2d(
+						Math.atan2(
+							Math.sin(mt1_left.getRadians()) + Math.sin(mt1_right.getRadians()),
+							Math.cos(mt1_left.getRadians()) + Math.cos(mt1_right.getRadians())
+						)
+					);
+					setIMUYaw(average);
 				}
 			}
 		);
