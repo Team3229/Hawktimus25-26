@@ -59,6 +59,12 @@
               }
             ]
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Hub1-TNE"
+          }
         }
       ]
     }
