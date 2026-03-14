@@ -87,6 +87,7 @@ public class RobotContainer {
 		NamedCommands.registerCommand("ArmOut", pathPlannerCommands.pathExtendStorage());
 		NamedCommands.registerCommand("WheelSpinUp", pathPlannerCommands.pathSpinUp());
 		NamedCommands.registerCommand("Shoot", pathPlannerCommands.pathShoot());
+		NamedCommands.registerCommand("Stow", pathPlannerCommands.pathStow());
 
 		SwerveInputStream driveAngularVelocity = driveSubsystem.getInputStream(
 			() -> -driverController.a_Y(),

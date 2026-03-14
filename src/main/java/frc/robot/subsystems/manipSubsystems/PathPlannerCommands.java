@@ -28,7 +28,7 @@ public class PathPlannerCommands extends SubsystemBase {
     }
 
     public Command pathShoot() {
-        return manipSubsystem.shoot().withTimeout(5);
+        return manipSubsystem.shoot().withTimeout(7);
     }
 
     public Command pathExtake() {
