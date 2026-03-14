@@ -206,7 +206,7 @@ public class DriveSubsystem extends SubsystemBase {
 			e.printStackTrace();
 		}
 
-		resetOdometry(new Pose2d(2, 4, swerveDrive.getYaw()));
+		// resetOdometry(new Pose2d(2, 4, swerveDrive.getYaw()));
 			
 		swerveDrive.setAngularVelocityCompensation(
 			true,
@@ -349,23 +349,26 @@ public class DriveSubsystem extends SubsystemBase {
 	 * @param initialHolonomicPose The pose to set the odometry to
 	 */
 	public void resetOdometry(Pose2d pose) {
-		if(DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)) {
+		if (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)) {
             if (pose == null) {
                 swerveDrive.resetOdometry(startingRedPose);
                 return;
             }
-        } else {
+        } else if (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)) {
             if (pose == null) {
 				swerveDrive.resetOdometry(startingBluePose);
 				return;
 			}
-        }
+        } else {
+			System.out.println("Unknown/incorrect alliance setup");
+		}
+
         swerveDrive.resetOdometry(pose);
     }
 
 	public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
 		return run(() -> {
-			if(hubAlign) {
+			if (hubAlign) {
 				// overrides velocity on the z axis to align to the hub
 				Pose2d currentPose = swerveDrive.getPose();
 				ChassisSpeeds currentSpeed = swerveDrive.getFieldVelocity();
@@ -553,7 +556,7 @@ public class DriveSubsystem extends SubsystemBase {
 	 */
 	 public Translation2d getTargetTranslation() {
 		Pose2d robotPose = getPose();
-		if(Alliance.getAlliance().equals(AllianceColor.Red) ) {
+		if(DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)) {
 		
 			if(robotPose.getMeasureX().gt(RED_HUB_CENTER.getMeasureX())) {
 				return RED_HUB_CENTER;
