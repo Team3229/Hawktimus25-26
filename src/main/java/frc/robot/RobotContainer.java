@@ -38,6 +38,7 @@ public class RobotContainer {
 	DriveSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
 
+	SwerveInputStream driveAngularVelocity;
 	
 	VisualizerSubsystem visualizerSubsystem;
 	PathPlannerCommands pathPlannerCommands;
@@ -80,15 +81,19 @@ public class RobotContainer {
 	public void teleopInit() {
 
 		System.out.println("TELEOP INIT");
-		
+	
+		driveAngularVelocity.allianceRelativeControl(!DriverStation.isFMSAttached());
 	}
 
 	public void autoInit() {
-		if(DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
+		// if(DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)) {
 			driveSubsystem.zeroGyroCommand();
-		} else {
-			driveSubsystem.zeroWithRedCommand();
-		}
+		// } else {
+		// 	driveSubsystem.zeroWithRedCommand();
+		// }
+
+		driveAngularVelocity.allianceRelativeControl(!DriverStation.isFMSAttached());
+
 	}
 
 	private void configDriveControls() {
@@ -99,7 +104,7 @@ public class RobotContainer {
 		NamedCommands.registerCommand("Shoot", pathPlannerCommands.pathShoot());
 		NamedCommands.registerCommand("Stow", pathPlannerCommands.pathStow());
 
-		SwerveInputStream driveAngularVelocity = driveSubsystem.getInputStream(
+		driveAngularVelocity = driveSubsystem.getInputStream(
 			() -> -driverController.a_Y(),
 			() -> -driverController.a_X(),
 			() -> -driverController.a_Z()
@@ -108,8 +113,7 @@ public class RobotContainer {
 			.cubeRotationControllerAxis(true)
 			.cubeTranslationControllerAxis(true)
 			.scaleTranslation(0.8)
-			.scaleRotation(0.9)
-			.allianceRelativeControl(true);
+			.scaleRotation(0.9);
 			
 		driveSubsystem.setDefaultCommand(
 			driveSubsystem.driveFieldOriented(
