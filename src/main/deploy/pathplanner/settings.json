@@ -3,7 +3,12 @@
   "robotLength": 0.845,
   "holonomicMode": true,
   "pathFolders": [],
-  "autoFolders": [],
+  "autoFolders": [
+    "Blue Better Autos",
+    "Easy Autos",
+    "Red Better Autos",
+    "Test Autos"
+  ],
   "defaultMaxVel": 3.0,
   "defaultMaxAccel": 2.0,
   "defaultMaxAngVel": 540.0,

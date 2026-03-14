@@ -5,13 +5,19 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "S2-TN"
+            "name": "Stow"
           }
         },
         {
-          "type": "parallel",
+          "type": "path",
+          "data": {
+            "pathName": "S1-TN"
+          }
+        },
+        {
+          "type": "race",
           "data": {
             "commands": [
               {
@@ -42,13 +48,13 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Shoot"
+                  "name": "Stow"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "Stow"
+                  "name": "Shoot"
                 }
               }
             ]
@@ -64,6 +70,6 @@
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Blue Better Autos",
   "choreoAuto": false
 }

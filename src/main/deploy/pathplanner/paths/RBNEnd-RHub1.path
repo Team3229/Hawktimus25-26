@@ -1,0 +1,116 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 8.826362339514978,
+        "y": 3.472168330955778
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 9.66737517831669,
+        "y": 2.851112696148359
+      },
+      "isLocked": false,
+      "linkedName": "RBNEnd"
+    },
+    {
+      "anchor": {
+        "x": 11.284707560627673,
+        "y": 2.450014265335236
+      },
+      "prevControl": {
+        "x": 11.03470756062767,
+        "y": 2.450014265335236
+      },
+      "nextControl": {
+        "x": 11.711683309557772,
+        "y": 2.450014265335236
+      },
+      "isLocked": false,
+      "linkedName": "RBottomBump2"
+    },
+    {
+      "anchor": {
+        "x": 12.604450784593437,
+        "y": 2.450014265335236
+      },
+      "prevControl": {
+        "x": 12.125720399429385,
+        "y": 2.462952924393724
+      },
+      "nextControl": {
+        "x": 13.104209772526495,
+        "y": 2.4365072656613695
+      },
+      "isLocked": false,
+      "linkedName": "RBottomBump1"
+    },
+    {
+      "anchor": {
+        "x": 13.096119828815977,
+        "y": 2.5405848787446508
+      },
+      "prevControl": {
+        "x": 12.669144079885877,
+        "y": 2.42413694721826
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "RHub1"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1.031587365053979,
+      "rotationDegrees": -45.0
+    },
+    {
+      "waypointRelativePos": 1.9144342263094876,
+      "rotationDegrees": -45.0
+    }
+  ],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 1.0427350427350426,
+      "maxWaypointRelativePos": 2.0284900284900282,
+      "constraints": {
+        "maxVelocity": 1.5,
+        "maxAcceleration": 2.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 360.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "Stow",
+      "waypointRelativePos": 0.41595441595441607,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 2.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 360.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -49.57392125990093
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 90.0
+  },
+  "useDefaultConstraints": true
+}
