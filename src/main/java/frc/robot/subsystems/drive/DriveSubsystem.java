@@ -36,6 +36,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -464,6 +465,15 @@ public class DriveSubsystem extends SubsystemBase {
 		return runOnce(() -> zeroGyro());
 	}
 
+	public void redGyro() {
+		getIMU().setYaw(0);
+		swerveDrive.resetOdometry(new Pose2d(getPose().getX(), getPose().getY(), new Rotation2d(Math.PI)));
+	}
+
+	public Command zeroWithRedCommand() {
+		return runOnce(() -> redGyro());
+	}
+
 	/**
 	 * Zeros the gyro with the lime light based on 2d april tags
 	 */
@@ -488,6 +498,7 @@ public class DriveSubsystem extends SubsystemBase {
 					);
 					setIMUYaw(average);
 				}
+				
 			}
 		);
 	}

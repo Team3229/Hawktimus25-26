@@ -84,7 +84,11 @@ public class RobotContainer {
 	}
 
 	public void autoInit() {
-		driveSubsystem.zeroGyroCommand();
+		if(DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
+			driveSubsystem.zeroGyroCommand();
+		} else {
+			driveSubsystem.zeroWithRedCommand();
+		}
 	}
 
 	private void configDriveControls() {
