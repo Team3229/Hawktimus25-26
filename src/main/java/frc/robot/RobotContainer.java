@@ -82,7 +82,7 @@ public class RobotContainer {
 
 		System.out.println("TELEOP INIT");
 	
-		driveAngularVelocity.allianceRelativeControl(!DriverStation.isFMSAttached());
+		// driveAngularVelocity.allianceRelativeControl(!DriverStation.isFMSAttached());
 	}
 
 	public void autoInit() {
@@ -92,7 +92,7 @@ public class RobotContainer {
 		// 	driveSubsystem.zeroWithRedCommand();
 		// }
 
-		driveAngularVelocity.allianceRelativeControl(!DriverStation.isFMSAttached());
+		// driveAngularVelocity.allianceRelativeControl(!DriverStation.isFMSAttached());
 
 	}
 
@@ -113,7 +113,8 @@ public class RobotContainer {
 			.cubeRotationControllerAxis(true)
 			.cubeTranslationControllerAxis(true)
 			.scaleTranslation(0.8)
-			.scaleRotation(0.9);
+			.scaleRotation(0.9)
+			.allianceRelativeControl(true);
 			
 		driveSubsystem.setDefaultCommand(
 			driveSubsystem.driveFieldOriented(
