@@ -113,7 +113,7 @@ public class RobotContainer {
 			.cubeRotationControllerAxis(false)
 			.cubeTranslationControllerAxis(true)
 			.scaleTranslation(0.8)
-			.scaleRotation(0.7)
+			.scaleRotation(0.55)
 			.allianceRelativeControl(true);
 			// .allianceRelativeControl(() -> DriverStation.isFMSAttached());
 			
