@@ -63,7 +63,7 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 public class DriveSubsystem extends SubsystemBase {
     
-    public static LinearVelocity MAX_VELOCITY = MetersPerSecond.of(4.0); // was 5
+    public static LinearVelocity MAX_VELOCITY = MetersPerSecond.of(4.5); // was 5
     
     private static final Distance TRANS_ERR_TOL = Meters.of(0.025); //TODO: Test this with a setpoint
 	private static final LinearVelocity TRANS_VEL_TOL = MetersPerSecond.of(0.1);
@@ -237,6 +237,7 @@ public class DriveSubsystem extends SubsystemBase {
 				builder.addDoubleProperty("TargetY", () -> currentTarget.getY(), null);
 				builder.addDoubleProperty("TargetRot", () -> targetAngleRot, null);
 				builder.addDoubleProperty("CurrentRot", () -> currentAngleRot, null);
+				builder.addBooleanProperty("Blue Alliance", () -> DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue), null);
 			}
 		};
 		SmartDashboard.putData("Drive", driveSendable);
@@ -272,7 +273,7 @@ public class DriveSubsystem extends SubsystemBase {
 					PP_ROT
 				),
 				config,
-				() -> Alliance.getAlliance() == AllianceColor.Red,
+				() -> DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red),
 				this
             );
 			PathfindingCommand.warmupCommand().schedule();
@@ -348,7 +349,7 @@ public class DriveSubsystem extends SubsystemBase {
 	 * @param initialHolonomicPose The pose to set the odometry to
 	 */
 	public void resetOdometry(Pose2d pose) {
-		if(Alliance.getAlliance() == AllianceColor.Red) {
+		if(DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)) {
             if (pose == null) {
                 swerveDrive.resetOdometry(startingRedPose);
                 return;
