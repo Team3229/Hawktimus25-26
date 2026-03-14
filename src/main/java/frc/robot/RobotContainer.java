@@ -64,6 +64,12 @@ public class RobotContainer {
 
 	private void configureBindings() {
 
+		NamedCommands.registerCommand("Intake", pathPlannerCommands.pathIntake());
+		NamedCommands.registerCommand("ArmOut", manipSubsystem.intakeArmOut());
+		NamedCommands.registerCommand("WheelSpinUp", pathPlannerCommands.pathSpinUp());
+		NamedCommands.registerCommand("Shoot", pathPlannerCommands.pathShoot());
+		NamedCommands.registerCommand("Stow", manipSubsystem.stow());
+
 		DriverStation.silenceJoystickConnectionWarning(true);
 
 		configDriveControls();
@@ -83,12 +89,6 @@ public class RobotContainer {
 
 	private void configDriveControls() {
 
-		NamedCommands.registerCommand("Intake", pathPlannerCommands.pathIntake());
-		NamedCommands.registerCommand("ArmOut", manipSubsystem.intakeArmOut());
-		NamedCommands.registerCommand("WheelSpinUp", pathPlannerCommands.pathSpinUp());
-		NamedCommands.registerCommand("Shoot", pathPlannerCommands.pathShoot());
-		NamedCommands.registerCommand("Stow", manipSubsystem.stow());
-
 		SwerveInputStream driveAngularVelocity = driveSubsystem.getInputStream(
 			() -> -driverController.a_Y(),
 			() -> -driverController.a_X(),
@@ -97,7 +97,7 @@ public class RobotContainer {
 			.deadband(0.1)
 			.cubeRotationControllerAxis(true)
 			.cubeTranslationControllerAxis(true)
-			.scaleTranslation(0.8)
+			.scaleTranslation(0.6)
 			.scaleRotation(0.9)
 			.allianceRelativeControl(true);
 			
