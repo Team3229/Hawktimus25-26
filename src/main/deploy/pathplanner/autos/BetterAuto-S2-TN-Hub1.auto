@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "S1-TN"
+            "pathName": "S2-TN"
           }
         },
         {
@@ -33,6 +33,12 @@
           "type": "path",
           "data": {
             "pathName": "TNeutralEnd-Hub1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot"
           }
         }
       ]
