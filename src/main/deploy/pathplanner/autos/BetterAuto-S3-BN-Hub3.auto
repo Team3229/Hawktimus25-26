@@ -40,6 +40,12 @@
           "data": {
             "name": "Shoot"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Hub3-BNE"
+          }
         }
       ]
     }
