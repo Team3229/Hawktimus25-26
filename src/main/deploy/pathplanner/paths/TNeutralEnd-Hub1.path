@@ -63,11 +63,11 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 1.0087964814074433,
-      "rotationDegrees": 45.0
+      "rotationDegrees": -135.0
     },
     {
       "waypointRelativePos": 1.9444222311075627,
-      "rotationDegrees": 45.0
+      "rotationDegrees": -135.0
     }
   ],
   "constraintZones": [
@@ -86,7 +86,14 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "Stow",
+      "waypointRelativePos": 0.22364672364673144,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 2.0,
