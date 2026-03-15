@@ -16,19 +16,19 @@
     },
     {
       "anchor": {
-        "x": 3.9644819277108434,
+        "x": 3.964,
         "y": 5.455602409638555
       },
       "prevControl": {
-        "x": 3.4864196957058966,
+        "x": 3.485937767995053,
         "y": 5.50340863283905
       },
       "nextControl": {
-        "x": 4.510867469879518,
+        "x": 4.510385542168674,
         "y": 5.400963855421687
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "BTB1"
     },
     {
       "anchor": {
@@ -44,7 +44,7 @@
         "y": 5.511256470713139
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "BTB2"
     },
     {
       "anchor": {
