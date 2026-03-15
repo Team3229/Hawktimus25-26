@@ -43,8 +43,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import frc.hawklibraries.utilities.Alliance;
-import frc.hawklibraries.utilities.Alliance.AllianceColor;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
 import frc.robot.utilities.LimelightHelpers;
@@ -63,7 +61,7 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 public class DriveSubsystem extends SubsystemBase {
     
-    public static LinearVelocity MAX_VELOCITY = MetersPerSecond.of(4.0); // was 5
+    public static LinearVelocity MAX_VELOCITY = MetersPerSecond.of(5); // was 5
     
     private static final Distance TRANS_ERR_TOL = Meters.of(0.025); //TODO: Test this with a setpoint
 	private static final LinearVelocity TRANS_VEL_TOL = MetersPerSecond.of(0.1);
@@ -206,7 +204,7 @@ public class DriveSubsystem extends SubsystemBase {
 			e.printStackTrace();
 		}
 
-		resetOdometry(new Pose2d(2, 4, swerveDrive.getYaw()));
+		// resetOdometry(new Pose2d(2, 4, swerveDrive.getYaw()));
 			
 		swerveDrive.setAngularVelocityCompensation(
 			true,
@@ -237,6 +235,7 @@ public class DriveSubsystem extends SubsystemBase {
 				builder.addDoubleProperty("TargetY", () -> currentTarget.getY(), null);
 				builder.addDoubleProperty("TargetRot", () -> targetAngleRot, null);
 				builder.addDoubleProperty("CurrentRot", () -> currentAngleRot, null);
+				builder.addBooleanProperty("Blue Alliance", () -> DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue), null);
 			}
 		};
 		SmartDashboard.putData("Drive", driveSendable);
@@ -272,7 +271,7 @@ public class DriveSubsystem extends SubsystemBase {
 					PP_ROT
 				),
 				config,
-				() -> Alliance.getAlliance() == AllianceColor.Red,
+				() -> DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red),
 				this
             );
 			PathfindingCommand.warmupCommand().schedule();
@@ -323,19 +322,16 @@ public class DriveSubsystem extends SubsystemBase {
 		LimelightHelpers.PoseEstimate estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-" + side);
 
 		if (estimate != null && estimate.tagCount > 0) {
-			
-			@SuppressWarnings("unused")
-			double tagID = LimelightHelpers.getFiducialID("limelight-" + side);
 
-				Translation3d aprilTagPosition = LimelightHelpers.getTargetPose3d_RobotSpace("limelight-" + side).getTranslation();
+			Translation3d aprilTagPosition = LimelightHelpers.getTargetPose3d_RobotSpace("limelight-" + side).getTranslation();
 
-				if (Math.hypot(aprilTagPosition.getX(), aprilTagPosition.getZ()) <= 10.5) {
+			if (Math.hypot(aprilTagPosition.getX(), aprilTagPosition.getZ()) <= 3.5) {
 					
 				swerveDrive.addVisionMeasurement(new Pose2d(estimate.pose.getX(), estimate.pose.getY(), getIMUYaw()), estimate.timestampSeconds);
 					
-				}
-				
 			}
+				
+		}
 
       }
 
@@ -351,23 +347,26 @@ public class DriveSubsystem extends SubsystemBase {
 	 * @param initialHolonomicPose The pose to set the odometry to
 	 */
 	public void resetOdometry(Pose2d pose) {
-		if(Alliance.getAlliance() == AllianceColor.Red) {
+		if (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)) {
             if (pose == null) {
                 swerveDrive.resetOdometry(startingRedPose);
                 return;
             }
-        } else {
+        } else if (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)) {
             if (pose == null) {
 				swerveDrive.resetOdometry(startingBluePose);
 				return;
 			}
-        }
+        } else {
+			System.out.println("Unknown/incorrect alliance setup");
+		}
+
         swerveDrive.resetOdometry(pose);
     }
 
 	public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
 		return run(() -> {
-			if(hubAlign) {
+			if (hubAlign) {
 				// overrides velocity on the z axis to align to the hub
 				Pose2d currentPose = swerveDrive.getPose();
 				ChassisSpeeds currentSpeed = swerveDrive.getFieldVelocity();
@@ -555,7 +554,7 @@ public class DriveSubsystem extends SubsystemBase {
 	 */
 	 public Translation2d getTargetTranslation() {
 		Pose2d robotPose = getPose();
-		if(Alliance.getAlliance().equals(AllianceColor.Red) ) {
+		if(DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)) {
 		
 			if(robotPose.getMeasureX().gt(RED_HUB_CENTER.getMeasureX())) {
 				return RED_HUB_CENTER;
