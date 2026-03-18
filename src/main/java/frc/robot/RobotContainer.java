@@ -55,6 +55,7 @@ public class RobotContainer {
 			"swerve",
 			TelemetryVerbosity.HIGH
 		);
+
 		manipSubsystem = new ManipSubsystem(driveSubsystem);
 
 		pathPlannerCommands = new PathPlannerCommands(manipSubsystem);
@@ -71,7 +72,8 @@ public class RobotContainer {
 		NamedCommands.registerCommand("Shoot", pathPlannerCommands.pathShoot());
 		NamedCommands.registerCommand("Stow", manipSubsystem.stow());
 
-		DriverStation.silenceJoystickConnectionWarning(true);
+		// DriverStation.silenceJoystickConnectionWarning(true);
+		DriverStation.silenceJoystickConnectionWarning(false);
 
 		configDriveControls();
 		configManipControls();
@@ -106,7 +108,8 @@ public class RobotContainer {
 			.cubeTranslationControllerAxis(true)
 			.scaleTranslation(0.8)
 			.scaleRotation(0.5)
-			.allianceRelativeControl(() -> DriverStation.isFMSAttached());
+			.allianceRelativeControl(() -> DriverStation.isFMSAttached())
+			.robotRelative(() -> driverController.p_Any().getAsBoolean());
 			
 		driveSubsystem.setDefaultCommand(
 			driveSubsystem.driveFieldOriented(
@@ -167,13 +170,6 @@ public class RobotContainer {
 			manipSubsystem.extake()
 		);
 
-		manipController.b_12().onTrue(
-			Commands.runOnce(() -> {
-				manipSubsystem.getCurrentCommand().cancel(); // TODO: currently crashes bot
-				// cancels ALL manipING on manip controller
-			})
-		);
-
 		manipController.p_Up().onTrue(
 			manipSubsystem.upSRPSCommand()
 		);
@@ -194,7 +190,6 @@ public class RobotContainer {
 
 	public void initTelemetery() {
 		SmartDashboard.putData(CommandScheduler.getInstance());
-
 
 		autoChooser = AutoBuilder.buildAutoChooser();
 		SmartDashboard.putData("Autonomous Chooser", autoChooser);
