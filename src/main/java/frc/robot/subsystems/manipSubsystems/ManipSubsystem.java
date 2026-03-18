@@ -5,15 +5,15 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.drive.YAGSLSubsystem;
 
 public class ManipSubsystem extends SubsystemBase {
     IntakeSubsystem intakeSubsystem;
     IndexSubsystem indexSubsystem;
     SpitterSubsystem spitterSubsystem;
-    DriveSubsystem driveSubsystem;
+    YAGSLSubsystem driveSubsystem;
     
-    public ManipSubsystem(DriveSubsystem drive) {
+    public ManipSubsystem(YAGSLSubsystem drive) {
         intakeSubsystem = new IntakeSubsystem();
         spitterSubsystem = new SpitterSubsystem(drive);
         indexSubsystem = new IndexSubsystem(spitterSubsystem);

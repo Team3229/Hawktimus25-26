@@ -23,12 +23,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.drive.YAGSLSubsystem;
 
 import static edu.wpi.first.units.Units.Amps;
 
 public class SpitterSubsystem extends SubsystemBase {
-    private static DriveSubsystem driveSubsystem;
+    private static YAGSLSubsystem driveSubsystem;
     private static double requestedShooterVelocity = 26;
     private static double requestedFeederVelocity = 38;
     private static double deadBand = 2.5;
@@ -77,7 +77,7 @@ public class SpitterSubsystem extends SubsystemBase {
 
     private static Sendable spitterSendable;
 
-    public SpitterSubsystem(DriveSubsystem drive) {
+    public SpitterSubsystem(YAGSLSubsystem drive) {
         driveSubsystem = drive;
 
         // initializes shooting motor

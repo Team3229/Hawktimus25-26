@@ -24,7 +24,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.inputs.ButtonBoard;
 import frc.robot.inputs.FlightStick;
 import frc.robot.subsystems.VisualizerSubsystem;
-import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.drive.YAGSLSubsystem;
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import frc.robot.subsystems.manipSubsystems.PathPlannerCommands;
 import swervelib.SwerveInputStream;
@@ -35,7 +35,7 @@ public class RobotContainer {
 	FlightStick driverController;
 	FlightStick manipController;
 	ButtonBoard buttonBoard;
-	DriveSubsystem driveSubsystem;
+	YAGSLSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
 
 	SwerveInputStream driveAngularVelocity;
@@ -51,7 +51,7 @@ public class RobotContainer {
 		driverController = new FlightStick(0);
 		manipController = new FlightStick(1);
 
-		driveSubsystem = new DriveSubsystem(
+		driveSubsystem = new YAGSLSubsystem(
 			"swerve",
 			TelemetryVerbosity.HIGH
 		);
