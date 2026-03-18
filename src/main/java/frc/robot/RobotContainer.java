@@ -82,18 +82,10 @@ public class RobotContainer {
 
 		System.out.println("TELEOP INIT");
 	
-		// driveAngularVelocity.allianceRelativeControl(!DriverStation.isFMSAttached());
 	}
 
 	public void autoInit() {
-		// if(DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)) {
-			driveSubsystem.zeroGyroCommand();
-		// } else {
-		// 	driveSubsystem.zeroWithRedCommand();
-		// }
-
-		// driveAngularVelocity.allianceRelativeControl(!DriverStation.isFMSAttached());
-
+		driveSubsystem.zeroGyroCommand();
 	}
 
 	private void configDriveControls() {
@@ -114,13 +106,14 @@ public class RobotContainer {
 			.cubeTranslationControllerAxis(true)
 			.scaleTranslation(0.8)
 			.scaleRotation(0.5)
-			.allianceRelativeControl(true);
-			// .allianceRelativeControl(() -> DriverStation.isFMSAttached());
+			// .allianceRelativeControl(true);
+			.allianceRelativeControl(() -> DriverStation.isFMSAttached());
 			
 		driveSubsystem.setDefaultCommand(
 			driveSubsystem.driveFieldOriented(
 				driveAngularVelocity
 			)
+
 		);
 
 		driverController.b_10().onTrue(
