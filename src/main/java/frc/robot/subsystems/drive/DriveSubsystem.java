@@ -70,6 +70,13 @@ public class DriveSubsystem extends SubsystemBase {
         .withRotationalDeadband(MaxAngularRate * 0.1)
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
         .withSteerRequestType(SteerRequestType.Position);
+
+        private final FieldCentric fieldcentric = new FieldCentric();
+
+        @Override
+        public StatusCode apply(SwerveControlParameters parameters, SwerveModule)
+
+    public final TunerSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     
     private static final Rotation2d bluePerspRot = Rotation2d.kZero;
     private static final Rotation2d redPerspRot = Rotation2d.k180deg;
@@ -77,6 +84,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     public DriveSubsystem() {
         drivetrain.configNeutralMode(NeutralModeValue.Coast);
+        driveTrain.seedFieldCentric(swerveIMU.getIMU());
         
     }
 
@@ -91,4 +99,5 @@ public class DriveSubsystem extends SubsystemBase {
             });
         }
     }
+    
 }

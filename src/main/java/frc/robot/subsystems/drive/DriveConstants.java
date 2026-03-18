@@ -20,9 +20,12 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
+import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
+import com.ctre.phoenix6.swerve.SwerveModuleConstantsFactory;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
@@ -75,12 +78,12 @@ public class DriveConstants {
       .withKP(0).withKI(0).withKD(0)
       .withKS(0).withKV(0).withKA(0);
    
-   private static final ClosedLoopOutputType kSteerClosedLoopOutput = ClosedLoopOutputType.Voltage;
    private static final ClosedLoopOutputType kAngleClosedLoopOutput = ClosedLoopOutputType.Voltage;
+   private static final ClosedLoopOutputType kDriveClosedLoopOutput = ClosedLoopOutputType.Voltage;
 
    private static final DriveMotorArrangement kDriveMotorType = DriveMotorArrangement.TalonFX_Integrated;
-   private static final DriveMotorArrangement kAngleMotorType = DriveMotorArrangement.TalonFX_Integrated;
-   
+  private static final SteerMotorArrangement kAngleMotorType = SteerMotorArrangement.TalonFX_Integrated;
+     
    public boolean canFly = true; //if you delete this you like eating puppies or if your name is logan - Owen
 
 
@@ -104,7 +107,7 @@ public class DriveConstants {
       
    private static final CANcoderConfiguration encoderInitialConfigs = new CANcoderConfiguration();
 
-   private static final Pigeon2Configuration pigeonConfigs;
+   private static final Pigeon2Configuration pigeonConfigs = new Pigeon2Configuration();
 
    public static final CANBus kCANBus = new CANBus().roboRIO();
 
@@ -122,4 +125,27 @@ public class DriveConstants {
 
     private static final int kPigeonId = 1; //Change later
    
+   public static final SwerveDrivetrainConstants DrivetrainConstants = new SwerveDrivetrainConstants()
+            .withCANBusName(kCANBus.getName())
+            .withPigeon2Id(kPigeonId)
+            .withPigeon2Configs(pigeonConfigs);
+
+            private static final SwerveModuleConstantsFactory<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> ConstantCreator =
+        new SwerveModuleConstantsFactory<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>()
+            .withDriveMotorGearRatio(kDriveGearRatio)
+            .withSteerMotorGearRatio(kSteerGearRatio)
+            .withCouplingGearRatio(kCoupleRatio)
+            .withWheelRadius(kWheelRadius)
+            .withSteerMotorGains(anglePID)
+            .withDriveMotorGains(drivePID)
+            .withSteerMotorClosedLoopOutput(kAngleClosedLoopOutput)
+            .withDriveMotorClosedLoopOutput(kDriveClosedLoopOutput)
+            .withSlipCurrent(kSlipCurrent)
+            .withSpeedAt12Volts(kSpeedAt12Volts)
+            .withDriveMotorType(kDriveMotorType)
+            .withSteerMotorType(kAngleMotorType)
+            .withFeedbackSource(kSteerFeedbackType)
+            .withDriveMotorInitialConfigs(driveInitialConfigs)
+            .withSteerMotorInitialConfigs(angleInitialConfigs)
+            .withEncoderInitialConfigs(encoderInitialConfigs);
 }
