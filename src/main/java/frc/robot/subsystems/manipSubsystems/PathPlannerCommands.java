@@ -12,26 +12,22 @@ public class PathPlannerCommands extends SubsystemBase {
     }
 
     public Command pathIntake() {
-        return manipSubsystem.intake().withTimeout(3);
-    }
-
-    public Command pathStow() {
-        return manipSubsystem.stow().withTimeout(3);
-    }
-
-    public Command pathExtendStorage() {
-        return manipSubsystem.intakeArmOut().withTimeout(3);
+        return manipSubsystem.intake().withTimeout(9);
     }
 
     public Command pathSpinUp() {
-        return manipSubsystem.intakeArmOut().withTimeout(6);
+        return manipSubsystem.spinUp().withTimeout(6);
     }
 
     public Command pathShoot() {
-        return manipSubsystem.shoot().withTimeout(5);
+        return manipSubsystem.shoot().withTimeout(5.5);
     }
 
     public Command pathExtake() {
         return manipSubsystem.extake().withTimeout(3);
+    }
+
+    public Command pathStow() {
+        return manipSubsystem.stow().withTimeout(3);
     }
 }

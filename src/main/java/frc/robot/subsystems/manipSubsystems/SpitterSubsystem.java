@@ -67,10 +67,10 @@ public class SpitterSubsystem extends SubsystemBase {
 
     static {
         // SPITTER_MAP.put(1.782, new SpitterParams(1, 1, 1));
-        SPITTER_MAP.put(2.745, new SpitterParams(28, 40, 1));
+        SPITTER_MAP.put(2.745, new SpitterParams(28, 40, 0.68));
         SPITTER_MAP.put(3.6576, new SpitterParams(31, 41, 0.9));
-        SPITTER_MAP.put(4.44, new SpitterParams(35, 41, 1.43));
-        SPITTER_MAP.put(5.33, new SpitterParams(39, 43, 1.2));
+        SPITTER_MAP.put(4.44, new SpitterParams(35, 41, 1.2));
+        SPITTER_MAP.put(5.33, new SpitterParams(39, 43, 1.34));
     }
 
     public static final double SYSTEM_LATENCY_SECONDS = 0.3;

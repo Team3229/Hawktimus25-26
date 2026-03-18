@@ -5,9 +5,9 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "S1-Hub1"
+            "name": "Intake"
           }
         },
         {
@@ -15,17 +15,11 @@
           "data": {
             "name": "Stow"
           }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot"
-          }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "Easy Autos",
+  "folder": "Test Autos",
   "choreoAuto": false
 }

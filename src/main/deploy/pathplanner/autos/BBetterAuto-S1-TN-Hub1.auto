@@ -5,25 +5,25 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "S2-HPStation"
-          }
-        },
-        {
           "type": "named",
           "data": {
-            "name": "ArmOut"
+            "name": "Stow"
           }
         },
         {
-          "type": "parallel",
+          "type": "path",
+          "data": {
+            "pathName": "S1-TN"
+          }
+        },
+        {
+          "type": "race",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "HPStationGrab"
+                  "pathName": "TNeutral Grab"
                 }
               },
               {
@@ -36,59 +36,40 @@
           }
         },
         {
+          "type": "path",
+          "data": {
+            "pathName": "TNeutralEnd-Hub1"
+          }
+        },
+        {
           "type": "parallel",
           "data": {
             "commands": [
               {
-                "type": "path",
+                "type": "named",
                 "data": {
-                  "pathName": "HPStation-Hub3"
+                  "name": "Stow"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "WheelSpinUp"
+                  "name": "Shoot"
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Hub3-BNeutral"
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "BNeutral Grab"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake"
-                }
-              }
-            ]
+            "pathName": "Hub1-TNE"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Blue Better Autos",
   "choreoAuto": false
 }

@@ -38,6 +38,7 @@ public class RobotContainer {
 	DriveSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
 
+	SwerveInputStream driveAngularVelocity;
 	
 	VisualizerSubsystem visualizerSubsystem;
 	PathPlannerCommands pathPlannerCommands;
@@ -64,6 +65,12 @@ public class RobotContainer {
 
 	private void configureBindings() {
 
+		NamedCommands.registerCommand("Intake", pathPlannerCommands.pathIntake());
+		NamedCommands.registerCommand("ArmOut", manipSubsystem.intakeArmOut());
+		NamedCommands.registerCommand("WheelSpinUp", pathPlannerCommands.pathSpinUp());
+		NamedCommands.registerCommand("Shoot", pathPlannerCommands.pathShoot());
+		NamedCommands.registerCommand("Stow", manipSubsystem.stow());
+
 		DriverStation.silenceJoystickConnectionWarning(true);
 
 		configDriveControls();
@@ -74,31 +81,41 @@ public class RobotContainer {
 	public void teleopInit() {
 
 		System.out.println("TELEOP INIT");
-		
+	
+		// driveAngularVelocity.allianceRelativeControl(!DriverStation.isFMSAttached());
 	}
 
 	public void autoInit() {
-		driveSubsystem.zeroGyroCommand();
+		// if(DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)) {
+			driveSubsystem.zeroGyroCommand();
+		// } else {
+		// 	driveSubsystem.zeroWithRedCommand();
+		// }
+
+		// driveAngularVelocity.allianceRelativeControl(!DriverStation.isFMSAttached());
+
 	}
 
 	private void configDriveControls() {
 
 		NamedCommands.registerCommand("Intake", pathPlannerCommands.pathIntake());
-		NamedCommands.registerCommand("ArmOut", pathPlannerCommands.pathExtendStorage());
+		NamedCommands.registerCommand("ArmOut", manipSubsystem.intakeArmOut());
 		NamedCommands.registerCommand("WheelSpinUp", pathPlannerCommands.pathSpinUp());
 		NamedCommands.registerCommand("Shoot", pathPlannerCommands.pathShoot());
+		NamedCommands.registerCommand("Stow", pathPlannerCommands.pathStow());
 
-		SwerveInputStream driveAngularVelocity = driveSubsystem.getInputStream(
+		driveAngularVelocity = driveSubsystem.getInputStream(
 			() -> -driverController.a_Y(),
 			() -> -driverController.a_X(),
 			() -> -driverController.a_Z()
 		)
 			.deadband(0.1)
-			.cubeRotationControllerAxis(true)
+			.cubeRotationControllerAxis(false)
 			.cubeTranslationControllerAxis(true)
 			.scaleTranslation(0.8)
-			.scaleRotation(0.9)
+			.scaleRotation(0.5)
 			.allianceRelativeControl(true);
+			// .allianceRelativeControl(() -> DriverStation.isFMSAttached());
 			
 		driveSubsystem.setDefaultCommand(
 			driveSubsystem.driveFieldOriented(
