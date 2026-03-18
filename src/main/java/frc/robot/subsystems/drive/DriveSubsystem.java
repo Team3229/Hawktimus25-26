@@ -61,24 +61,21 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 public class DriveSubsystem extends SubsystemBase {
     
-    public static LinearVelocity MAX_VELOCITY = MetersPerSecond.of(5); // was 5
+    public static LinearVelocity MAX_VELOCITY = MetersPerSecond.of(5);
     
-    private static final Distance TRANS_ERR_TOL = Meters.of(0.025); //TODO: Test this with a setpoint
+    private static final Distance TRANS_ERR_TOL = Meters.of(0.025);
 	private static final LinearVelocity TRANS_VEL_TOL = MetersPerSecond.of(0.1);
 	private static final Angle ROT_ERR_TOL = Degrees.of(0.5);
 	private static final AngularVelocity ROT_VEL_TOL = DegreesPerSecond.of(0.5);
 
-	private static final LinearVelocity TRANS_MAX_VEL = MetersPerSecond.of(3); //TODO: Was 1
+	private static final LinearVelocity TRANS_MAX_VEL = MetersPerSecond.of(3);
 	private static final LinearAcceleration TRANS_MAX_ACCEL = MetersPerSecondPerSecond.of(2);
 
-	private static final AngularVelocity ROT_MAX_VEL = DegreesPerSecond.of(540); // TODO: We multiplied these by 0.75
+	private static final AngularVelocity ROT_MAX_VEL = DegreesPerSecond.of(540);
 	private static final AngularAcceleration ROT_MAX_ACCEL = DegreesPerSecondPerSecond.of(540);
 
     private static final Pose2d startingBluePose = new Pose2d(2, 4, new Rotation2d(0));
     private static final Pose2d startingRedPose = new Pose2d(2, 4, new Rotation2d(Math.PI));
-
-	// private static final Pose2d redHubPose = new Pose2d(Inches.of(468.56), Inches.of(158.32), new Rotation2d());
-	// private static final Pose2d blueHubPose = new Pose2d(Inches.of(152.56), Inches.of(158.32), new Rotation2d());
 
 	public static final Translation2d BLUE_HUB_CENTER = new Translation2d(4.6116, 4.0213);
 	public static final Translation2d BLUE_HUB_BACK = new Translation2d(5.2342, 4.0213);
@@ -203,17 +200,12 @@ public class DriveSubsystem extends SubsystemBase {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		// resetOdometry(new Pose2d(2, 4, swerveDrive.getYaw()));
 			
 		swerveDrive.setAngularVelocityCompensation(
 			true,
 			true,
 			0.1
 		);
-		
-		swerveDrive.chassisVelocityCorrection = false; //does nothing set to true and test later
-		swerveDrive.autonomousChassisVelocityCorrection = false; //does nothing currently set to true and test later
 		
 		swerveDrive.useExternalFeedbackSensor();
 
@@ -235,7 +227,11 @@ public class DriveSubsystem extends SubsystemBase {
 				builder.addDoubleProperty("TargetY", () -> currentTarget.getY(), null);
 				builder.addDoubleProperty("TargetRot", () -> targetAngleRot, null);
 				builder.addDoubleProperty("CurrentRot", () -> currentAngleRot, null);
-				builder.addBooleanProperty("Blue Alliance", () -> DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue), null);
+				builder.addBooleanProperty(
+					"Blue Alliance", 
+					() -> DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue), 
+					null
+				);
 			}
 		};
 		SmartDashboard.putData("Drive", driveSendable);
@@ -605,7 +601,6 @@ public class DriveSubsystem extends SubsystemBase {
 				hubAlign = false;
 			}
 		};
-		// return Commands.runOnce(() -> hubAlign = !hubAlign);
 	}
 
 }
