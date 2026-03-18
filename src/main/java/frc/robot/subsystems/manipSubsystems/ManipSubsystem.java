@@ -117,4 +117,7 @@ public class ManipSubsystem extends SubsystemBase {
         return spitterSubsystem.downFRPSCommand();
     }
 
+    public Command stowSpinCommand() {
+        return intakeSubsystem.toggleStowSpin();
+    }
 }

@@ -159,6 +159,10 @@ public class RobotContainer {
 			manipSubsystem.intakeArmOut()
 		);
 
+		manipController.b_6().whileTrue(
+			manipSubsystem.stowSpinCommand()
+		);
+
 		manipController.b_10().whileTrue(
 			manipSubsystem.extake()
 		);
