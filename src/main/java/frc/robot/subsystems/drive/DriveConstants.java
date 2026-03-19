@@ -148,4 +148,10 @@ public class DriveConstants {
             .withDriveMotorInitialConfigs(driveInitialConfigs)
             .withSteerMotorInitialConfigs(angleInitialConfigs)
             .withEncoderInitialConfigs(encoderInitialConfigs);
+
+         private static final int kFrontLeftDriveMotorID = 0;//TBD
+         private static final int kFrontLeftAngleMotorID = 0;//TBD
+         private static final int kFrontLeftCanID = 0;//TBD
+         private static final Angle kFrontLeftEncoderOffset = Degrees.of(0);
+         private static final boolean kDriveMotorInverted = false;
 }
