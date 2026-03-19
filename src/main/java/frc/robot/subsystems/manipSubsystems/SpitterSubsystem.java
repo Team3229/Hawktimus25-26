@@ -178,8 +178,8 @@ public class SpitterSubsystem extends SubsystemBase {
             @Override
             public void initSendable(SendableBuilder builder) {
                 builder.addDoubleProperty(kShooterPKey, () -> kP, (newkP) -> editSpitterP(newkP));
-                builder.addDoubleProperty("Shooter I", () -> kV, (newkV) -> editSpitterP(newkV));
-
+                builder.addDoubleProperty("Shooter V", () -> kV, (newkV) -> editSpitterV(newkV));
+            
             }
         };
         SmartDashboard.putData("SpitterPID", spitterPIDSendable);
@@ -208,22 +208,24 @@ public class SpitterSubsystem extends SubsystemBase {
         return out;
     }
 
-     private void editSpitterP(double newkP) {
-            kP = newkP;
-            RSMotorConfig.Slot0.kP = kP;
-            LSMotorConfig.Slot0.kP = kP;
+    private void editSpitterP(double newkP) {
+        kP = newkP;
+        RSMotorConfig.Slot0.kP = kP;
+        LSMotorConfig.Slot0.kP = kP;
 
-            rightSpitter.getConfigurator().apply(RSMotorConfig);
-            leftSpitter.getConfigurator().apply(LSMotorConfig);
+        rightSpitter.getConfigurator().apply(RSMotorConfig);
+        leftSpitter.getConfigurator().apply(LSMotorConfig);
+        System.out.println(RSMotorConfig.Slot0.kP);
     }
 
-         private void editSpitterI(double newkV) {
-            kV = newkV;
-            RSMotorConfig.Slot0.kV = kV;
-            LSMotorConfig.Slot0.kV = kV;
+    private void editSpitterV(double newkV) {
+        kV = newkV;
+        RSMotorConfig.Slot0.kV = kV;
+        LSMotorConfig.Slot0.kV = kV;
 
-            rightSpitter.getConfigurator().apply(RSMotorConfig);
-            leftSpitter.getConfigurator().apply(LSMotorConfig);
+        rightSpitter.getConfigurator().apply(RSMotorConfig);
+        leftSpitter.getConfigurator().apply(LSMotorConfig);
+        System.out.println(RSMotorConfig.Slot0.kV);
     }
     
     public boolean shooterIsReady() {
