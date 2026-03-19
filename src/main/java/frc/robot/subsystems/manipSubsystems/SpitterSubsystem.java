@@ -34,11 +34,13 @@ public class SpitterSubsystem extends SubsystemBase {
     private static double deadBand = 2.5;
 
     // change PID (if needed)
-    private static double kP = 0.1;
-    private static double kV = 0.13;
+    private double kV = 0.13;
+    private double kP = 0.1;
 
-    private static double fP = 0.1;
-    private static double fV = 0.13;
+    private double fP = 0.1;
+    private double fV = 0.13;
+
+    public static final String kShooterPKey = "ShooterP";
 
     private static final int LS_CAN_ID = 10;
     private TalonFX leftSpitter;
@@ -76,6 +78,7 @@ public class SpitterSubsystem extends SubsystemBase {
     public static final double SYSTEM_LATENCY_SECONDS = 0.3;
 
     private static Sendable spitterSendable;
+    private static Sendable spitterPIDSendable;
 
     public SpitterSubsystem(DriveSubsystem drive) {
         driveSubsystem = drive;
@@ -170,6 +173,16 @@ public class SpitterSubsystem extends SubsystemBase {
             };
         };
 		SmartDashboard.putData("Spitter", spitterSendable);
+
+        spitterPIDSendable = new Sendable() {
+            @Override
+            public void initSendable(SendableBuilder builder) {
+                builder.addDoubleProperty(kShooterPKey, () -> kP, (newkP) -> editSpitterP(newkP));
+                builder.addDoubleProperty("Shooter I", () -> kV, (newkV) -> editSpitterP(newkV));
+
+            }
+        };
+        SmartDashboard.putData("SpitterPID", spitterPIDSendable);
     }
 
     public Command shoot() {
@@ -195,6 +208,24 @@ public class SpitterSubsystem extends SubsystemBase {
         return out;
     }
 
+     private void editSpitterP(double newkP) {
+            kP = newkP;
+            RSMotorConfig.Slot0.kP = kP;
+            LSMotorConfig.Slot0.kP = kP;
+
+            rightSpitter.getConfigurator().apply(RSMotorConfig);
+            leftSpitter.getConfigurator().apply(LSMotorConfig);
+    }
+
+         private void editSpitterI(double newkV) {
+            kV = newkV;
+            RSMotorConfig.Slot0.kV = kV;
+            LSMotorConfig.Slot0.kV = kV;
+
+            rightSpitter.getConfigurator().apply(RSMotorConfig);
+            leftSpitter.getConfigurator().apply(LSMotorConfig);
+    }
+    
     public boolean shooterIsReady() {
         double leftVelocity = leftSpitter.getVelocity().getValueAsDouble();
         double rightVelocity = rightSpitter.getVelocity().getValueAsDouble();

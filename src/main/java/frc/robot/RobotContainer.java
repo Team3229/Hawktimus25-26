@@ -27,6 +27,7 @@ import frc.robot.subsystems.VisualizerSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import frc.robot.subsystems.manipSubsystems.PathPlannerCommands;
+import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
 import swervelib.SwerveInputStream;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
@@ -37,6 +38,7 @@ public class RobotContainer {
 	ButtonBoard buttonBoard;
 	DriveSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
+	SpitterSubsystem spitterSubsystem;
 
 	SwerveInputStream driveAngularVelocity;
 	
@@ -57,6 +59,7 @@ public class RobotContainer {
 		);
 
 		manipSubsystem = new ManipSubsystem(driveSubsystem);
+		spitterSubsystem = new SpitterSubsystem(driveSubsystem);
 
 		pathPlannerCommands = new PathPlannerCommands(manipSubsystem);
 
@@ -185,7 +188,6 @@ public class RobotContainer {
 		manipController.p_Left().onTrue(
 			manipSubsystem.downFRPSCommand()
 		);
-
 	}
 
 	public void initTelemetery() {
