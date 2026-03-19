@@ -11,11 +11,15 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.DriveRequestType;
-import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.SteerRequestType;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveControlParameters;
+import com.ctre.phoenix6.swerve.SwerveModule;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
@@ -51,6 +55,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
 import frc.robot.utilities.LimelightHelpers;
+import  frc.robot.subsystems.drive.DriveConstants;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,7 +79,7 @@ public class DriveSubsystem extends SubsystemBase {
         private final FieldCentric fieldcentric = new FieldCentric();
 
         @Override
-        public StatusCode apply(SwerveControlParameters parameters, SwerveModule)
+        public StatusCode apply(SwerveControlParameters parameters, SwerveModule swerveModule)
 
     public final TunerSwerveDrivetrain drivetrain = DriveConstants.createDrivetrain();
     
@@ -90,6 +95,8 @@ public class DriveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+
+        // is  there a reason we are not running the reset odomenty from YAGSL subsystem?
         if (!operatorPersp || DriverStation.isDisabled()) {
             DriverStation.getAlliance().ifPresent(allianceColor -> {
                 setOperatorPerspectiveForward(
