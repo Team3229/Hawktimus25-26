@@ -91,37 +91,30 @@ public class DriveSubsystem extends SubsystemBase {
 
     public DriveSubsystem() {
         drivetrain.configNeutralMode(NeutralModeValue.Coast);
-        driveTrain.seedFieldCentric(/* find out how to get rotation */);
+        drivetrain.seedFieldCentric(/* find out how to get rotation */);
     }
 
     @Override
     public void periodic() {
-
         // is  there a reason we are not running the reset odomenty from YAGSL subsystem?
         if (!operatorPersp || DriverStation.isDisabled()) {
             DriverStation.getAlliance().ifPresent(allianceColor -> {
-                setOperatorPerspectiveForward(
-                    allianceColor == Alliance.Red ? redPerspRot : bluePerspRot
-                );
-                operatorPersp = true;
+                if (allianceColor == Alliance.Red) {
+                    setOperatorPerspectiveForward(redPerspRot);
+                } else if (allianceColor == Alliance.Blue) {
+                    setOperatorPerspectiveForward(bluePerspRot);
+                } else {
+                    setOperatorPerspectiveForward(bluePerspRot);
+                    System.out.println("Unknown alliance color, defaulting to blue perspective");
+                }
             });
+            operatorPersp = true;
         }
     }
 
     public void updateOdometry() {
     //   public final SwerveDriveState john;//getState()
-      var state = SwerveDrivetrain.SwerveDriveState getState();
+      var state = SwerveDrivetrain.SwerveDriveState.getState();
       final Pose2d pose = state.Pose();
     }
-
-   //I apologize greyson but this command is teleporting me to it asking me to import stuff evry 3 seconds
-   
-   
-   
-   
-   
-   
-   
-   
-    //all errors are becaue owen is gay and short
 }

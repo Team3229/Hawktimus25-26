@@ -20,6 +20,8 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.hardware.DeviceIdentifier;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
@@ -135,7 +137,7 @@ public class DriveConstants {
             .withSupplyCurrentLimitEnable(true)
    );
 
-   private static CANcoderConfigurator kFLCANConfig = new CANcoderConfigurator(kFrontRightEncoderID);
+   private static CANcoderConfiguration kFLCANConfig;
    
    private static final ClosedLoopOutputType kAngleClosedLoopOutput = ClosedLoopOutputType.Voltage;
    private static final ClosedLoopOutputType kDriveClosedLoopOutput = ClosedLoopOutputType.Voltage;
@@ -150,15 +152,15 @@ public class DriveConstants {
    private static final TalonFXConfiguration driveInitialConfigs = new TalonFXConfiguration()
       .withCurrentLimits(
          new CurrentLimitsConfigs()
-           .withSupplyCurrentLimit(Amps.of(39))
-           .withSupplyCurrentLimitEnable(true)
+            .withSupplyCurrentLimit(Amps.of(39))
+            .withSupplyCurrentLimitEnable(true)
       );
 
    private static final TalonFXConfiguration angleInitialConfigs = new TalonFXConfiguration()
       .withCurrentLimits(
          new CurrentLimitsConfigs()
-           .withSupplyCurrentLimit(Amps.of(20))
-           .withSupplyCurrentLimitEnable(true)
+            .withSupplyCurrentLimit(Amps.of(20))
+            .withSupplyCurrentLimitEnable(true)
       );
 
    private static final CANcoderConfiguration encoderInitialConfigs = new CANcoderConfiguration();
@@ -215,7 +217,6 @@ public class DriveConstants {
    private static TalonFX kFLDrive = new TalonFX(kFrontLeftDriveMotorID);
    private static TalonFX kFLAngle = new TalonFX(kFrontLeftAngleMotorID);
    
-
    private static final Distance KFLX_DISTANCE = Inches.of(-13.5);
    private static final Distance KFLY_DISTANCE = Inches.of(13.5);
 
@@ -226,8 +227,6 @@ public class DriveConstants {
    private static final boolean kFRDriveMotorInverted = false;
    private static final boolean kFRAngleMotorInverted = true;
 
-
-   
    private static TalonFX kFRDrive = new TalonFX(kFrontRightDriveMotorID);
    private static TalonFX kFRAngle = new TalonFX(kFrontRightAngleMotorID);
    
@@ -246,10 +245,11 @@ public class DriveConstants {
 
    private static TalonFX kBRDrive = new TalonFX(kFrontRightDriveMotorID);
    private static TalonFX kBRAngle = new TalonFX(kFrontRightAngleMotorID);
+   private static CANcoder kBRCANcoder = new CANcoder(kBackRightEncoderID);
 
    private static final int kBackLeftDriveMotorID = 7;
    private static final int kBackLeftAngleMotorID = 8;
-   private static final int kBackLeftEncoderID = 9;
+   private static final int kBLEncoderID = 9;
    private static final Angle kBackLeftEncoderOffset = Degrees.of(0);
    private static final boolean kBLDriveMotorInverted = false;
    private static final boolean kBLAngleMotorInverted = true; 
@@ -269,8 +269,8 @@ public class DriveConstants {
       kFRDrive.getConfigurator().apply(kFRDriveConfig);
       kBLDrive.getConfigurator().apply(kBLDriveConfig);
       kBRDrive.getConfigurator().apply(kBRDriveConfig);
-
-   } 
+      kBRCANcoder.getConfigurator().apply(kBRCANcoderConfig);
+   }
 
    public static final SwerveDrivetrainConstants<kFLAngleConfig, kFLDriveConfig, >
 }
