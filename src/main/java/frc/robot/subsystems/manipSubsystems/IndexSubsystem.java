@@ -32,6 +32,8 @@ public class IndexSubsystem extends SubsystemBase {
 
     private double requestedSpeed;
 
+    private static Sendable indexPIDSendable;
+
     private double sensorToMechanismRatio = 5;
     
     private static double kP = 0.5;
@@ -71,7 +73,17 @@ public class IndexSubsystem extends SubsystemBase {
         indexMotorConfig.Slot0.kV = kV;
         indexMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         indexMotor.getConfigurator().apply(indexMotorConfig);
+        
+            indexPIDSendable = new Sendable() {
+	    	@Override
+	    	public void initSendable(SendableBuilder builder) {
+	    		builder.addDoubleProperty("Index P", () -> kP, (newkP) -> editIndexP(newkP));
+	    		builder.addDoubleProperty("Index V", () -> kV, (newkV) -> editIndexV(newkV));
+	    	}
+	    };
+        SmartDashboard.putData("IndexPID", indexPIDSendable);
     }
+
     
     /**Command to run the index motors */
     public Command index(double rps) {
@@ -114,7 +126,6 @@ public class IndexSubsystem extends SubsystemBase {
             index(reverse).withTimeout(0.1)
         ).repeatedly();
     }
-    
 
     public boolean isReady() {
         double deadBand = 0.1;
@@ -124,6 +135,22 @@ public class IndexSubsystem extends SubsystemBase {
         } else {
             return Math.abs(requestedSpeed - indexVelocity) <= deadBand;
         }
+    }
+
+    private void editIndexP(double newkP) {
+        kP = newkP;
+        indexMotorConfig.Slot0.kP = kP;
+
+        indexMotor.getConfigurator().apply(indexMotorConfig);
+        System.out.println(indexMotorConfig.Slot0.kP);
+    }
+
+    private void editIndexV(double newkV) {
+        kV = newkV;
+        indexMotorConfig.Slot0.kV = kV;
+
+        indexMotor.getConfigurator().apply(indexMotorConfig);
+        System.out.println(indexMotorConfig.Slot0.kV);
     }
 
 }

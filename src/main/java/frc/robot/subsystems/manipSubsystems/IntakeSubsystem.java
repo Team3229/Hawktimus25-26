@@ -73,18 +73,18 @@ public class IntakeSubsystem extends SubsystemBase {
 	private Angle requestedAngle;
 	private double requestedVelocity;
 	
-	private static final double aP = 8.5;
-	private static final double aI = 0; 
-	private static final double aD = 0.00; 
-	private static final double aV = 0.12;
-	private static final double aA = 0.01;
-	private static final double aS = 0.25;
-	private static final double aG = 1.75;
+	private double aP = 8.5;
+	private double aI = 0; 
+	private double aD = 0.00; 
+	private double aV = 0.12;
+	private double aA = 0.01;
+	private double aS = 0.25;
+	private double aG = 1.75;
 
-	private static final double rP = 0.1; 
-	private static final double rI = 0.0; 
-	private static final double rD = 0.0; 
-	private static final double rV = 0.13; 
+	private double rP = 0.1; 
+	private double rI = 0.0; 
+	private double rD = 0.0; 
+	private double rV = 0.13; 
 	
 	private static final double ROD_CW_SPEED = 70; 
 	private static final double ROD_CCW_SPEED = -70;
@@ -94,6 +94,7 @@ public class IntakeSubsystem extends SubsystemBase {
 	private static boolean stowSpin = false;
 
 	private static Sendable intakeSendable;
+	private static Sendable intakePIDSendable;
 	
 	public IntakeSubsystem() {
 		super();
@@ -245,7 +246,134 @@ public class IntakeSubsystem extends SubsystemBase {
 		};
 		SmartDashboard.putData("Intake", intakeSendable);
 
+		intakePIDSendable = new Sendable() {
+		@Override
+			public void initSendable(SendableBuilder builder) {
+				builder.addDoubleProperty("Rod P", () -> rP, (newrP) -> editRodP(newrP));
+				builder.addDoubleProperty("Rod I", () -> rI, (newrI) -> editRodI(newrI));
+				builder.addDoubleProperty("Rod D", () -> rD, (newrD) -> editRodD(newrD));
+				builder.addDoubleProperty("Rod V", () -> rV, (newrV) -> editRodV(newrV));
+
+				builder.addDoubleProperty("Arm P", () -> aV, (newaP) -> editArmP(newaP));
+				builder.addDoubleProperty("Arm I", () -> aV, (newaI) -> editArmI(newaI));
+				builder.addDoubleProperty("Arm D", () -> aV, (newaD) -> editArmD(newaD));
+				builder.addDoubleProperty("Arm V", () -> aV, (newaV) -> editArmV(newaV));
+				builder.addDoubleProperty("Arm A", () -> aV, (newaA) -> editArmA(newaA));
+				builder.addDoubleProperty("Arm S", () -> aV, (newaS) -> editArmS(newaS));
+				builder.addDoubleProperty("Arm G", () -> aV, (newaG) -> editArmG(newaG));
+			}
+		};
+		SmartDashboard.putData("IntakePID", intakePIDSendable);
 	}
+
+	private void editRodP(double newrP) {
+        rP = newrP;
+        rodMotorConfig.Slot0.kP = rP;
+
+        rodMotor.getConfigurator().apply(rodMotorConfig);
+        System.out.println(rodMotorConfig.Slot0.kP);
+    }
+
+	private void editRodI(double newrI) {
+        rI = newrI;
+        rodMotorConfig.Slot0.kI = rI;
+
+        rodMotor.getConfigurator().apply(rodMotorConfig);
+        System.out.println(rodMotorConfig.Slot0.kI);
+    }
+
+	private void editRodD(double newrD) {
+        rD = newrD;
+        rodMotorConfig.Slot0.kP = rD;
+
+        rodMotor.getConfigurator().apply(rodMotorConfig);
+        System.out.println(rodMotorConfig.Slot0.kD);
+    }
+
+	private void editRodV(double newrV) {
+        rV = newrV;
+        rodMotorConfig.Slot0.kV = rV;
+
+        rodMotor.getConfigurator().apply(rodMotorConfig);
+        System.out.println(rodMotorConfig.Slot0.kV);
+    }
+
+	private void editArmP(double newaP) {
+        aP = newaP;
+        armMotorConfig.Slot0.kP = aP;
+		armMotorConfig2.Slot0.kP = aP;
+
+        armMotorLeft.getConfigurator().apply(armMotorConfig);
+		armMotorRight.getConfigurator().apply(armMotorConfig2);
+        System.out.println(armMotorConfig.Slot0.kP);
+		System.out.println(armMotorConfig2.Slot0.kP);
+    }
+
+	private void editArmI(double newaI) {
+        aI = newaI;
+        armMotorConfig.Slot0.kI = aI;
+		armMotorConfig2.Slot0.kI = aI;
+
+        armMotorLeft.getConfigurator().apply(armMotorConfig);
+		armMotorRight.getConfigurator().apply(armMotorConfig2);
+        System.out.println(armMotorConfig.Slot0.kI);
+		System.out.println(armMotorConfig2.Slot0.kI);
+    }
+
+	private void editArmD(double newaD) {
+        aD = newaD;
+        armMotorConfig.Slot0.kD = aD;
+		armMotorConfig2.Slot0.kD = aD;
+
+        armMotorLeft.getConfigurator().apply(armMotorConfig);
+		armMotorRight.getConfigurator().apply(armMotorConfig2);
+        System.out.println(armMotorConfig.Slot0.kD);
+		System.out.println(armMotorConfig2.Slot0.kD);
+    }
+
+	private void editArmV(double newaV) {
+        aV = newaV;
+        armMotorConfig.Slot0.kV = aV;
+		armMotorConfig2.Slot0.kV = aV;
+
+        armMotorLeft.getConfigurator().apply(armMotorConfig);
+		armMotorRight.getConfigurator().apply(armMotorConfig2);
+        System.out.println(armMotorConfig.Slot0.kV);
+		System.out.println(armMotorConfig2.Slot0.kV);
+    }
+	
+	private void editArmA(double newaA) {
+        aA = newaA;
+        armMotorConfig.Slot0.kA = aA;
+		armMotorConfig2.Slot0.kA = aA;
+
+        armMotorLeft.getConfigurator().apply(armMotorConfig);
+		armMotorRight.getConfigurator().apply(armMotorConfig2);
+        System.out.println(armMotorConfig.Slot0.kA);
+		System.out.println(armMotorConfig2.Slot0.kA);
+    }
+
+	private void editArmS(double newaS) {
+        aS = newaS;
+        armMotorConfig.Slot0.kS = aS;
+		armMotorConfig2.Slot0.kS = aS;
+
+        armMotorLeft.getConfigurator().apply(armMotorConfig);
+		armMotorRight.getConfigurator().apply(armMotorConfig2);
+        System.out.println(armMotorConfig.Slot0.kS);
+		System.out.println(armMotorConfig2.Slot0.kS);
+    }
+
+	private void editArmG(double newaG) {
+        aG = newaG;
+        armMotorConfig.Slot0.kG = aG;
+		armMotorConfig2.Slot0.kG = aG;
+
+        armMotorLeft.getConfigurator().apply(armMotorConfig);
+		armMotorRight.getConfigurator().apply(armMotorConfig2);
+        System.out.println(armMotorConfig.Slot0.kG);
+		System.out.println(armMotorConfig2.Slot0.kG);
+    }
 	
 	/** rotates the arm to the angle, finishes when armIsReady returns true */
 	public Command rotateTo(Angle setpoint) {

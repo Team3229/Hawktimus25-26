@@ -40,9 +40,7 @@ public class SpitterSubsystem extends SubsystemBase {
     private double fP = 0.1;
     private double fV = 0.13;
 
-    public static final String kShooterPKey = "ShooterP";
-
-    private static final int LS_CAN_ID = 10;
+    private static final int LS_CAN_ID = 10; 
     private TalonFX leftSpitter;
     private TalonFXConfiguration LSMotorConfig;
 
@@ -177,12 +175,13 @@ public class SpitterSubsystem extends SubsystemBase {
         spitterPIDSendable = new Sendable() {
             @Override
             public void initSendable(SendableBuilder builder) {
-                builder.addDoubleProperty(kShooterPKey, () -> kP, (newkP) -> editSpitterP(newkP));
-                builder.addDoubleProperty("Shooter V", () -> kV, (newkV) -> editSpitterV(newkV));
-            
+                builder.addDoubleProperty("Spitter P", () -> kP, (newkP) -> editSpitterP(newkP));
+                builder.addDoubleProperty("Spitter V", () -> kV, (newkV) -> editSpitterV(newkV));
+                builder.addDoubleProperty("Feeder P", () -> fP, (newfP) -> editFeederP(newfP));
+                builder.addDoubleProperty("Feeder V", () -> fV, (newfV) -> editFeederV(newfV));
             }
         };
-        SmartDashboard.putData("SpitterPID", spitterPIDSendable);
+        SmartDashboard.putData("ShooterPID", spitterPIDSendable);
     }
 
     public Command shoot() {
@@ -226,6 +225,22 @@ public class SpitterSubsystem extends SubsystemBase {
         rightSpitter.getConfigurator().apply(RSMotorConfig);
         leftSpitter.getConfigurator().apply(LSMotorConfig);
         System.out.println(RSMotorConfig.Slot0.kV);
+    }
+
+    private void editFeederP(double newfP) {
+        fP = newfP;
+        feederMotorConfig.Slot0.kP = fP;
+
+        feeder.getConfigurator().apply(feederMotorConfig);
+        System.out.println(feederMotorConfig.Slot0.kP);
+    }
+
+     private void editFeederV(double newfV) {
+        fV = newfV;
+        feederMotorConfig.Slot0.kV = fV;
+
+        feeder.getConfigurator().apply(feederMotorConfig);
+        System.out.println(feederMotorConfig.Slot0.kV);
     }
     
     public boolean shooterIsReady() {
