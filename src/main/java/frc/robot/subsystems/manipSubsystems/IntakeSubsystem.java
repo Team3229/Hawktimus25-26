@@ -253,7 +253,6 @@ public class IntakeSubsystem extends SubsystemBase {
 				builder.addDoubleProperty("Rod I", () -> rI, (newrI) -> editRodI(newrI));
 				builder.addDoubleProperty("Rod D", () -> rD, (newrD) -> editRodD(newrD));
 				builder.addDoubleProperty("Rod V", () -> rV, (newrV) -> editRodV(newrV));
-
 				builder.addDoubleProperty("Arm P", () -> aV, (newaP) -> editArmP(newaP));
 				builder.addDoubleProperty("Arm I", () -> aV, (newaI) -> editArmI(newaI));
 				builder.addDoubleProperty("Arm D", () -> aV, (newaD) -> editArmD(newaD));
@@ -475,10 +474,10 @@ public class IntakeSubsystem extends SubsystemBase {
 	public Command toggleStowSpin() {
 		return new Command() {
 			@Override
-			public void initialize() {
+			public void execute() {
 				stowSpin = true;
 			}
-					//TODO: ASK OWEN WHAT BUTTON HE WANTS THIS ON
+
 			@Override
 			public void end(boolean interrupted) {
 				stowSpin = false;
