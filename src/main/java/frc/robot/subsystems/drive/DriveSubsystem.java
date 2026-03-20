@@ -15,6 +15,7 @@ import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveControlParameters;
+import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
@@ -25,6 +26,7 @@ import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -63,34 +65,33 @@ import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-//TODO:
+// TODO:
 // Initilase talon motors for drive
 // Create a field relative drive
-// Take the commands from yagsl file and make ctre 
+// Take the commands from yagsl file and make ctre: update odometry, reset odometry, get and set IMU yaw, getPose, zeroGyro, zeroGyroWithLimelight
+// then steal: getTargetTranslation, angle from hub, distance from hub, hubAlign if(hubAlign)
 // Make drive controller run all of them
 
 public class DriveSubsystem extends SubsystemBase {
     private final SwerveRequest.FieldCentric driveRequest = new SwerveRequest.FieldCentric()
-        .withDeadband(MaxSpeed * 0.1)
-        .withRotationalDeadband(MaxAngularRate * 0.1)
+        .withDeadband(DriveConstants.kMaxSpeed.times(0.1))
+        .withRotationalDeadband(DriveConstants.kMaxAngularRate.times(0.1))
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
         .withSteerRequestType(SteerRequestType.Position);
 
-        private final FieldCentric fieldcentric = new FieldCentric();
+    private final FieldCentric fieldcentric = new FieldCentric();
 
-        @Override
-        public StatusCode apply(SwerveControlParameters parameters, SwerveModule swerveModule)
+    // public StatusCode apply(SwerveControlParameters parameters, SwerveModule swerveModule) {}
 
-    public final TunerSwerveDrivetrain drivetrain = DriveConstants.createDrivetrain();
+    public final DriveConstants drivetrain = DriveConstants.createDrivetrain();
     
     private static final Rotation2d bluePerspRot = Rotation2d.kZero;
     private static final Rotation2d redPerspRot = Rotation2d.k180deg;
-    private boolean operatorPersp = false;
+    private boolean operatorPersp = false; // TODO: determine if we need this
 
     public DriveSubsystem() {
         drivetrain.configNeutralMode(NeutralModeValue.Coast);
-        driveTrain.seedFieldCentric(swerveIMU.getIMU());
-        
+        driveTrain.seedFieldCentric(/* find out how to get rotation */);
     }
 
     @Override
@@ -106,5 +107,21 @@ public class DriveSubsystem extends SubsystemBase {
             });
         }
     }
-    
+
+    public void updateOdometry() {
+    //   public final SwerveDriveState john;//getState()
+      var state = SwerveDrivetrain.SwerveDriveState getState();
+      final Pose2d pose = state.Pose();
+    }
+
+   //I apologize greyson but this command is teleporting me to it asking me to import stuff evry 3 seconds
+   
+   
+   
+   
+   
+   
+   
+   
+    //all errors are becaue owen is gay and short
 }
