@@ -39,8 +39,6 @@ public class RobotContainer {
 	DriveSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
 	SpitterSubsystem spitterSubsystem;
-
-	SwerveInputStream driveAngularVelocity;
 	
 	VisualizerSubsystem visualizerSubsystem;
 	PathPlannerCommands pathPlannerCommands;
@@ -75,8 +73,7 @@ public class RobotContainer {
 		NamedCommands.registerCommand("Shoot", pathPlannerCommands.pathShoot());
 		NamedCommands.registerCommand("Stow", manipSubsystem.stow());
 
-		// DriverStation.silenceJoystickConnectionWarning(true);
-		DriverStation.silenceJoystickConnectionWarning(false);
+		DriverStation.silenceJoystickConnectionWarning(true); // TODO: MAKE THIS FALSE FOR COMP!!!!!!!!!!!!!!!!
 
 		configDriveControls();
 		configManipControls();
@@ -101,16 +98,16 @@ public class RobotContainer {
 		NamedCommands.registerCommand("Shoot", pathPlannerCommands.pathShoot());
 		NamedCommands.registerCommand("Stow", pathPlannerCommands.pathStow());
 
-		driveAngularVelocity = driveSubsystem.getInputStream(
+		SwerveInputStream driveAngularVelocity = driveSubsystem.getInputStream(
 			() -> -driverController.a_Y(),
 			() -> -driverController.a_X(),
 			() -> -driverController.a_Z()
 		)
 			.deadband(0.1)
-			.cubeRotationControllerAxis(false)
+			.cubeRotationControllerAxis(true)
 			.cubeTranslationControllerAxis(true)
 			.scaleTranslation(0.8)
-			.scaleRotation(0.5)
+			.scaleRotation(0.7)
 			.allianceRelativeControl(() -> DriverStation.isFMSAttached())
 			.robotRelative(() -> driverController.p_Any().getAsBoolean());
 			
@@ -143,7 +140,7 @@ public class RobotContainer {
 	}
 
 	private void configManipControls() {
-		// CURRENTLY AVAILABLE: 6, 11, slider
+		// CURRENTLY AVAILABLE: 7, 8, 9, 11, slider
 
 		manipController.b_Trigger().whileTrue(
 			manipSubsystem.shoot()
