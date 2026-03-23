@@ -253,13 +253,13 @@ public class IntakeSubsystem extends SubsystemBase {
 				builder.addDoubleProperty("Rod I", () -> rI, (newrI) -> editRodI(newrI));
 				builder.addDoubleProperty("Rod D", () -> rD, (newrD) -> editRodD(newrD));
 				builder.addDoubleProperty("Rod V", () -> rV, (newrV) -> editRodV(newrV));
-				builder.addDoubleProperty("Arm P", () -> aV, (newaP) -> editArmP(newaP));
-				builder.addDoubleProperty("Arm I", () -> aV, (newaI) -> editArmI(newaI));
-				builder.addDoubleProperty("Arm D", () -> aV, (newaD) -> editArmD(newaD));
+				builder.addDoubleProperty("Arm P", () -> aP, (newaP) -> editArmP(newaP));
+				builder.addDoubleProperty("Arm I", () -> aI, (newaI) -> editArmI(newaI));
+				builder.addDoubleProperty("Arm D", () -> aD, (newaD) -> editArmD(newaD));
 				builder.addDoubleProperty("Arm V", () -> aV, (newaV) -> editArmV(newaV));
-				builder.addDoubleProperty("Arm A", () -> aV, (newaA) -> editArmA(newaA));
-				builder.addDoubleProperty("Arm S", () -> aV, (newaS) -> editArmS(newaS));
-				builder.addDoubleProperty("Arm G", () -> aV, (newaG) -> editArmG(newaG));
+				builder.addDoubleProperty("Arm A", () -> aA, (newaA) -> editArmA(newaA));
+				builder.addDoubleProperty("Arm S", () -> aS, (newaS) -> editArmS(newaS));
+				builder.addDoubleProperty("Arm G", () -> aG, (newaG) -> editArmG(newaG));
 			}
 		};
 		SmartDashboard.putData("IntakePID", intakePIDSendable);
