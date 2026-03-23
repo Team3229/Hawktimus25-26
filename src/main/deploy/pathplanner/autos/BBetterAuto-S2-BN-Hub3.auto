@@ -5,9 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "Stow"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "ZeroGyroWithLimelight"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Stow"
+                }
+              }
+            ]
           }
         },
         {
