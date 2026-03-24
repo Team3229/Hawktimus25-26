@@ -165,7 +165,7 @@ public class RobotContainer {
 		);
 
 		manipController.b_6().whileTrue(
-			manipSubsystem.stowSpinCommand()
+			manipSubsystem.toggleStowSpin()
 		);
 
 		manipController.b_10().whileTrue(

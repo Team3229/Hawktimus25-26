@@ -35,8 +35,7 @@ public class IntakeSubsystem extends SubsystemBase {
 	private static TalonFX armMotorRight;
 	private static TalonFX armMotorLeft;
 	private static TalonFX rodMotor;
-	private static TalonFXConfiguration armMotorConfigL;
-	private static TalonFXConfiguration armMotorConfigR;
+	private static TalonFXConfiguration armMotorConfig;
 
 	private static MotionMagicVoltage rotateRequest;
 
@@ -50,9 +49,6 @@ public class IntakeSubsystem extends SubsystemBase {
 	private static DigitalInput extendLimitSwitch;
 
 	private static GravityTypeValue gravityTypeValue = GravityTypeValue.Arm_Cosine;
-
-	// private static Angle softLimitUp = Rotations.of(-0.07);
-	// private static Angle softLimitDown = Rotations.of(0.37);
 	
 	private static final int ARM_R_CAN_ID = 16; 
 	private static final int ARM_L_CAN_ID = 5; 
@@ -103,15 +99,11 @@ public class IntakeSubsystem extends SubsystemBase {
 		
 		extendLimitSwitch = new DigitalInput(EXTEND_LIMIT_PORT);
 		
-		armMotorRight = new TalonFX(ARM_R_CAN_ID, CANBus.roboRIO());
+		rotateRequest = new MotionMagicVoltage(0).withSlot(0);
 		
 		armMotorLeft = new TalonFX(ARM_L_CAN_ID, CANBus.roboRIO());
 		
-		rodMotor = new TalonFX(ROD_CAN_ID, CANBus.roboRIO());
-
-		rotateRequest = new MotionMagicVoltage(0).withSlot(0);
-
-		armMotorConfigL = new TalonFXConfiguration()
+		armMotorConfig = new TalonFXConfiguration()
 		.withMotorOutput(
 			new MotorOutputConfigs()
 			.withNeutralMode(NeutralModeValue.Brake)
@@ -132,64 +124,29 @@ public class IntakeSubsystem extends SubsystemBase {
 				.withSupplyVoltageTimeConstant(0)
 		);
 			
-		armMotorConfigL.Slot0.GravityType = gravityTypeValue;
+		armMotorConfig.Slot0.GravityType = gravityTypeValue;
 						
-		armMotorConfigL.Slot0.kP = aP;
-		armMotorConfigL.Slot0.kI = aI;
-		armMotorConfigL.Slot0.kD = aD;
-		armMotorConfigL.Slot0.kV = aV;
-		armMotorConfigL.Slot0.kA = aA;
-		armMotorConfigL.Slot0.kS = aS;
-		armMotorConfigL.Slot0.kG = aG;
-		armMotorConfigL.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+		armMotorConfig.Slot0.kP = aP;
+		armMotorConfig.Slot0.kI = aI;
+		armMotorConfig.Slot0.kD = aD;
+		armMotorConfig.Slot0.kV = aV;
+		armMotorConfig.Slot0.kA = aA;
+		armMotorConfig.Slot0.kS = aS;
+		armMotorConfig.Slot0.kG = aG;
+		armMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 		
-		armMotorConfigL.MotionMagic
+		armMotorConfig.MotionMagic
 		.withMotionMagicCruiseVelocity(motionMagicCruiseVelocity)
 		.withMotionMagicAcceleration(motionMagicAcceleration)
 		.withMotionMagicJerk(motionMagicJerk);
 		
-		armMotorRight.getConfigurator().apply(armMotorConfigL);
-		
-		armMotorConfigR = new TalonFXConfiguration()
-		.withMotorOutput(
-			new MotorOutputConfigs()
-				.withNeutralMode(NeutralModeValue.Brake)
-		)
-		.withCurrentLimits(
-			new CurrentLimitsConfigs()
-				.withStatorCurrentLimit(CURRENT_LIMIT)
-				.withStatorCurrentLimitEnable(true)
-		)
-		.withFeedback(
-			new FeedbackConfigs()
-				.withSensorToMechanismRatio(sensorToMechanismRatio)
-		)
-		.withVoltage(
-			new VoltageConfigs()
-				.withPeakForwardVoltage(12)
-				.withPeakReverseVoltage(-12)
-				.withSupplyVoltageTimeConstant(0)
-		);
+		armMotorLeft.getConfigurator().apply(armMotorConfig);
 
-		armMotorConfigR.Slot0.kP = aP;
-		armMotorConfigR.Slot0.kI = aI;
-		armMotorConfigR.Slot0.kD = aD;
-		armMotorConfigR.Slot0.kV = aV;
-		armMotorConfigR.Slot0.kA = aA;
-		armMotorConfigR.Slot0.kS = aS;
-		armMotorConfigR.Slot0.kG = aG;
-		armMotorConfigR.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
-		armMotorConfigR.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-
-		armMotorConfigR.MotionMagic
-		.withMotionMagicCruiseVelocity(motionMagicCruiseVelocity)
-		.withMotionMagicAcceleration(motionMagicAcceleration)
-		.withMotionMagicJerk(motionMagicJerk);
-
-		armMotorLeft.getConfigurator().apply(armMotorConfigR);
-
+		armMotorRight = new TalonFX(ARM_R_CAN_ID, CANBus.roboRIO());
+		armMotorRight.getConfigurator().apply(armMotorConfig);
 		armMotorRight.setControl(new Follower(ARM_L_CAN_ID, MotorAlignmentValue.Opposed));
-
+		
+		rodMotor = new TalonFX(ROD_CAN_ID, CANBus.roboRIO());
 		rodMotorConfig = new TalonFXConfiguration()
 		.withMotorOutput(
 			new MotorOutputConfigs()
@@ -295,65 +252,59 @@ public class IntakeSubsystem extends SubsystemBase {
 
 	private void editArmP(double newaP) {
         aP = newaP;
-        armMotorConfigL.Slot0.kP = aP;
-		armMotorConfigR.Slot0.kP = aP;
+        armMotorConfig.Slot0.kP = aP;
 
-        armMotorLeft.getConfigurator().apply(armMotorConfigL);
-		armMotorRight.getConfigurator().apply(armMotorConfigR);
+        armMotorLeft.getConfigurator().apply(armMotorConfig);
+		armMotorRight.getConfigurator().apply(armMotorConfig);
     }
 
 	private void editArmI(double newaI) {
         aI = newaI;
-        armMotorConfigL.Slot0.kI = aI;
-		armMotorConfigR.Slot0.kI = aI;
+        armMotorConfig.Slot0.kI = aI;
+		armMotorConfig.Slot0.kI = aI;
 
-        armMotorLeft.getConfigurator().apply(armMotorConfigL);
-		armMotorRight.getConfigurator().apply(armMotorConfigR);
+        armMotorLeft.getConfigurator().apply(armMotorConfig);
+		armMotorRight.getConfigurator().apply(armMotorConfig);
     }
 
 	private void editArmD(double newaD) {
         aD = newaD;
-        armMotorConfigL.Slot0.kD = aD;
-		armMotorConfigR.Slot0.kD = aD;
+        armMotorConfig.Slot0.kD = aD;
 
-        armMotorLeft.getConfigurator().apply(armMotorConfigL);
-		armMotorRight.getConfigurator().apply(armMotorConfigR);
+        armMotorLeft.getConfigurator().apply(armMotorConfig);
+		armMotorRight.getConfigurator().apply(armMotorConfig);
     }
 
 	private void editArmV(double newaV) {
         aV = newaV;
-        armMotorConfigL.Slot0.kV = aV;
-		armMotorConfigR.Slot0.kV = aV;
+        armMotorConfig.Slot0.kV = aV;
 
-        armMotorLeft.getConfigurator().apply(armMotorConfigL);
-		armMotorRight.getConfigurator().apply(armMotorConfigR);
+        armMotorLeft.getConfigurator().apply(armMotorConfig);
+		armMotorRight.getConfigurator().apply(armMotorConfig);
     }
 	
 	private void editArmA(double newaA) {
         aA = newaA;
-        armMotorConfigL.Slot0.kA = aA;
-		armMotorConfigR.Slot0.kA = aA;
+        armMotorConfig.Slot0.kA = aA;
 
-        armMotorLeft.getConfigurator().apply(armMotorConfigL);
-		armMotorRight.getConfigurator().apply(armMotorConfigR);
+        armMotorLeft.getConfigurator().apply(armMotorConfig);
+		armMotorRight.getConfigurator().apply(armMotorConfig);
     }
 
 	private void editArmS(double newaS) {
         aS = newaS;
-        armMotorConfigL.Slot0.kS = aS;
-		armMotorConfigR.Slot0.kS = aS;
+        armMotorConfig.Slot0.kS = aS;
 
-        armMotorLeft.getConfigurator().apply(armMotorConfigL);
-		armMotorRight.getConfigurator().apply(armMotorConfigR);
+        armMotorLeft.getConfigurator().apply(armMotorConfig);
+		armMotorRight.getConfigurator().apply(armMotorConfig);
     }
 
 	private void editArmG(double newaG) {
         aG = newaG;
-        armMotorConfigL.Slot0.kG = aG;
-		armMotorConfigR.Slot0.kG = aG;
+        armMotorConfig.Slot0.kG = aG;
 
-        armMotorLeft.getConfigurator().apply(armMotorConfigL);
-		armMotorRight.getConfigurator().apply(armMotorConfigR);
+        armMotorLeft.getConfigurator().apply(armMotorConfig);
+		armMotorRight.getConfigurator().apply(armMotorConfig);
     }
 	
 	/** rotates the arm to the angle, finishes when armIsReady returns true */
