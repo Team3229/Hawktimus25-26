@@ -227,15 +227,9 @@ public class DriveSubsystem extends SubsystemBase {
 				builder.addDoubleProperty("TargetY", () -> currentTarget.getY(), null);
 				builder.addDoubleProperty("TargetRot", () -> targetAngleRot, null);
 				builder.addDoubleProperty("CurrentRot", () -> currentAngleRot, null);
-				builder.addBooleanProperty(
-					"Blue Alliance", 
-					() -> DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue), 
-					null
-				);
 			}
 		};
 		SmartDashboard.putData("Drive", driveSendable);
-
 
 	}
 
@@ -253,13 +247,13 @@ public class DriveSubsystem extends SubsystemBase {
                 () -> swerveDrive.getRobotVelocity(),
                 (speedsRobotRelative, moduleFeedForwards) -> {
 					if (enableFeedforward) {
-						swerveDrive.drive(
+						swerveDrive.drive( // TODO: replace the .drive with (hopefully) a CTRE alternative
 							speedsRobotRelative,
 							swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
 							moduleFeedForwards.linearForces()
 						);
 					} else {
-						swerveDrive.setChassisSpeeds(speedsRobotRelative);
+						swerveDrive.setChassisSpeeds(speedsRobotRelative); // TODO: same here
 					}
 				},
 				new PPHolonomicDriveController(
@@ -298,6 +292,8 @@ public class DriveSubsystem extends SubsystemBase {
 		return getIMU().getAngularVelocityZWorld().getValue();
 	}
 
+	// TODO: all four of these can be stolen for CTRE
+
 
 	/**
    * Updates the drivetrain odometry object to the robot's current position on the
@@ -305,34 +301,35 @@ public class DriveSubsystem extends SubsystemBase {
    * 
    * @return The new updated pose of the robot.
    */
-  public void updateOdometry() {
+	public void updateOdometry() {
 
-    for (String side : new String[] {"left", "right"}) {
+		for (String side : new String[] {"left", "right"}) {
 
-    	LimelightHelpers.SetRobotOrientation(
-			"limelight-" + side, getIMUYaw().getDegrees(), 
-			getIMUYawRate().in(DegreesPerSecond), 
-			0, 0, 0, 0
-		);
+			LimelightHelpers.SetRobotOrientation(
+				"limelight-" + side, getIMUYaw().getDegrees(), 
+				getIMUYawRate().in(DegreesPerSecond), 
+				0, 0, 0, 0
+			);
 
-		LimelightHelpers.PoseEstimate estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-" + side);
+			LimelightHelpers.PoseEstimate estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-" + side);
 
-		if (estimate != null && estimate.tagCount > 0) {
+			if (estimate != null && estimate.tagCount > 0) {
 
-			Translation3d aprilTagPosition = LimelightHelpers.getTargetPose3d_RobotSpace("limelight-" + side).getTranslation();
+				Translation3d aprilTagPosition = LimelightHelpers.getTargetPose3d_RobotSpace("limelight-" + side).getTranslation();
 
-			if (Math.hypot(aprilTagPosition.getX(), aprilTagPosition.getZ()) <= 3.5) {
+				if (Math.hypot(aprilTagPosition.getX(), aprilTagPosition.getZ()) <= 3.5) {
 					
-				swerveDrive.addVisionMeasurement(new Pose2d(estimate.pose.getX(), estimate.pose.getY(), getIMUYaw()), estimate.timestampSeconds);
+					swerveDrive.addVisionMeasurement(new Pose2d(estimate.pose.getX(), estimate.pose.getY(), getIMUYaw()), estimate.timestampSeconds);
+						//TODO: in order to switch to a different drive we need to change this
+						// create a SwervePoseEstimator and use the .addVisionMeasurment(with same stuff here) on it
+
+				}
 					
 			}
-				
+
 		}
 
-      }
-
     }
-
 
     /**
 	 * Resets odometry to the given pose. Gyro angle and module positions do not
@@ -358,6 +355,7 @@ public class DriveSubsystem extends SubsystemBase {
 		}
 
         swerveDrive.resetOdometry(pose);
+		// TODO: simply steal the yagsl code that makes this (if no CTRE alternative)
     }
 
 	public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
@@ -425,9 +423,9 @@ public class DriveSubsystem extends SubsystemBase {
 				ChassisSpeeds newVelocity = new ChassisSpeeds(driverSpeed.vxMetersPerSecond, driverSpeed.vyMetersPerSecond, angularSpeedRps);
 				
 				// running the bot in robot relative with the new calculated angle
-				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(newVelocity, getIMUYaw()));		
+				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(newVelocity, getIMUYaw())); //TODO: just this line of hubAlign needs to change
 			} else {
-				distanceToTarget = distanceFromHub();
+				distanceToTarget = distanceFromHub(); // TODO: put this in the periodic for CTRE
 				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(velocity.get(), getIMUYaw()));
 				// swerveDrive.driveFieldOriented(velocity.get()); //Field relative is relying on odemtry instead of IMUYaw
 			}

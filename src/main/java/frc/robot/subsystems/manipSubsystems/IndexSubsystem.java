@@ -37,6 +37,8 @@ public class IndexSubsystem extends SubsystemBase {
     private double sensorToMechanismRatio = 5;
     
     private static double kP = 0.5;
+    private static double kI = 0;
+    private static double kD = 0;
     private static double kV = 0.13;
 
     //change ID
@@ -44,8 +46,6 @@ public class IndexSubsystem extends SubsystemBase {
 
     //change current limit
     private static final Current CURRENT_LIMIT = Amps.of(40);
-
-    //change indexSpeed
     
     // variables are halved when ran for some reason :(
     public final int forwards = 40;
@@ -70,6 +70,8 @@ public class IndexSubsystem extends SubsystemBase {
 			        .withSensorToMechanismRatio(sensorToMechanismRatio)
 		    );
         indexMotorConfig.Slot0.kP = kP;
+        indexMotorConfig.Slot0.kI = kI;
+        indexMotorConfig.Slot0.kD = kD;
         indexMotorConfig.Slot0.kV = kV;
         indexMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         indexMotor.getConfigurator().apply(indexMotorConfig);
@@ -78,6 +80,8 @@ public class IndexSubsystem extends SubsystemBase {
 	    	@Override
 	    	public void initSendable(SendableBuilder builder) {
 	    		builder.addDoubleProperty("Index P", () -> kP, (newkP) -> editIndexP(newkP));
+	    		builder.addDoubleProperty("Index I", () -> kI, (newkI) -> editIndexI(newkI));
+	    		builder.addDoubleProperty("Index D", () -> kD, (newkD) -> editIndexD(newkD));
 	    		builder.addDoubleProperty("Index V", () -> kV, (newkV) -> editIndexV(newkV));
 	    	}
 	    };
@@ -142,7 +146,20 @@ public class IndexSubsystem extends SubsystemBase {
         indexMotorConfig.Slot0.kP = kP;
 
         indexMotor.getConfigurator().apply(indexMotorConfig);
-        System.out.println(indexMotorConfig.Slot0.kP);
+    }
+
+    private void editIndexI(double newkI) {
+        kP = newkI;
+        indexMotorConfig.Slot0.kI = kI;
+
+        indexMotor.getConfigurator().apply(indexMotorConfig);
+    }
+
+    private void editIndexD(double newkD) {
+        kV = newkD;
+        indexMotorConfig.Slot0.kD = kD;
+
+        indexMotor.getConfigurator().apply(indexMotorConfig);
     }
 
     private void editIndexV(double newkV) {

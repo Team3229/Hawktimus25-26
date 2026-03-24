@@ -9,6 +9,7 @@ import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.VoltageConfigs;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -26,7 +27,6 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -35,8 +35,8 @@ public class IntakeSubsystem extends SubsystemBase {
 	private static TalonFX armMotorRight;
 	private static TalonFX armMotorLeft;
 	private static TalonFX rodMotor;
-	private static TalonFXConfiguration armMotorConfig;
-	private static TalonFXConfiguration armMotorConfig2;
+	private static TalonFXConfiguration armMotorConfigL;
+	private static TalonFXConfiguration armMotorConfigR;
 
 	private static MotionMagicVoltage rotateRequest;
 
@@ -91,7 +91,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
 	private static final Angle angleDeadBand = Rotations.of(0.01);
 
-	private static boolean stowSpin = false;
+	public static boolean stowSpin = false;
 
 	private static Sendable intakeSendable;
 	private static Sendable intakePIDSendable;
@@ -111,7 +111,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
 		rotateRequest = new MotionMagicVoltage(0).withSlot(0);
 
-		armMotorConfig = new TalonFXConfiguration()
+		armMotorConfigL = new TalonFXConfiguration()
 		.withMotorOutput(
 			new MotorOutputConfigs()
 			.withNeutralMode(NeutralModeValue.Brake)
@@ -132,25 +132,25 @@ public class IntakeSubsystem extends SubsystemBase {
 				.withSupplyVoltageTimeConstant(0)
 		);
 			
-		armMotorConfig.Slot0.GravityType = gravityTypeValue;
+		armMotorConfigL.Slot0.GravityType = gravityTypeValue;
 						
-		armMotorConfig.Slot0.kP = aP;
-		armMotorConfig.Slot0.kI = aI;
-		armMotorConfig.Slot0.kD = aD;
-		armMotorConfig.Slot0.kV = aV;
-		armMotorConfig.Slot0.kA = aA;
-		armMotorConfig.Slot0.kS = aS;
-		armMotorConfig.Slot0.kG = aG;
-		armMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+		armMotorConfigL.Slot0.kP = aP;
+		armMotorConfigL.Slot0.kI = aI;
+		armMotorConfigL.Slot0.kD = aD;
+		armMotorConfigL.Slot0.kV = aV;
+		armMotorConfigL.Slot0.kA = aA;
+		armMotorConfigL.Slot0.kS = aS;
+		armMotorConfigL.Slot0.kG = aG;
+		armMotorConfigL.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 		
-		armMotorConfig.MotionMagic
+		armMotorConfigL.MotionMagic
 		.withMotionMagicCruiseVelocity(motionMagicCruiseVelocity)
 		.withMotionMagicAcceleration(motionMagicAcceleration)
 		.withMotionMagicJerk(motionMagicJerk);
 		
-		armMotorRight.getConfigurator().apply(armMotorConfig);
+		armMotorRight.getConfigurator().apply(armMotorConfigL);
 		
-		armMotorConfig2 = new TalonFXConfiguration()
+		armMotorConfigR = new TalonFXConfiguration()
 		.withMotorOutput(
 			new MotorOutputConfigs()
 				.withNeutralMode(NeutralModeValue.Brake)
@@ -171,22 +171,22 @@ public class IntakeSubsystem extends SubsystemBase {
 				.withSupplyVoltageTimeConstant(0)
 		);
 
-		armMotorConfig2.Slot0.kP = aP;
-		armMotorConfig2.Slot0.kI = aI;
-		armMotorConfig2.Slot0.kD = aD;
-		armMotorConfig2.Slot0.kV = aV;
-		armMotorConfig2.Slot0.kA = aA;
-		armMotorConfig2.Slot0.kS = aS;
-		armMotorConfig2.Slot0.kG = aG;
-		armMotorConfig2.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
-		armMotorConfig2.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+		armMotorConfigR.Slot0.kP = aP;
+		armMotorConfigR.Slot0.kI = aI;
+		armMotorConfigR.Slot0.kD = aD;
+		armMotorConfigR.Slot0.kV = aV;
+		armMotorConfigR.Slot0.kA = aA;
+		armMotorConfigR.Slot0.kS = aS;
+		armMotorConfigR.Slot0.kG = aG;
+		armMotorConfigR.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+		armMotorConfigR.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
-		armMotorConfig2.MotionMagic
+		armMotorConfigR.MotionMagic
 		.withMotionMagicCruiseVelocity(motionMagicCruiseVelocity)
 		.withMotionMagicAcceleration(motionMagicAcceleration)
 		.withMotionMagicJerk(motionMagicJerk);
 
-		armMotorLeft.getConfigurator().apply(armMotorConfig2);
+		armMotorLeft.getConfigurator().apply(armMotorConfigR);
 
 		armMotorRight.setControl(new Follower(ARM_L_CAN_ID, MotorAlignmentValue.Opposed));
 
@@ -249,10 +249,6 @@ public class IntakeSubsystem extends SubsystemBase {
 		intakePIDSendable = new Sendable() {
 		@Override
 			public void initSendable(SendableBuilder builder) {
-				builder.addDoubleProperty("Rod P", () -> rP, (newrP) -> editRodP(newrP));
-				builder.addDoubleProperty("Rod I", () -> rI, (newrI) -> editRodI(newrI));
-				builder.addDoubleProperty("Rod D", () -> rD, (newrD) -> editRodD(newrD));
-				builder.addDoubleProperty("Rod V", () -> rV, (newrV) -> editRodV(newrV));
 				builder.addDoubleProperty("Arm P", () -> aP, (newaP) -> editArmP(newaP));
 				builder.addDoubleProperty("Arm I", () -> aI, (newaI) -> editArmI(newaI));
 				builder.addDoubleProperty("Arm D", () -> aD, (newaD) -> editArmD(newaD));
@@ -260,6 +256,10 @@ public class IntakeSubsystem extends SubsystemBase {
 				builder.addDoubleProperty("Arm A", () -> aA, (newaA) -> editArmA(newaA));
 				builder.addDoubleProperty("Arm S", () -> aS, (newaS) -> editArmS(newaS));
 				builder.addDoubleProperty("Arm G", () -> aG, (newaG) -> editArmG(newaG));
+				builder.addDoubleProperty("Rod P", () -> rP, (newrP) -> editRodP(newrP));
+				builder.addDoubleProperty("Rod I", () -> rI, (newrI) -> editRodI(newrI));
+				builder.addDoubleProperty("Rod D", () -> rD, (newrD) -> editRodD(newrD));
+				builder.addDoubleProperty("Rod V", () -> rV, (newrV) -> editRodV(newrV));
 			}
 		};
 		SmartDashboard.putData("IntakePID", intakePIDSendable);
@@ -270,7 +270,6 @@ public class IntakeSubsystem extends SubsystemBase {
         rodMotorConfig.Slot0.kP = rP;
 
         rodMotor.getConfigurator().apply(rodMotorConfig);
-        System.out.println(rodMotorConfig.Slot0.kP);
     }
 
 	private void editRodI(double newrI) {
@@ -278,7 +277,6 @@ public class IntakeSubsystem extends SubsystemBase {
         rodMotorConfig.Slot0.kI = rI;
 
         rodMotor.getConfigurator().apply(rodMotorConfig);
-        System.out.println(rodMotorConfig.Slot0.kI);
     }
 
 	private void editRodD(double newrD) {
@@ -286,7 +284,6 @@ public class IntakeSubsystem extends SubsystemBase {
         rodMotorConfig.Slot0.kP = rD;
 
         rodMotor.getConfigurator().apply(rodMotorConfig);
-        System.out.println(rodMotorConfig.Slot0.kD);
     }
 
 	private void editRodV(double newrV) {
@@ -294,84 +291,69 @@ public class IntakeSubsystem extends SubsystemBase {
         rodMotorConfig.Slot0.kV = rV;
 
         rodMotor.getConfigurator().apply(rodMotorConfig);
-        System.out.println(rodMotorConfig.Slot0.kV);
     }
 
 	private void editArmP(double newaP) {
         aP = newaP;
-        armMotorConfig.Slot0.kP = aP;
-		armMotorConfig2.Slot0.kP = aP;
+        armMotorConfigL.Slot0.kP = aP;
+		armMotorConfigR.Slot0.kP = aP;
 
-        armMotorLeft.getConfigurator().apply(armMotorConfig);
-		armMotorRight.getConfigurator().apply(armMotorConfig2);
-        System.out.println(armMotorConfig.Slot0.kP);
-		System.out.println(armMotorConfig2.Slot0.kP);
+        armMotorLeft.getConfigurator().apply(armMotorConfigL);
+		armMotorRight.getConfigurator().apply(armMotorConfigR);
     }
 
 	private void editArmI(double newaI) {
         aI = newaI;
-        armMotorConfig.Slot0.kI = aI;
-		armMotorConfig2.Slot0.kI = aI;
+        armMotorConfigL.Slot0.kI = aI;
+		armMotorConfigR.Slot0.kI = aI;
 
-        armMotorLeft.getConfigurator().apply(armMotorConfig);
-		armMotorRight.getConfigurator().apply(armMotorConfig2);
-        System.out.println(armMotorConfig.Slot0.kI);
-		System.out.println(armMotorConfig2.Slot0.kI);
+        armMotorLeft.getConfigurator().apply(armMotorConfigL);
+		armMotorRight.getConfigurator().apply(armMotorConfigR);
     }
 
 	private void editArmD(double newaD) {
         aD = newaD;
-        armMotorConfig.Slot0.kD = aD;
-		armMotorConfig2.Slot0.kD = aD;
+        armMotorConfigL.Slot0.kD = aD;
+		armMotorConfigR.Slot0.kD = aD;
 
-        armMotorLeft.getConfigurator().apply(armMotorConfig);
-		armMotorRight.getConfigurator().apply(armMotorConfig2);
-        System.out.println(armMotorConfig.Slot0.kD);
-		System.out.println(armMotorConfig2.Slot0.kD);
+        armMotorLeft.getConfigurator().apply(armMotorConfigL);
+		armMotorRight.getConfigurator().apply(armMotorConfigR);
     }
 
 	private void editArmV(double newaV) {
         aV = newaV;
-        armMotorConfig.Slot0.kV = aV;
-		armMotorConfig2.Slot0.kV = aV;
+        armMotorConfigL.Slot0.kV = aV;
+		armMotorConfigR.Slot0.kV = aV;
 
-        armMotorLeft.getConfigurator().apply(armMotorConfig);
-		armMotorRight.getConfigurator().apply(armMotorConfig2);
-        System.out.println(armMotorConfig.Slot0.kV);
-		System.out.println(armMotorConfig2.Slot0.kV);
+        armMotorLeft.getConfigurator().apply(armMotorConfigL);
+		armMotorRight.getConfigurator().apply(armMotorConfigR);
     }
 	
 	private void editArmA(double newaA) {
         aA = newaA;
-        armMotorConfig.Slot0.kA = aA;
-		armMotorConfig2.Slot0.kA = aA;
+        armMotorConfigL.Slot0.kA = aA;
+		armMotorConfigR.Slot0.kA = aA;
 
-        armMotorLeft.getConfigurator().apply(armMotorConfig);
-		armMotorRight.getConfigurator().apply(armMotorConfig2);
-        System.out.println(armMotorConfig.Slot0.kA);
-		System.out.println(armMotorConfig2.Slot0.kA);
+        armMotorLeft.getConfigurator().apply(armMotorConfigL);
+		armMotorRight.getConfigurator().apply(armMotorConfigR);
     }
 
 	private void editArmS(double newaS) {
         aS = newaS;
-        armMotorConfig.Slot0.kS = aS;
-		armMotorConfig2.Slot0.kS = aS;
+        armMotorConfigL.Slot0.kS = aS;
+		armMotorConfigR.Slot0.kS = aS;
 
-        armMotorLeft.getConfigurator().apply(armMotorConfig);
-		armMotorRight.getConfigurator().apply(armMotorConfig2);
-        System.out.println(armMotorConfig.Slot0.kS);
-		System.out.println(armMotorConfig2.Slot0.kS);
+        armMotorLeft.getConfigurator().apply(armMotorConfigL);
+		armMotorRight.getConfigurator().apply(armMotorConfigR);
     }
 
 	private void editArmG(double newaG) {
         aG = newaG;
-        armMotorConfig.Slot0.kG = aG;
-		armMotorConfig2.Slot0.kG = aG;
+        armMotorConfigL.Slot0.kG = aG;
+		armMotorConfigR.Slot0.kG = aG;
 
-        armMotorLeft.getConfigurator().apply(armMotorConfig);
-		armMotorRight.getConfigurator().apply(armMotorConfig2);
-        System.out.println(armMotorConfig.Slot0.kG);
-		System.out.println(armMotorConfig2.Slot0.kG);
+        armMotorLeft.getConfigurator().apply(armMotorConfigL);
+		armMotorRight.getConfigurator().apply(armMotorConfigR);
     }
 	
 	/** rotates the arm to the angle, finishes when armIsReady returns true */
@@ -415,16 +397,15 @@ public class IntakeSubsystem extends SubsystemBase {
 			@Override
 			public void execute() {
 				rodMotor.setControl(new VelocityVoltage(speedSetpoint).withSlot(0));
-				
+
 				if(speedSetpoint != 0 && extendLimitSwitch() == false) {
-					// armMotorLeft.setControl(rotateRequest.withPosition(COLLECTION_POINT.plus(Rotations.of(0))));
 					armMotorLeft.setControl(new VelocityVoltage(0.2).withSlot(0));
 				}
 
 			}
 			@Override
 			public void end(boolean interrupted) {
-				rodMotor.setControl(new VelocityVoltage(0).withSlot(0));
+				rodMotor.setControl(new CoastOut());
 			}
 		};
 		out.addRequirements(this);
@@ -463,26 +444,7 @@ public class IntakeSubsystem extends SubsystemBase {
 	 * Command to return to a safe angle 
 	 */
 	public Command stow() {
-		return new ParallelCommandGroup(
-			rotateTo(STOW_ANGLE)
-		);
-	}
-
-	/**
-	 * Toggles the bot to align to the hub 
-	 */
-	public Command toggleStowSpin() {
-		return new Command() {
-			@Override
-			public void execute() {
-				stowSpin = true;
-			}
-
-			@Override
-			public void end(boolean interrupted) {
-				stowSpin = false;
-			}
-		};
+		return rotateTo(STOW_ANGLE);
 	}
 
 	public Command goHome() {
@@ -512,20 +474,12 @@ public class IntakeSubsystem extends SubsystemBase {
 		}
 	}
 
-	public Trigger extendLimit() {
-		return new Trigger(this::extendLimitSwitch);
-	}
-
-	private boolean extendLimitSwitch() {
-		return extendLimitSwitch.get();
-	}
-
-	  public Trigger homeLimit() {
-		return new Trigger(this::homeLimitSwitch);
-	}
-
 	private boolean homeLimitSwitch() {
 		return homeLimitSwitch.get();
+	}
+
+	public Trigger homeLimit() {
+		return new Trigger(this::homeLimitSwitch);
 	}
 
 	public void setHome() {
@@ -533,6 +487,14 @@ public class IntakeSubsystem extends SubsystemBase {
 		armMotorLeft.setPosition(HOME_ANGLE);
 		armMotorRight.setPosition(HOME_ANGLE);
 		System.out.println("Home has been set");
+	}
+
+	private boolean extendLimitSwitch() {
+		return extendLimitSwitch.get();
+	}
+
+	public Trigger extendLimit() {
+		return new Trigger(this::extendLimitSwitch);
 	}
 
 	public void setExtended() {

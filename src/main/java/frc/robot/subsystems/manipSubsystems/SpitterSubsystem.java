@@ -245,7 +245,6 @@ public class SpitterSubsystem extends SubsystemBase {
 
         rightSpitter.getConfigurator().apply(RSMotorConfig);
         leftSpitter.getConfigurator().apply(LSMotorConfig);
-        System.out.println(RSMotorConfig.Slot0.kP);
     }
 
     private void editSpitterI(double newkI) {
@@ -255,7 +254,6 @@ public class SpitterSubsystem extends SubsystemBase {
 
         rightSpitter.getConfigurator().apply(RSMotorConfig);
         leftSpitter.getConfigurator().apply(LSMotorConfig);
-        System.out.println(RSMotorConfig.Slot0.kI);
     }
 
     private void editSpitterD(double newkD) {
@@ -265,7 +263,6 @@ public class SpitterSubsystem extends SubsystemBase {
 
         rightSpitter.getConfigurator().apply(RSMotorConfig);
         leftSpitter.getConfigurator().apply(LSMotorConfig);
-        System.out.println(RSMotorConfig.Slot0.kD);
     }
 
     private void editSpitterV(double newkV) {
@@ -275,7 +272,6 @@ public class SpitterSubsystem extends SubsystemBase {
 
         rightSpitter.getConfigurator().apply(RSMotorConfig);
         leftSpitter.getConfigurator().apply(LSMotorConfig);
-        System.out.println(RSMotorConfig.Slot0.kV);
     }
 
     private void editFeederP(double newfP) {
@@ -283,7 +279,6 @@ public class SpitterSubsystem extends SubsystemBase {
         feederMotorConfig.Slot0.kP = fP;
 
         feeder.getConfigurator().apply(feederMotorConfig);
-        System.out.println(feederMotorConfig.Slot0.kP);
     }
 
     private void editFeederI(double newkI) {
@@ -291,7 +286,6 @@ public class SpitterSubsystem extends SubsystemBase {
         feederMotorConfig.Slot0.kI = kI;
 
         feeder.getConfigurator().apply(feederMotorConfig);
-        System.out.println(feederMotorConfig.Slot0.kI);
     }
 
     private void editFeederD(double newkD) {
@@ -299,7 +293,6 @@ public class SpitterSubsystem extends SubsystemBase {
         feederMotorConfig.Slot0.kD = kD;
 
         feeder.getConfigurator().apply(feederMotorConfig);
-        System.out.println(feederMotorConfig.Slot0.kD);
     }
 
      private void editFeederV(double newfV) {
@@ -307,7 +300,6 @@ public class SpitterSubsystem extends SubsystemBase {
         feederMotorConfig.Slot0.kV = fV;
 
         feeder.getConfigurator().apply(feederMotorConfig);
-        System.out.println(feederMotorConfig.Slot0.kV);
     }
     
     public boolean shooterIsReady() {
@@ -326,51 +318,35 @@ public class SpitterSubsystem extends SubsystemBase {
         if(requestedFeederVelocity == 0) {
             return false;
         } else {
-            return Math.abs(requestedFeederVelocity - feederVelocity) <= deadBand;
+            return Math.abs(requestedFeederVelocity - feederVelocity) <= deadBand; // i believe feeder is halfed or /2.5
         }
-    }
-
-     private void upSRPS() {
-        requestedShooterVelocity = Math.min(requestedShooterVelocity + 1, 100);
     }
 
     public Command upSRPSCommand() {
         return runOnce(() -> {
-            upSRPS(); 
-            System.out.println("We lowered SRPS: " + requestedShooterVelocity);
+            requestedShooterVelocity = Math.min(requestedShooterVelocity + 1, 100); 
+            System.out.println("SRPS raised to: " + requestedShooterVelocity);
         });
-    }
-
-    private void downSRPS() {
-        requestedShooterVelocity = Math.max(requestedShooterVelocity - 1, 5);
     }
 
     public Command downSRPSCommand() {
         return runOnce(() -> {
-            downSRPS(); 
-            System.out.println("WE lowered SRPS to: " + requestedShooterVelocity);
+            requestedShooterVelocity = Math.max(requestedShooterVelocity - 1, 5);
+            System.out.println("SRPS lowered to: " + requestedShooterVelocity);
         });
-    }
-
-     private void upFRPS() {
-        requestedFeederVelocity = Math.min(requestedFeederVelocity + 1, 100);
     }
     
     public Command upFRPSCommand() { 
         return runOnce(() -> {
-            upFRPS(); 
-            System.out.println("WE raised FRPS to: " + requestedFeederVelocity);
+            requestedFeederVelocity = Math.min(requestedFeederVelocity + 1, 100);
+            System.out.println("FRPS raised to: " + requestedFeederVelocity);
         });
-    }
-
-    private void downFRPS() {
-        requestedFeederVelocity = Math.max(requestedFeederVelocity - 1, 5);
     }
 
     public Command downFRPSCommand() {
         return runOnce(() -> {
-            downFRPS(); 
-            System.out.println("WE lowered FRPS to: " + requestedFeederVelocity);
+            requestedFeederVelocity = Math.max(requestedFeederVelocity - 1, 5);
+            System.out.println("FRPS lowered to: " + requestedFeederVelocity);
         });
     }
 
