@@ -21,7 +21,6 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
-import edu.wpi.first.util.sendable.Sendable;
 
 public class DriveConstants {
     // Both sets of gains need to be tuned to your individual robot.
@@ -149,14 +148,14 @@ public class DriveConstants {
 		);
 
     // Pathplanner PID
-	private static final PIDConstants PP_TRANS = 
+	public static final PIDConstants PP_TRANS = 
 		new PIDConstants(
 			5.2,
 			0.0,
 			0.01
 		);
 
-	private static final PIDConstants PP_ROT = 
+	public static final PIDConstants PP_ROT = 
 		new PIDConstants(
 			3.0,
 			0.0,
@@ -191,7 +190,6 @@ public class DriveConstants {
 		ROTATION_CONSTANTS.kD,
 		new Constraints(ROT_MAX_VEL.in(RadiansPerSecond), ROT_MAX_ACCEL.in(RadiansPerSecondPerSecond))
 	);
-
 
     // These are only used for simulation
     private static final MomentOfInertia kSteerInertia = KilogramSquareMeters.of(0.01);

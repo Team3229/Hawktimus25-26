@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -21,26 +22,28 @@ import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+
 import edu.wpi.first.wpilibj.DriverStation;
+
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
+
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+
 import frc.robot.inputs.ButtonBoard;
 import frc.robot.inputs.FlightStick;
 import frc.robot.subsystems.VisualizerSubsystem;
+
 import frc.robot.subsystems.drive.DriveSubsystem;
-import frc.robot.subsystems.drive.YAGSLSubsystem;
+import frc.robot.subsystems.drive.DriveConstants;
+
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import frc.robot.subsystems.manipSubsystems.PathPlannerCommands;
 import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
-import swervelib.SwerveInputStream;
-import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
-import frc.robot.subsystems.drive.DriveConstants;
-import frc.robot.subsystems.drive.DriveSubsystem;
 
 public class RobotContainer {
 	private double MaxSpeed = 1.0 * DriveConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -116,26 +119,6 @@ public class RobotContainer {
 				.withRotationalRate(Math.pow(-driverController.a_Z(), 3) * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
-
-		// SwerveInputStream driveAngularVelocity = driveSubsystem.getInputStream(
-		// 	() -> -driverController.a_Y(),
-		// 	() -> -driverController.a_X(),
-		// 	() -> -driverController.a_Z()
-		// )
-		// 	.deadband(0.1)
-		// 	.cubeRotationControllerAxis(true)
-		// 	.cubeTranslationControllerAxis(true)
-		// 	.scaleTranslation(0.8)
-		// 	.scaleRotation(0.9)
-		// 	.allianceRelativeControl(() -> !DriverStation.isFMSAttached())
-		// 	.robotRelative(() -> driverController.p_Any().getAsBoolean());
-			
-		// driveSubsystem.setDefaultCommand(
-		// 	driveSubsystem.driveFieldOriented(
-		// 		driveAngularVelocity
-		// 	)
-
-		// );
 
 		driverController.b_10().onTrue(
 			driveSubsystem.zeroGyroWithLimelight()
