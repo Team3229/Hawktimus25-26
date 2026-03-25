@@ -49,8 +49,6 @@ public class RobotContainer {
 		.withDeadband(MaxSpeed * 0.1)
 		.withRotationalDeadband(MaxAngularRate * 0.1) 
 		.withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-    private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
 	FlightStick driverController;
 	FlightStick manipController;
@@ -110,12 +108,12 @@ public class RobotContainer {
 	}
 
 	private void configDriveControls() {
-		drivetrain.setDefaultCommand(
+		driveSubsystem.drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
-        	drivetrain.applyRequest(() ->
-				drive.withVelocityX(-driverController.a_Y() * MaxSpeed) // Drive forward with negative Y (forward)
-				.withVelocityY(-driverController.a_X() * MaxSpeed) // Drive left with negative X (left)
-				.withRotationalRate(-driverController.a_Z() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+        	driveSubsystem.drivetrain.applyRequest(() ->
+				drive.withVelocityX(Math.pow(-driverController.a_Y(), 3) * MaxSpeed) // Drive forward with negative Y (forward)
+				.withVelocityY(Math.pow(-driverController.a_X(), 3) * MaxSpeed) // Drive left with negative X (left)
+				.withRotationalRate(Math.pow(-driverController.a_Z(), 3) * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
 

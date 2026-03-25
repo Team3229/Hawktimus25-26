@@ -6,11 +6,15 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.ApplyChassisSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 
 import edu.wpi.first.math.Matrix;
@@ -34,6 +38,8 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
+
 
 import frc.robot.subsystems.drive.DriveConstants.TunerSwerveDrivetrain;
 import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
@@ -327,9 +333,9 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
             // overrides the drivers Z input with the calculated angle 
             ChassisSpeeds driverSpeed = currentSpeed;
             ChassisSpeeds newVelocity = new ChassisSpeeds(driverSpeed.vxMetersPerSecond, driverSpeed.vyMetersPerSecond, angularSpeedRps);
-            
+            ApplyFieldSpeeds fieldSpeeds = new ApplyFieldSpeeds().withSpeeds(newVelocity);
             // running the bot in robot relative with the new calculated angle
-            drivetrain.applyRequest(new FieldCentric().);
+            drivetrain.applyRequest(fieldSpeeds);
 		}
     }
 
