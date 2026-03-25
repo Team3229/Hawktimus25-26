@@ -32,9 +32,13 @@ public class IndexSubsystem extends SubsystemBase {
 
     private double requestedSpeed;
 
+    private static Sendable indexPIDSendable;
+
     private double sensorToMechanismRatio = 5;
     
     private static double kP = 0.5;
+    private static double kI = 0;
+    private static double kD = 0;
     private static double kV = 0.13;
 
     //change ID
@@ -42,8 +46,6 @@ public class IndexSubsystem extends SubsystemBase {
 
     //change current limit
     private static final Current CURRENT_LIMIT = Amps.of(40);
-
-    //change indexSpeed
     
     // variables are halved when ran for some reason :(
     public final int forwards = 40;
@@ -68,10 +70,24 @@ public class IndexSubsystem extends SubsystemBase {
 			        .withSensorToMechanismRatio(sensorToMechanismRatio)
 		    );
         indexMotorConfig.Slot0.kP = kP;
+        indexMotorConfig.Slot0.kI = kI;
+        indexMotorConfig.Slot0.kD = kD;
         indexMotorConfig.Slot0.kV = kV;
         indexMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         indexMotor.getConfigurator().apply(indexMotorConfig);
+        
+            indexPIDSendable = new Sendable() {
+	    	@Override
+	    	public void initSendable(SendableBuilder builder) {
+	    		builder.addDoubleProperty("Index P", () -> kP, (newkP) -> editIndexP(newkP));
+	    		builder.addDoubleProperty("Index I", () -> kI, (newkI) -> editIndexI(newkI));
+	    		builder.addDoubleProperty("Index D", () -> kD, (newkD) -> editIndexD(newkD));
+	    		builder.addDoubleProperty("Index V", () -> kV, (newkV) -> editIndexV(newkV));
+	    	}
+	    };
+        SmartDashboard.putData("IndexPID", indexPIDSendable);
     }
+
     
     /**Command to run the index motors */
     public Command index(double rps) {
@@ -114,7 +130,6 @@ public class IndexSubsystem extends SubsystemBase {
             index(reverse).withTimeout(0.1)
         ).repeatedly();
     }
-    
 
     public boolean isReady() {
         double deadBand = 0.1;
@@ -124,6 +139,35 @@ public class IndexSubsystem extends SubsystemBase {
         } else {
             return Math.abs(requestedSpeed - indexVelocity) <= deadBand;
         }
+    }
+
+    private void editIndexP(double newkP) {
+        kP = newkP;
+        indexMotorConfig.Slot0.kP = kP;
+
+        indexMotor.getConfigurator().apply(indexMotorConfig);
+    }
+
+    private void editIndexI(double newkI) {
+        kP = newkI;
+        indexMotorConfig.Slot0.kI = kI;
+
+        indexMotor.getConfigurator().apply(indexMotorConfig);
+    }
+
+    private void editIndexD(double newkD) {
+        kV = newkD;
+        indexMotorConfig.Slot0.kD = kD;
+
+        indexMotor.getConfigurator().apply(indexMotorConfig);
+    }
+
+    private void editIndexV(double newkV) {
+        kV = newkV;
+        indexMotorConfig.Slot0.kV = kV;
+
+        indexMotor.getConfigurator().apply(indexMotorConfig);
+        System.out.println(indexMotorConfig.Slot0.kV);
     }
 
 }

@@ -35,9 +35,9 @@ public class ManipSubsystem extends SubsystemBase {
      * moves intake arm to be vertical
      */
     public Command stow() {
-        return runOnce(() -> System.out.println("SSTOOOOOOOOWWWWWWWWWWWWWW"))
+        return runOnce(() -> System.out.println("Beginning to stow"))
         .andThen(intakeSubsystem.stow())
-        .andThen(runOnce(() -> System.out.println("WE ARE DONE WITH STOWING")));
+        .andThen(runOnce(() -> System.out.println("Fully stowed")));
     }
 
     /**
@@ -53,9 +53,9 @@ public class ManipSubsystem extends SubsystemBase {
      * moves the intake arm out
      */
     public Command intakeArmOut() {
-        return runOnce(() -> System.out.println("WE HAVE BEGUN THE PROCESS OF EXTENDING"))
+        return runOnce(() -> System.out.println("Beginning the extention"))
         .andThen(intakeSubsystem.extendIntake())
-        .andThen(runOnce(() -> System.out.println("WE ARE SO DONE WITH EXTENDING")));
+        .andThen(runOnce(() -> System.out.println("Fully extended")));
     }
 
     /**
@@ -78,7 +78,7 @@ public class ManipSubsystem extends SubsystemBase {
             indexSubsystem.index(indexSubsystem.forwards)
         ));
 
-        // //MANUAL ADJUSTABLE SHOOT
+        // //MANUAL SHOOT
         // return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
         // .andThen(new ParallelCommandGroup(
         //     // intakeSubsystem.agitateFuel(),
@@ -117,7 +117,20 @@ public class ManipSubsystem extends SubsystemBase {
         return spitterSubsystem.downFRPSCommand();
     }
 
-    public Command stowSpinCommand() {
-        return intakeSubsystem.toggleStowSpin();
-    }
+    /**
+	 * Toggles the bot to spin the intake while stowed 
+	 */
+	public Command toggleStowSpin() {
+		return new Command() {
+			@Override
+			public void initialize() {
+				IntakeSubsystem.stowSpin = true;
+			}
+
+			@Override
+			public void end(boolean interrupted) {
+				IntakeSubsystem.stowSpin = false;
+			}
+		};
+	} // TODO: just a test for next time, as it wasn't turning off before
 }
