@@ -75,6 +75,7 @@ public class RobotContainer {
 		NamedCommands.registerCommand("ZeroGyroWithLimelight", driveSubsystem.zeroGyroWithLimelight());
 
 		DriverStation.silenceJoystickConnectionWarning(true); // TODO: MAKE THIS FALSE FOR COMP!!!!!!!!!!!!!!!!
+		
 
 		configDriveControls();
 		configManipControls();

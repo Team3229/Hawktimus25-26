@@ -4,6 +4,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -34,9 +35,9 @@ import java.util.Date;
 
 public class SpitterSubsystem extends SubsystemBase {
     private static DriveSubsystem driveSubsystem;
-    private static double requestedShooterVelocity = 26;
+    private static double requestedShooterVelocity = 28;
     private static double requestedFeederVelocity = 38;
-    private static double deadBand = 2.5;
+    private static double deadBand = 1;
 
     // change PID (if needed)
     private double kP = 0.6;
@@ -62,6 +63,8 @@ public class SpitterSubsystem extends SubsystemBase {
     private TalonFXConfiguration feederMotorConfig;
 
     private long spitTimer = 0;
+
+    private double sensorToMechanismRatio = 9;
 
     private static final Current CURRENT_LIMIT = Amps.of(40);
 
@@ -116,7 +119,7 @@ public class SpitterSubsystem extends SubsystemBase {
         shooterMotorConfig.Slot0.kD = kD;
         shooterMotorConfig.Slot0.kV = kV;
         
-        shooterMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        shooterMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         leftSpitter.getConfigurator().apply(shooterMotorConfig);
 
         rightSpitter = new TalonFX(RS_CAN_ID, CANBus.roboRIO()); 
@@ -140,17 +143,17 @@ public class SpitterSubsystem extends SubsystemBase {
                     .withPeakForwardVoltage(12)
                     .withPeakReverseVoltage(-12)
                     .withSupplyVoltageTimeConstant(0)
-            );
-            // .withFeedback(
-            //     new FeedbackConfigs()
-            //         .withSensorToMechanismRatio(sensorToMechanismRatio)
-		    // );
+            )
+            .withFeedback(
+                new FeedbackConfigs()
+                    .withSensorToMechanismRatio(sensorToMechanismRatio)
+		    );
         
         feederMotorConfig.Slot0.kP = fP;
         feederMotorConfig.Slot0.kI = fI;
         feederMotorConfig.Slot0.kD = fD;
         feederMotorConfig.Slot0.kV = fV;
-        feederMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        feederMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         feeder.getConfigurator().apply(feederMotorConfig);
 
         spitterSendable = new Sendable() {
