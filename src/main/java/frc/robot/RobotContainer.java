@@ -46,8 +46,9 @@ import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
 
 
 public class RobotContainer {
-	private double MaxSpeed = 1.0 * DriveConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+	private double MaxSpeed = 1.0 * DriveConstants.kSpeedAt12Volts.in(MetersPerSecond);
+    private double MaxAngularRate = RotationsPerSecond.of(1.205).in(RadiansPerSecond); 
+	// TODO: this needs to be tested bc idk if this is correct, it could be tho bc mathmatically that lines up with yagsl code
 	
 	private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
 		.withDeadband(MaxSpeed * 0.1)
