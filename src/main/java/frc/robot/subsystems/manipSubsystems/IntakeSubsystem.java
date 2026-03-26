@@ -61,21 +61,21 @@ public class IntakeSubsystem extends SubsystemBase {
 	private static final Current CURRENT_LIMIT = Amps.of(40);
 	
 	public static final Angle HOME_ANGLE = Rotations.of(0);
-	public static final Angle STOW_ANGLE = Rotations.of(0.06); // was 0.097
-	public static final Angle COLLECTION_POINT = Rotations.of(0.347);
+	public static final Angle STOW_ANGLE = Rotations.of(0.25); // was 0.097
+	public static final Angle COLLECTION_POINT = Rotations.of(0.347); // was 0.347
 	
 	private static double sensorToMechanismRatio = 25;
 	
 	private Angle requestedAngle;
 	private double requestedVelocity;
 	
-	private double aP = 8.5;
-	private double aI = 0; 
-	private double aD = 0.00; 
-	private double aV = 0.12;
-	private double aA = 0.01;
-	private double aS = 0.25;
-	private double aG = 1.75;
+	private double aP = 0.0;
+	private double aI = 0.0; 
+	private double aD = 0.0; 
+	private double aV = 0.0;
+	private double aA = 0.0;
+	private double aS = 0.0;
+	private double aG = 0.0;
 
 	private double rP = 0.1; 
 	private double rI = 0.0; 
