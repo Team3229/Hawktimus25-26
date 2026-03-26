@@ -11,6 +11,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -29,6 +30,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class ArmSubsystem extends SubsystemBase {
+
+	RollerSubsystem rollerSubsystem;
 
 	private static TalonFX armMotorRight;
 	private static TalonFX armMotorLeft;
@@ -73,10 +76,13 @@ public class ArmSubsystem extends SubsystemBase {
 
 	public static boolean stowSpin = false;
 
+	public static final double ROD_CW_SPEED = RollerSubsystem.ROD_CW_SPEED;
+
 	private static Sendable intakeSendable;
 	private static Sendable intakePIDSendable;
 	
 	public ArmSubsystem() {
+		
 		super();
 
 		homeLimitSwitch = new DigitalInput(HOME_LIMIT_PORT);
@@ -172,6 +178,8 @@ public class ArmSubsystem extends SubsystemBase {
 			}
 		};
 		SmartDashboard.putData("IntakePID", intakePIDSendable);
+
+		rollerSubsystem = new RollerSubsystem();
 	}
 
 	private void editArmP(double newaP) {
@@ -231,7 +239,7 @@ public class ArmSubsystem extends SubsystemBase {
 		armMotorRight.getConfigurator().apply(armMotorConfig);
     }
 	
-	/** rotates the arm to the angle, finishes when armIsReady returns true */
+	
 	public Command rotateTo(Angle setpoint) {
 		Command out = new Command() {
 			@Override
@@ -242,11 +250,9 @@ public class ArmSubsystem extends SubsystemBase {
 			@Override
 			public void execute() {
 				armMotorLeft.setControl(rotateRequest.withPosition(setpoint));
-			}
-
-			@Override
-			public boolean isFinished() {
-				return armIsReady();
+				if(stowSpin) {
+					rollerSubsystem.rodSpin(ROD_CW_SPEED);
+				}
 			}
 
 			@Override
