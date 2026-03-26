@@ -48,7 +48,13 @@ import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
 public class RobotContainer {
 	private double MaxSpeed = 1.0 * DriveConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+	
 	private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+		.withDeadband(MaxSpeed * 0.1)
+		.withRotationalDeadband(MaxAngularRate * 0.1) 
+		.withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+
+	private final SwerveRequest.RobotCentric robotRelative = new SwerveRequest.RobotCentric()
 		.withDeadband(MaxSpeed * 0.1)
 		.withRotationalDeadband(MaxAngularRate * 0.1) 
 		.withDriveRequestType(DriveRequestType.OpenLoopVoltage);
@@ -133,6 +139,14 @@ public class RobotContainer {
 				driveSubsystem.getCurrentCommand().cancel();
 				// cancels ALL DRIVING on driver controller
 			})
+		);
+
+		driverController.p_Any().whileTrue(
+			driveSubsystem.drivetrain.applyRequest(() ->
+				robotRelative.withVelocityX(Math.pow(-driverController.a_Y(), 3) * MaxSpeed)
+				.withVelocityY(Math.pow(-driverController.a_X(), 3) * MaxSpeed)
+				.withRotationalRate(Math.pow(-driverController.a_Z(), 3) * MaxAngularRate)
+			)
 		);
 
 		driverController.b_Trigger().whileTrue(
