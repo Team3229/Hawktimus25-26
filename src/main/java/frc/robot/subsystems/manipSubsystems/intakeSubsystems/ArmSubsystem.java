@@ -67,7 +67,7 @@ public class ArmSubsystem extends SubsystemBase {
 	private double aV = 0.0;
 	private double aA = 0.0;
 	private double aS = 0.0;
-	private double aG = 5.95;
+	private double aG = 1.4553; //is tuned
 
 	private static final Angle angleDeadBand = Rotations.of(0.01);
 
