@@ -20,6 +20,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -51,6 +52,8 @@ public class RobotContainer {
     private double MaxAngularRate = RotationsPerSecond.of(1.205).in(RadiansPerSecond); 
 	// TODO: this needs to be tested bc idk if this is correct, it could be tho bc mathmatically that lines up with yagsl code
 	
+	CameraServer intakeCamera;
+
 	private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
 		.withDeadband(MaxSpeed * 0.1)
 		.withRotationalDeadband(MaxAngularRate * 0.1) 
@@ -75,17 +78,8 @@ public class RobotContainer {
 	private Command autoCommand;
 
 	public RobotContainer() {
-
 		driverController = new FlightStick(0);
 		manipController = new FlightStick(1);
-
-		driveSubsystem = new DriveSubsystem(
-			DriveConstants.DrivetrainConstants, 
-			DriveConstants.FrontLeft, 
-			DriveConstants.FrontRight, 
-			DriveConstants.BackLeft, 
-			DriveConstants.BackRight
-		);
 
 		manipSubsystem = new ManipSubsystem(driveSubsystem);
 		spitterSubsystem = new SpitterSubsystem(driveSubsystem);
