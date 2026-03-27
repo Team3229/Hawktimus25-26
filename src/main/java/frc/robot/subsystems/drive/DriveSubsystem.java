@@ -49,7 +49,6 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import frc.robot.subsystems.VisionSubsystem;
-import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.DriveConstants.TunerSwerveDrivetrain;
 import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
 import frc.robot.utilities.LimelightHelpers;
@@ -372,7 +371,6 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
     * 
     * @return The new updated pose of the robot.
     */
-
     public void updateOdometry() {
         for (String side : new String[] {"left", "right"}) {
             LimelightHelpers.SetRobotOrientation(
@@ -446,19 +444,19 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
     public void resetOdometry(Pose2d pose) {
         if (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)) {
             if (pose == null) {
-                resetOdometry(DriveConstants.startingRedPose);
+                resetPose(DriveConstants.startingRedPose);
                 return;
             }
         } else if (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)) {
             if (pose == null) {
-                resetOdometry(DriveConstants.startingBluePose);
+                resetPose(DriveConstants.startingBluePose);
                 return;
             }
         } else {
             System.out.println("Unknown/incorrect alliance setup");
         }
 
-        resetOdometry(pose);
+        resetPose(pose);
     }
 
     /**
@@ -469,7 +467,7 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
      */	
 
     public Pose2d getPose() {
-        return getPose();
+        return getStateCopy().Pose;
     }
 
     public void setIMUYaw(Rotation2d yaw) {

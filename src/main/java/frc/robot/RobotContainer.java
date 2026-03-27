@@ -67,7 +67,6 @@ public class RobotContainer {
 	FlightStick driverController;
 	FlightStick manipController;
 	ButtonBoard buttonBoard;
-	DriveSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
 	SpitterSubsystem spitterSubsystem;
 	
@@ -81,8 +80,8 @@ public class RobotContainer {
 		driverController = new FlightStick(0);
 		manipController = new FlightStick(1);
 
-		manipSubsystem = new ManipSubsystem(driveSubsystem);
-		spitterSubsystem = new SpitterSubsystem(driveSubsystem);
+		manipSubsystem = new ManipSubsystem(drivetrain);
+		spitterSubsystem = new SpitterSubsystem(drivetrain);
 
 		pathPlannerCommands = new PathPlannerCommands(manipSubsystem);
 
@@ -97,7 +96,7 @@ public class RobotContainer {
 		NamedCommands.registerCommand("WheelSpinUp", pathPlannerCommands.pathSpinUp());
 		NamedCommands.registerCommand("Shoot", pathPlannerCommands.pathShoot());
 		NamedCommands.registerCommand("Stow", manipSubsystem.stow());
-		NamedCommands.registerCommand("ZeroGyroWithLimelight", driveSubsystem.zeroGyroWithLimelight());
+		NamedCommands.registerCommand("ZeroGyroWithLimelight", drivetrain.zeroGyroWithLimelight());
 
 		DriverStation.silenceJoystickConnectionWarning(true); // TODO: MAKE THIS FALSE FOR COMP!!!!!!!!!!!!!!!!
 
@@ -117,7 +116,7 @@ public class RobotContainer {
 	}
 
 	public void autoInit() {
-		driveSubsystem.zeroGyroCommand();
+		drivetrain.zeroGyroCommand();
 	}
 
 	private void configDriveControls() {
@@ -131,16 +130,16 @@ public class RobotContainer {
         );
 
 		driverController.b_10().onTrue(
-			driveSubsystem.zeroGyroWithLimelight()
+			drivetrain.zeroGyroWithLimelight()
 		);
 
 		driverController.b_11().onTrue(
-			driveSubsystem.zeroGyroCommand()
+			drivetrain.zeroGyroCommand()
 		);
 
 		driverController.b_Hazard().onTrue(
 			Commands.runOnce(() -> {
-				driveSubsystem.getCurrentCommand().cancel();
+				drivetrain.getCurrentCommand().cancel();
 				// cancels ALL DRIVING on driver controller
 			})
 		);
@@ -154,7 +153,7 @@ public class RobotContainer {
 		);
 
 		driverController.b_Trigger().whileTrue(
-			driveSubsystem.toggleHubAlign()
+			drivetrain.toggleHubAlign()
 		);
 
 	}
@@ -234,7 +233,7 @@ public class RobotContainer {
 					new Rotation2d())).collect(Collectors.toList())
 				);
 			}
-			driveSubsystem.postTrajectoryToField(poses);
+			drivetrain.postTrajectoryToField(poses);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
