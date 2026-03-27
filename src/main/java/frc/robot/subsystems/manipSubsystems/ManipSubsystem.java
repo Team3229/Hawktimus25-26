@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.manipSubsystems.intakeSubsystems.IntakeSubsystem;
 
 public class ManipSubsystem extends SubsystemBase {
     IntakeSubsystem intakeSubsystem;
@@ -117,20 +118,4 @@ public class ManipSubsystem extends SubsystemBase {
         return spitterSubsystem.downFRPSCommand();
     }
 
-    /**
-	 * Toggles the bot to spin the intake while stowed 
-	 */
-	public Command toggleStowSpin() {
-		return new Command() {
-			@Override
-			public void initialize() {
-				IntakeSubsystem.stowSpin = true;
-			}
-
-			@Override
-			public void end(boolean interrupted) {
-				IntakeSubsystem.stowSpin = false;
-			}
-		};
-	} // TODO: just a test for next time, as it wasn't turning off before
 }

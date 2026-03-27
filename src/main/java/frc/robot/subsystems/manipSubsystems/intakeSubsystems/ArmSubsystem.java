@@ -11,7 +11,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -55,7 +55,8 @@ public class ArmSubsystem extends SubsystemBase {
 	private static final int EXTEND_LIMIT_PORT = 1;
 
 	public static final Angle HOME_ANGLE = Rotations.of(0);
-	public static final Angle STOW_ANGLE = Rotations.of(0.25); // was 0.097
+	public static final Angle STOW_ANGLE = Rotations.of(0.2); // was 0.097
+	public static Angle COLLECTION_POINT2 = Rotations.of(0.3); // TODO: delete
 	public static final Angle COLLECTION_POINT = Rotations.of(0.347); // was 0.347
 	
 	private static final Current CURRENT_LIMIT = Amps.of(40);
@@ -70,7 +71,7 @@ public class ArmSubsystem extends SubsystemBase {
 	private double aV = 0.0;
 	private double aA = 0.0;
 	private double aS = 0.0;
-	private double aG = 5.95;
+	private double aG = 9.677;
 
 	private static final Angle angleDeadBand = Rotations.of(0.01);
 
@@ -79,9 +80,9 @@ public class ArmSubsystem extends SubsystemBase {
 	public static final double ROD_CW_SPEED = RollerSubsystem.ROD_CW_SPEED;
 
 	private static Sendable intakeSendable;
-	private static Sendable intakePIDSendable;
+	private static Sendable armPIDSendable;
 	
-	public ArmSubsystem() {
+	public ArmSubsystem(RollerSubsystem roll) {
 		
 		super();
 
@@ -126,9 +127,9 @@ public class ArmSubsystem extends SubsystemBase {
 		armMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 		
 		armMotorConfig.MotionMagic
-		.withMotionMagicCruiseVelocity(motionMagicCruiseVelocity)
-		.withMotionMagicAcceleration(motionMagicAcceleration)
-		.withMotionMagicJerk(motionMagicJerk);
+			.withMotionMagicCruiseVelocity(motionMagicCruiseVelocity)
+			.withMotionMagicAcceleration(motionMagicAcceleration)
+			.withMotionMagicJerk(motionMagicJerk);
 		
 		armMotorLeft.getConfigurator().apply(armMotorConfig);
 
@@ -165,7 +166,7 @@ public class ArmSubsystem extends SubsystemBase {
 		};
 		SmartDashboard.putData("Intake", intakeSendable);
 
-		intakePIDSendable = new Sendable() {
+		armPIDSendable = new Sendable() {
 		@Override
 			public void initSendable(SendableBuilder builder) {
 				builder.addDoubleProperty("Arm P", () -> aP, (newaP) -> editArmP(newaP));
@@ -175,12 +176,17 @@ public class ArmSubsystem extends SubsystemBase {
 				builder.addDoubleProperty("Arm A", () -> aA, (newaA) -> editArmA(newaA));
 				builder.addDoubleProperty("Arm S", () -> aS, (newaS) -> editArmS(newaS));
 				builder.addDoubleProperty("Arm G", () -> aG, (newaG) -> editArmG(newaG));
+				// builder.addDoubleProperty("Setpoint", () -> COLLECTION_POINT2.baseUnitMagnitude(), (setpoint) -> editSetpoint2(setpoint));
 			}
 		};
-		SmartDashboard.putData("IntakePID", intakePIDSendable);
+		SmartDashboard.putData("ArmPID", armPIDSendable);
 
-		rollerSubsystem = new RollerSubsystem();
+		rollerSubsystem = roll;
 	}
+
+	private void editSetpoint2(Angle setpoint) {
+		COLLECTION_POINT2 = setpoint;
+    }
 
 	private void editArmP(double newaP) {
         aP = newaP;
@@ -256,6 +262,11 @@ public class ArmSubsystem extends SubsystemBase {
 			}
 
 			@Override
+			public boolean isFinished() {
+				return armIsReady();
+			}
+
+			@Override
 			public void end(boolean interrupted) {
 			    armMotorLeft.set(0);
 			}
@@ -277,8 +288,13 @@ public class ArmSubsystem extends SubsystemBase {
 		Angle leftArmAngle = armMotorLeft.getPosition().getValue();
 
 		// System.out.println("req: " + requestedAngle.toShortString() + " Rcur: " + rightArmAngle.toShortString() + " Lcur: " + leftArmAngle.toShortString());
-
-		return leftArmAngle.isNear(requestedAngle, angleDeadBand);
+		if (leftArmAngle.isNear(requestedAngle, angleDeadBand)) {
+			armMotorLeft.setControl(new StaticBrake());
+			System.out.println("I made it!!!!!!!!");
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	private boolean homeLimitSwitch() {
