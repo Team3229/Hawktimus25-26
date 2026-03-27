@@ -73,7 +73,7 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
     // );
     // maybe??????? need something like drivetrain from container
 
-    public final Field2d field = new Field2d();
+    public final static Field2d field = new Field2d();
     
     private static final double kSimLoopPeriod = 0.004; // 4 ms
     private Notifier m_simNotifier = null;
@@ -293,8 +293,8 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
 
         if (hubAlign) {
             // overrides velocity on the z axis to align to the hub
-            Pose2d currentPose = drivetrain.getPose(); 
-            ChassisSpeeds currentSpeed = drivetrain.getKinematics().toChassisSpeeds();
+            Pose2d currentPose = getPose(); 
+            ChassisSpeeds currentSpeed = getKinematics().toChassisSpeeds();
             
             Translation2d robotTranslation = currentPose.getTranslation();
             Translation2d spitterTranslation = robotTranslation.rotateBy(Rotation2d.k180deg); // our spitter is on the back of the bot
@@ -354,12 +354,12 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
             ChassisSpeeds newVelocity = new ChassisSpeeds(driverSpeed.vxMetersPerSecond, driverSpeed.vyMetersPerSecond, angularSpeedRps);
             SwerveRequest fieldSpeedRequest = new ApplyFieldSpeeds().withSpeeds(newVelocity);
             // running the bot in robot relative with the new calculated angle
-            drivetrain.applyRequest(() -> fieldSpeedRequest);
+            applyRequest(() -> fieldSpeedRequest);
         }
     }
 
     public void postTrajectoryToField(List<Pose2d> trajectory) {
-        drivetrain.field.getObject("Trajectory").setPoses(trajectory);
+        DriveSubsystem.field.getObject("Trajectory").setPoses(trajectory);
     }
 
     public double getToF(double distanceMeters) {
@@ -387,7 +387,7 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
                 Translation3d aprilTagPosition = LimelightHelpers.getTargetPose3d_RobotSpace("limelight-" + side).getTranslation();
 
                 if (Math.hypot(aprilTagPosition.getX(), aprilTagPosition.getZ()) <= 3.5) {			
-                    drivetrain.addVisionMeasurement(new Pose2d(estimate.pose.getX(), estimate.pose.getY(), getIMUYaw()), estimate.timestampSeconds);
+                    addVisionMeasurement(new Pose2d(estimate.pose.getX(), estimate.pose.getY(), getIMUYaw()), estimate.timestampSeconds);
                 }
             }
         }
@@ -395,7 +395,7 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
 
     public void zeroGyro() {
         getIMU().setYaw(0);
-        drivetrain.resetOdometry(new Pose2d(getPose().getX(), getPose().getY(), new Rotation2d()));
+        resetOdometry(new Pose2d(getPose().getX(), getPose().getY(), new Rotation2d()));
     }
 
     public Command zeroGyroCommand() {
@@ -404,7 +404,7 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
 
     public void redGyro() {
         getIMU().setYaw(0);
-        drivetrain.resetOdometry(new Pose2d(getPose().getX(), getPose().getY(), new Rotation2d(Math.PI)));
+        resetOdometry(new Pose2d(getPose().getX(), getPose().getY(), new Rotation2d(Math.PI)));
     }
 
     /**
@@ -446,19 +446,19 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
     public void resetOdometry(Pose2d pose) {
         if (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)) {
             if (pose == null) {
-                drivetrain.resetOdometry(DriveConstants.startingRedPose);
+                resetOdometry(DriveConstants.startingRedPose);
                 return;
             }
         } else if (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)) {
             if (pose == null) {
-                drivetrain.resetOdometry(DriveConstants.startingBluePose);
+                resetOdometry(DriveConstants.startingBluePose);
                 return;
             }
         } else {
             System.out.println("Unknown/incorrect alliance setup");
         }
 
-        drivetrain.resetOdometry(pose);
+        resetOdometry(pose);
     }
 
     /**
@@ -469,16 +469,16 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
      */	
 
     public Pose2d getPose() {
-        return drivetrain.getPose();
+        return getPose();
     }
 
     public void setIMUYaw(Rotation2d yaw) {
         getIMU().setYaw(yaw.getMeasure());
-        drivetrain.resetOdometry(new Pose2d(getPose().getX(), getPose().getY(), yaw));
+        resetOdometry(new Pose2d(getPose().getX(), getPose().getY(), yaw));
     }
 
     public Pigeon2 getIMU() {
-        return drivetrain.getPigeon2();
+        return getPigeon2();
     }
 
     public Rotation2d getIMUYaw() {
@@ -614,18 +614,18 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
             final boolean enableFeedforward = true;
 
             AutoBuilder.configure(
-                () -> drivetrain.getPose(),
+                () -> getPose(),
                 this::resetOdometry,
-                () -> drivetrain.getKinematics().toChassisSpeeds(),
+                () -> getKinematics().toChassisSpeeds(),
                 (speedsRobotRelative, moduleFeedForwards) -> {
                     ApplyRobotSpeeds relativeRequest = new ApplyRobotSpeeds().withSpeeds(speedsRobotRelative);
 					if (enableFeedforward) {
                         relativeRequest
                             .withWheelForceFeedforwardsX(moduleFeedForwards.linearForces())
                             .withWheelForceFeedforwardsY(moduleFeedForwards.linearForces());
-                        drivetrain.applyRequest(() -> relativeRequest);
+                            applyRequest(() -> relativeRequest);
 					} else {
-						drivetrain.applyRequest(() -> relativeRequest);
+						applyRequest(() -> relativeRequest);
 					}
 				},
 				new PPHolonomicDriveController(
