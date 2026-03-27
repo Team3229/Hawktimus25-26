@@ -46,6 +46,7 @@ import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
 
 
 public class RobotContainer {
+	public final DriveSubsystem drivetrain = DriveConstants.createDrivetrain();
 	private double MaxSpeed = 1.0 * DriveConstants.kSpeedAt12Volts.in(MetersPerSecond);
     private double MaxAngularRate = RotationsPerSecond.of(1.205).in(RadiansPerSecond); 
 	// TODO: this needs to be tested bc idk if this is correct, it could be tho bc mathmatically that lines up with yagsl code
@@ -78,6 +79,14 @@ public class RobotContainer {
 		driverController = new FlightStick(0);
 		manipController = new FlightStick(1);
 
+		driveSubsystem = new DriveSubsystem(
+			DriveConstants.DrivetrainConstants, 
+			DriveConstants.FrontLeft, 
+			DriveConstants.FrontRight, 
+			DriveConstants.BackLeft, 
+			DriveConstants.BackRight
+		);
+
 		manipSubsystem = new ManipSubsystem(driveSubsystem);
 		spitterSubsystem = new SpitterSubsystem(driveSubsystem);
 
@@ -103,7 +112,7 @@ public class RobotContainer {
 		
 		final var idle = new SwerveRequest.Idle();
         	RobotModeTriggers.disabled().whileTrue(
-            driveSubsystem.drivetrain.applyRequest(() -> idle).ignoringDisable(false) //check on this wording is weird I think should be false based on reading
+            drivetrain.applyRequest(() -> idle).ignoringDisable(false) //check on this wording is weird I think should be false based on reading
         );
 	}
 	
@@ -118,9 +127,9 @@ public class RobotContainer {
 	}
 
 	private void configDriveControls() {
-		driveSubsystem.drivetrain.setDefaultCommand(
+		drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
-        	driveSubsystem.drivetrain.applyRequest(() ->
+        	drivetrain.applyRequest(() ->
 				drive.withVelocityX(Math.pow(-driverController.a_Y(), 3) * MaxSpeed) // Drive forward with negative Y (forward)
 				.withVelocityY(Math.pow(-driverController.a_X(), 3) * MaxSpeed) // Drive left with negative X (left)
 				.withRotationalRate(Math.pow(-driverController.a_Z(), 3) * MaxAngularRate) // Drive counterclockwise with negative X (left)
@@ -143,7 +152,7 @@ public class RobotContainer {
 		);
 
 		driverController.p_Any().whileTrue(
-			driveSubsystem.drivetrain.applyRequest(() ->
+			drivetrain.applyRequest(() ->
 				robotRelative.withVelocityX(Math.pow(-driverController.a_Y(), 3) * MaxSpeed)
 				.withVelocityY(Math.pow(-driverController.a_X(), 3) * MaxSpeed)
 				.withRotationalRate(Math.pow(-driverController.a_Z(), 3) * MaxAngularRate)

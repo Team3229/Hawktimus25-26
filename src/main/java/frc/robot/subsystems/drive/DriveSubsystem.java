@@ -49,6 +49,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.DriveConstants.TunerSwerveDrivetrain;
 import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
 import frc.robot.utilities.LimelightHelpers;
@@ -62,7 +63,15 @@ import frc.robot.utilities.LimelightHelpers;
  */
 
 public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
-    public final DriveSubsystem drivetrain = DriveConstants.createDrivetrain();
+
+    // private TunerSwerveDrivetrain drivetrain = new TunerSwerveDrivetrain(
+    //     DriveConstants.DrivetrainConstants, 
+    //     DriveConstants.FrontLeft,
+    //     DriveConstants.FrontRight,
+    //     DriveConstants.BackRight,
+    //     DriveConstants.BackLeft
+    // );
+    // maybe??????? need something like drivetrain from container
 
     public final Field2d field = new Field2d();
     
