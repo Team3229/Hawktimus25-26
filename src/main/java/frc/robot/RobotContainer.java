@@ -13,6 +13,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -45,6 +46,8 @@ public class RobotContainer {
 
 	private SendableChooser<Command> autoChooser;
 	private Command autoCommand;
+
+	CameraServer intakeCamera;
 
 	public RobotContainer() {
 
