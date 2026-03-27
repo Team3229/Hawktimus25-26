@@ -11,6 +11,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -29,6 +30,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class ArmSubsystem extends SubsystemBase {
+
+	RollerSubsystem rollerSubsystem;
 
 	private static TalonFX armMotorRight;
 	private static TalonFX armMotorLeft;
@@ -52,7 +55,8 @@ public class ArmSubsystem extends SubsystemBase {
 	private static final int EXTEND_LIMIT_PORT = 1;
 
 	public static final Angle HOME_ANGLE = Rotations.of(0);
-	public static final Angle STOW_ANGLE = Rotations.of(0.25); // was 0.097
+	public static final Angle STOW_ANGLE = Rotations.of(0.2); // was 0.097
+	public static Angle COLLECTION_POINT2 = Rotations.of(0.3); // TODO: delete
 	public static final Angle COLLECTION_POINT = Rotations.of(0.347); // was 0.347
 	
 	private static final Current CURRENT_LIMIT = Amps.of(40);
@@ -73,10 +77,13 @@ public class ArmSubsystem extends SubsystemBase {
 
 	public static boolean stowSpin = false;
 
+	public static final double ROD_CW_SPEED = RollerSubsystem.ROD_CW_SPEED;
+
 	private static Sendable intakeSendable;
-	private static Sendable intakePIDSendable;
+	private static Sendable armPIDSendable;
 	
-	public ArmSubsystem() {
+	public ArmSubsystem(RollerSubsystem roll) {
+		
 		super();
 
 		homeLimitSwitch = new DigitalInput(HOME_LIMIT_PORT);
@@ -120,9 +127,9 @@ public class ArmSubsystem extends SubsystemBase {
 		armMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 		
 		armMotorConfig.MotionMagic
-		.withMotionMagicCruiseVelocity(motionMagicCruiseVelocity)
-		.withMotionMagicAcceleration(motionMagicAcceleration)
-		.withMotionMagicJerk(motionMagicJerk);
+			.withMotionMagicCruiseVelocity(motionMagicCruiseVelocity)
+			.withMotionMagicAcceleration(motionMagicAcceleration)
+			.withMotionMagicJerk(motionMagicJerk);
 		
 		armMotorLeft.getConfigurator().apply(armMotorConfig);
 
@@ -159,7 +166,7 @@ public class ArmSubsystem extends SubsystemBase {
 		};
 		SmartDashboard.putData("Intake", intakeSendable);
 
-		intakePIDSendable = new Sendable() {
+		armPIDSendable = new Sendable() {
 		@Override
 			public void initSendable(SendableBuilder builder) {
 				builder.addDoubleProperty("Arm P", () -> aP, (newaP) -> editArmP(newaP));
@@ -169,10 +176,17 @@ public class ArmSubsystem extends SubsystemBase {
 				builder.addDoubleProperty("Arm A", () -> aA, (newaA) -> editArmA(newaA));
 				builder.addDoubleProperty("Arm S", () -> aS, (newaS) -> editArmS(newaS));
 				builder.addDoubleProperty("Arm G", () -> aG, (newaG) -> editArmG(newaG));
+				// builder.addDoubleProperty("Setpoint", () -> COLLECTION_POINT2.baseUnitMagnitude(), (setpoint) -> editSetpoint2(setpoint));
 			}
 		};
-		SmartDashboard.putData("IntakePID", intakePIDSendable);
+		SmartDashboard.putData("ArmPID", armPIDSendable);
+
+		rollerSubsystem = roll;
 	}
+
+	private void editSetpoint2(Angle setpoint) {
+		COLLECTION_POINT2 = setpoint;
+    }
 
 	private void editArmP(double newaP) {
         aP = newaP;
@@ -231,7 +245,7 @@ public class ArmSubsystem extends SubsystemBase {
 		armMotorRight.getConfigurator().apply(armMotorConfig);
     }
 	
-	/** rotates the arm to the angle, finishes when armIsReady returns true */
+	
 	public Command rotateTo(Angle setpoint) {
 		Command out = new Command() {
 			@Override
@@ -242,6 +256,9 @@ public class ArmSubsystem extends SubsystemBase {
 			@Override
 			public void execute() {
 				armMotorLeft.setControl(rotateRequest.withPosition(setpoint));
+				if(stowSpin) {
+					rollerSubsystem.rodSpin(ROD_CW_SPEED);
+				}
 			}
 
 			@Override
@@ -271,8 +288,13 @@ public class ArmSubsystem extends SubsystemBase {
 		Angle leftArmAngle = armMotorLeft.getPosition().getValue();
 
 		// System.out.println("req: " + requestedAngle.toShortString() + " Rcur: " + rightArmAngle.toShortString() + " Lcur: " + leftArmAngle.toShortString());
-
-		return leftArmAngle.isNear(requestedAngle, angleDeadBand);
+		if (leftArmAngle.isNear(requestedAngle, angleDeadBand)) {
+			armMotorLeft.setControl(new StaticBrake());
+			System.out.println("I made it!!!!!!!!");
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	private boolean homeLimitSwitch() {

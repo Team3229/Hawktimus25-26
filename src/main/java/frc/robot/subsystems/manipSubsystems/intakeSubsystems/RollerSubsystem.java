@@ -81,7 +81,7 @@ public class RollerSubsystem extends SubsystemBase {
 			}
 		};
 
-		SmartDashboard.putData("Intake", intakeRodSendable);
+		SmartDashboard.putData("IntakeRoller", intakeRodSendable);
 
 		intakeRodPIDSendable = new Sendable() {
 		@Override
@@ -92,7 +92,7 @@ public class RollerSubsystem extends SubsystemBase {
 				builder.addDoubleProperty("Rod V", () -> rV, (newrV) -> editRodV(newrV));
 			}
 		};
-		SmartDashboard.putData("IntakePID", intakeRodPIDSendable);
+		SmartDashboard.putData("IntakeRollerPID", intakeRodPIDSendable);
 	}
 
 	private void editRodP(double newrP) {

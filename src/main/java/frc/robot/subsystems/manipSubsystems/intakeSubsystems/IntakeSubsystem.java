@@ -17,10 +17,12 @@ public class IntakeSubsystem extends SubsystemBase{
     public static final Angle HOME_ANGLE = ArmSubsystem.HOME_ANGLE;
 	public static final Angle STOW_ANGLE = ArmSubsystem.STOW_ANGLE;
 	public static final Angle COLLECTION_POINT = ArmSubsystem.COLLECTION_POINT;
+	public static final Angle COLLECTION_POINT2 = ArmSubsystem.COLLECTION_POINT2;
+
 
     public IntakeSubsystem() {
-        rollerSubsystem = new RollerSubsystem();
-        armSubsystem = new ArmSubsystem();
+		rollerSubsystem = new RollerSubsystem();
+        armSubsystem = new ArmSubsystem(rollerSubsystem);
     }
 
     /**
@@ -67,6 +69,7 @@ public class IntakeSubsystem extends SubsystemBase{
 	 * @return Command to rotate the arm
 	 */
 	public Command extendIntake() {
-		return armSubsystem.rotateTo(COLLECTION_POINT);
+		return armSubsystem.rotateTo(COLLECTION_POINT2);
 	}
+
 }
