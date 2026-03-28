@@ -19,7 +19,6 @@ public class IntakeSubsystem extends SubsystemBase{
 	public static final Angle COLLECTION_POINT = ArmSubsystem.COLLECTION_POINT;
 	public static final Angle COLLECTION_POINT2 = ArmSubsystem.COLLECTION_POINT2;
 
-
     public IntakeSubsystem() {
 		rollerSubsystem = new RollerSubsystem();
         armSubsystem = new ArmSubsystem(rollerSubsystem);

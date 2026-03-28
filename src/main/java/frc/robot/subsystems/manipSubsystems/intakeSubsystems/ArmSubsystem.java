@@ -63,7 +63,7 @@ public class ArmSubsystem extends SubsystemBase {
 	
 	private static double sensorToMechanismRatio = 25;
 	
-	private Angle requestedAngle;
+	private Angle requestedAngle = Rotations.of(0);
 	
 	private double aP = 0.0;
 	private double aI = 0.0; 
@@ -73,7 +73,7 @@ public class ArmSubsystem extends SubsystemBase {
 	private double aS = 0.0;
 	private double aG = 1.4553; //is tuned
 
-	private static final Angle angleDeadBand = Rotations.of(0.01);
+	private static final Angle angleDeadBand = Rotations.of(0.0139);
 
 	public static boolean stowSpin = false;
 
@@ -83,8 +83,10 @@ public class ArmSubsystem extends SubsystemBase {
 	private static Sendable armPIDSendable;
 	
 	public ArmSubsystem(RollerSubsystem roll) {
-		
+
 		super();
+
+		rollerSubsystem = roll;
 
 		homeLimitSwitch = new DigitalInput(HOME_LIMIT_PORT);
 		
@@ -153,18 +155,19 @@ public class ArmSubsystem extends SubsystemBase {
 		setHome();
 
 		intakeSendable = new Sendable() {
-		@Override 
-		public void initSendable(SendableBuilder builder) {
-			builder.addDoubleProperty("PositionL", () -> armMotorLeft.getPosition().getValueAsDouble(), null);
-			builder.addDoubleProperty("PositionR", () -> armMotorRight.getPosition().getValueAsDouble(), null);
-			builder.addDoubleProperty("VelocityL", () -> armMotorLeft.getVelocity().getValueAsDouble(), null);
-			builder.addDoubleProperty("VelocityR", () -> armMotorRight.getVelocity().getValueAsDouble(), null);
-			builder.addDoubleProperty("VoltageL", ()-> armMotorLeft.getMotorVoltage().getValueAsDouble(), null); 
-			builder.addDoubleProperty("VoltageR", ()-> armMotorRight.getMotorVoltage().getValueAsDouble(), null); 
-			builder.addBooleanProperty("Arm is ready", () -> armIsReady(), null);
+			@Override 
+			public void initSendable(SendableBuilder builder) {
+				builder.addDoubleProperty("PositionL", () -> armMotorLeft.getPosition().getValueAsDouble(), null);
+				builder.addDoubleProperty("PositionR", () -> armMotorRight.getPosition().getValueAsDouble(), null);
+				builder.addDoubleProperty("VelocityL", () -> armMotorLeft.getVelocity().getValueAsDouble(), null);
+				builder.addDoubleProperty("VelocityR", () -> armMotorRight.getVelocity().getValueAsDouble(), null);
+				builder.addDoubleProperty("VoltageL", ()-> armMotorLeft.getMotorVoltage().getValueAsDouble(), null); 
+				builder.addDoubleProperty("VoltageR", ()-> armMotorRight.getMotorVoltage().getValueAsDouble(), null); 
+				builder.addBooleanProperty("Arm is ready", () -> armIsReady(), null);
+				builder.addDoubleProperty("Setpoint", () -> requestedAngle.magnitude(), null);
 			}
 		};
-		SmartDashboard.putData("Intake", intakeSendable);
+		SmartDashboard.putData("IntakeArm", intakeSendable);
 
 		armPIDSendable = new Sendable() {
 		@Override
@@ -176,17 +179,11 @@ public class ArmSubsystem extends SubsystemBase {
 				builder.addDoubleProperty("Arm A", () -> aA, (newaA) -> editArmA(newaA));
 				builder.addDoubleProperty("Arm S", () -> aS, (newaS) -> editArmS(newaS));
 				builder.addDoubleProperty("Arm G", () -> aG, (newaG) -> editArmG(newaG));
-				// builder.addDoubleProperty("Setpoint", () -> COLLECTION_POINT2.baseUnitMagnitude(), (setpoint) -> editSetpoint2(setpoint));
 			}
 		};
 		SmartDashboard.putData("ArmPID", armPIDSendable);
 
-		rollerSubsystem = roll;
 	}
-
-	private void editSetpoint2(Angle setpoint) {
-		COLLECTION_POINT2 = setpoint;
-    }
 
 	private void editArmP(double newaP) {
         aP = newaP;
@@ -245,11 +242,11 @@ public class ArmSubsystem extends SubsystemBase {
 		armMotorRight.getConfigurator().apply(armMotorConfig);
     }
 	
-	
 	public Command rotateTo(Angle setpoint) {
 		Command out = new Command() {
 			@Override
 			public void initialize() {
+				armMotorLeft.setControl(rotateRequest.withPosition(armMotorLeft.getPosition().getValue()));
 				requestedAngle = setpoint;
 			}
 
@@ -261,15 +258,16 @@ public class ArmSubsystem extends SubsystemBase {
 				}
 			}
 
-			@Override
-			public boolean isFinished() {
-				return armIsReady();
-			}
+			// @Override
+			// public boolean isFinished() {
+			// 	return armIsReady();
+			// }
 
 			@Override
 			public void end(boolean interrupted) {
-			    armMotorLeft.set(0);
+				armMotorLeft.setControl(new StaticBrake());
 			}
+
 		};
 
 		out.addRequirements(this);
@@ -285,16 +283,13 @@ public class ArmSubsystem extends SubsystemBase {
 			return false;
 		}
 
-		Angle leftArmAngle = armMotorLeft.getPosition().getValue();
+		Angle ArmAngleAverage = (armMotorLeft.getPosition().getValue().plus(armMotorRight.getPosition().getValue())).div(2);
 
 		// System.out.println("req: " + requestedAngle.toShortString() + " Rcur: " + rightArmAngle.toShortString() + " Lcur: " + leftArmAngle.toShortString());
-		if (leftArmAngle.isNear(requestedAngle, angleDeadBand)) {
+		if (ArmAngleAverage.isNear(requestedAngle, angleDeadBand)) {
 			armMotorLeft.setControl(new StaticBrake());
-			System.out.println("I made it!!!!!!!!");
-			return true;
-		} else {
-			return false;
-		}
+		} 
+		return ArmAngleAverage.isNear(requestedAngle, angleDeadBand);
 	}
 
 	private boolean homeLimitSwitch() {
