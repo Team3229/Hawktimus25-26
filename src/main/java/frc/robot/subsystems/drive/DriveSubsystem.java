@@ -120,7 +120,7 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
     );
     
     /* SysId routine for characterizing steer. This is used to find PID gains for the steer motors. */
-    private final SysIdRoutine m_sysIdRoutineSteer = new SysIdRoutine(
+	private final SysIdRoutine m_sysIdRoutineSteer = new SysIdRoutine(
         new SysIdRoutine.Config(
             null,        // Use default ramp rate (1 V/s)
             Volts.of(7), // Use dynamic voltage of 7 V
@@ -288,6 +288,7 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
                 m_hasAppliedOperatorPerspective = true;
             });
         }
+
         distanceFromHub();
 
         if (hubAlign) {
@@ -358,7 +359,7 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
     }
 
     public void postTrajectoryToField(List<Pose2d> trajectory) {
-        DriveSubsystem.field.getObject("Trajectory").setPoses(trajectory);
+        field.getObject("Trajectory").setPoses(trajectory);
     }
 
     public double getToF(double distanceMeters) {
