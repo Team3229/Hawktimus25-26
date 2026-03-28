@@ -40,16 +40,17 @@ public class SpitterSubsystem extends SubsystemBase {
     private static double deadBand = 1;
 
     // change PID (if needed)
-    private double kP = 0.6;
-    private double kI = 0.25;
-    private double kD = 0.0001;
-    private double kV = 0.0;
-    private double kFF = 0;
+    private double kP = 0.745;
+    private double kI = 0.0;
+    private double kD = 0.0;
+    private double kV = 0.13;
+    private double kA = 0.0;
+    private double kFF = 0.0;
 
     private double fP = 0.1;
     private double fI = 0.0;
     private double fD = 0.0;
-    private double fV = 0.13;
+    private double fV = 0.116;
 
     private static final int LS_CAN_ID = 10; 
     private TalonFX leftSpitter;
@@ -81,8 +82,8 @@ public class SpitterSubsystem extends SubsystemBase {
 
     static {
         // SPITTER_MAP.put(1.782, new SpitterParams(1, 1, 1));
-        SPITTER_MAP.put(2.745, new SpitterParams(28, 40, 0.68));
-        SPITTER_MAP.put(3.6576, new SpitterParams(31, 41, 0.9));
+        SPITTER_MAP.put(2.917, new SpitterParams(28, 38, 0.68));
+        SPITTER_MAP.put(3.6576, new SpitterParams(30, 44, 0.9));
         SPITTER_MAP.put(4.44, new SpitterParams(35, 41, 1.2));
         SPITTER_MAP.put(5.33, new SpitterParams(39, 43, 1.34));
     }
@@ -118,13 +119,14 @@ public class SpitterSubsystem extends SubsystemBase {
         shooterMotorConfig.Slot0.kI = kI;
         shooterMotorConfig.Slot0.kD = kD;
         shooterMotorConfig.Slot0.kV = kV;
+        shooterMotorConfig.Slot0.kA = kA;
         
-        shooterMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        shooterMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         leftSpitter.getConfigurator().apply(shooterMotorConfig);
 
         rightSpitter = new TalonFX(RS_CAN_ID, CANBus.roboRIO()); 
         rightSpitter.getConfigurator().apply(shooterMotorConfig);
-        rightSpitter.setControl(new Follower(LS_CAN_ID, MotorAlignmentValue.Opposed));
+        rightSpitter.setControl(new Follower(LS_CAN_ID, MotorAlignmentValue.Opposed));        
 
         // initializes feeding motor
         feeder = new TalonFX(Feeder_CAN_ID, CANBus.roboRIO()); 
@@ -199,7 +201,7 @@ public class SpitterSubsystem extends SubsystemBase {
             }
             @Override
             public void execute() {
-                setSpitterSpeeds(); // REMOVE FOR MANUAL
+                // setSpitterSpeeds(); // REMOVE FOR MANUAL
                 leftSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0).withFeedForward(kFF));
                 feeder.setControl(new VelocityVoltage(requestedFeederVelocity).withSlot(0));
                 if (shooterIsReady() && end == null) {
@@ -292,8 +294,7 @@ public class SpitterSubsystem extends SubsystemBase {
         if(requestedShooterVelocity == 0) {
             return false;
         } else {
-            return Math.abs(requestedShooterVelocity - leftVelocity) <= deadBand 
-            && Math.abs(requestedShooterVelocity - rightVelocity) <= deadBand;
+            return (Math.abs(requestedShooterVelocity - leftVelocity) + Math.abs(requestedShooterVelocity - rightVelocity))/2 <= deadBand;
         }
     }
    
@@ -302,34 +303,34 @@ public class SpitterSubsystem extends SubsystemBase {
         if(requestedFeederVelocity == 0) {
             return false;
         } else {
-            return Math.abs(requestedFeederVelocity - feederVelocity) <= deadBand; // i believe feeder is halfed or /2.5
+            return Math.abs(requestedFeederVelocity - feederVelocity) <= deadBand;
         }
     }
 
     public Command upSRPSCommand() {
         return runOnce(() -> {
-            requestedShooterVelocity = Math.min(requestedShooterVelocity + 1, 45); 
+            requestedShooterVelocity = Math.min(requestedShooterVelocity + 1, 100); 
             System.out.println("SRPS raised to: " + requestedShooterVelocity);
         });
     }
 
     public Command downSRPSCommand() {
         return runOnce(() -> {
-            requestedShooterVelocity = Math.max(requestedShooterVelocity - 1, 25);
+            requestedShooterVelocity = Math.max(requestedShooterVelocity - 1, 5);
             System.out.println("SRPS lowered to: " + requestedShooterVelocity);
         });
     }
     
     public Command upFRPSCommand() { 
         return runOnce(() -> {
-            requestedFeederVelocity = Math.min(requestedFeederVelocity + 1, 45);
+            requestedFeederVelocity = Math.min(requestedFeederVelocity + 1, 100);
             System.out.println("FRPS raised to: " + requestedFeederVelocity);
         });
     }
 
     public Command downFRPSCommand() {
         return runOnce(() -> {
-            requestedFeederVelocity = Math.max(requestedFeederVelocity - 1, 25);
+            requestedFeederVelocity = Math.max(requestedFeederVelocity - 1, 5);
             System.out.println("FRPS lowered to: " + requestedFeederVelocity);
         });
     }
