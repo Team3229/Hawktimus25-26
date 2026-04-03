@@ -54,26 +54,26 @@ public class ArmSubsystem extends SubsystemBase {
 	private static final int HOME_LIMIT_PORT = 0; 
 	private static final int EXTEND_LIMIT_PORT = 1;
 
-	public static final Angle HOME_ANGLE = Rotations.of(0);
-	public static final Angle STOW_ANGLE = Rotations.of(0.2); // was 0.097
-	public static Angle COLLECTION_POINT2 = Rotations.of(0.3); // TODO: delete
-	public static final Angle COLLECTION_POINT = Rotations.of(0.347); // was 0.347
+	public static final Angle HOME_ANGLE = Rotations.of(0.139);
+	public static final Angle STOW_ANGLE = Rotations.of(0.368);
+	public static Angle COLLECTION_POINT2 = Rotations.of(0.4722222222222222); // TODO: delete
+	public static final Angle COLLECTION_POINT = Rotations.of(0.5);
+
+	private static final Angle angleDeadBand = Rotations.of(0.0055555555555556);
 	
 	private static final Current CURRENT_LIMIT = Amps.of(40);
 	
-	private static double sensorToMechanismRatio = 25;
+	private static double sensorToMechanismRatio = 30.5555555555555555555555555;
 	
 	private Angle requestedAngle = Rotations.of(0);
 	
-	private double aP = 0.0;
+	private double aP = 0.5;
 	private double aI = 0.0; 
-	private double aD = 0.0; 
-	private double aV = 0.0;
+	private double aD = 1; 
+	private double aV = 2;
 	private double aA = 0.0;
-	private double aS = 0.0;
-	private double aG = 1.4553; //is tuned
-
-	private static final Angle angleDeadBand = Rotations.of(0.0139);
+	private double aS = 0.4;
+	private double aG = 0.5; 
 
 	public static boolean stowSpin = false;
 
@@ -286,9 +286,9 @@ public class ArmSubsystem extends SubsystemBase {
 		Angle ArmAngleAverage = (armMotorLeft.getPosition().getValue().plus(armMotorRight.getPosition().getValue())).div(2);
 
 		// System.out.println("req: " + requestedAngle.toShortString() + " Rcur: " + rightArmAngle.toShortString() + " Lcur: " + leftArmAngle.toShortString());
-		if (ArmAngleAverage.isNear(requestedAngle, angleDeadBand)) {
-			armMotorLeft.setControl(new StaticBrake());
-		} 
+		// if (ArmAngleAverage.isNear(requestedAngle, angleDeadBand)) {
+		// 	armMotorLeft.setControl(new StaticBrake());
+		// } 
 		return ArmAngleAverage.isNear(requestedAngle, angleDeadBand);
 	}
 
