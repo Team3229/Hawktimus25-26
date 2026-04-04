@@ -161,6 +161,18 @@ public class RobotContainer {
 	}
 
 	private void configManipControls() {
+		// TODO: delete
+
+		manipController.b_7().whileTrue(
+			manipSubsystem.spinShooter()
+		);
+
+		manipController.b_8().whileTrue(
+			manipSubsystem.spinKicker()
+		);
+
+		// TODO: delete
+
 		// CURRENTLY AVAILABLE: 6, 7, 8, 9, 11, slider
 
 		manipController.b_Trigger().whileTrue(
