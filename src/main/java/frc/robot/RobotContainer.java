@@ -52,8 +52,6 @@ public class RobotContainer {
     private double MaxAngularRate = RotationsPerSecond.of(1.205).in(RadiansPerSecond); 
 	// TODO: this needs to be tested bc idk if this is correct, it could be tho bc mathmatically that lines up with yagsl code
 	
-	CameraServer intakeCamera;
-
 	private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
 		.withDeadband(MaxSpeed * 0.1)
 		.withRotationalDeadband(MaxAngularRate * 0.1) 
@@ -76,9 +74,10 @@ public class RobotContainer {
 	private SendableChooser<Command> autoChooser;
 	private Command autoCommand;
 
-	CameraServer intakeCamera;
 
 	public RobotContainer() {
+		CameraServer.startAutomaticCapture("Intake Camera", 0);
+
 		driverController = new FlightStick(0);
 		manipController = new FlightStick(1);
 
