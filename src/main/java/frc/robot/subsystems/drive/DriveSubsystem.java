@@ -63,15 +63,6 @@ import frc.robot.utilities.LimelightHelpers;
 
 public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
 
-    // private TunerSwerveDrivetrain drivetrain = new TunerSwerveDrivetrain(
-    //     DriveConstants.DrivetrainConstants, 
-    //     DriveConstants.FrontLeft,
-    //     DriveConstants.FrontRight,
-    //     DriveConstants.BackRight,
-    //     DriveConstants.BackLeft
-    // );
-    // maybe??????? need something like drivetrain from container
-
     public final static Field2d field = new Field2d();
     
     private static final double kSimLoopPeriod = 0.004; // 4 ms
@@ -294,7 +285,7 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
         if (hubAlign) {
             // overrides velocity on the z axis to align to the hub
             Pose2d currentPose = getPose(); 
-            ChassisSpeeds currentSpeed = getKinematics().toChassisSpeeds();
+            ChassisSpeeds currentSpeed = getState().Speeds;
             
             Translation2d robotTranslation = currentPose.getTranslation();
             Translation2d spitterTranslation = robotTranslation.rotateBy(Rotation2d.k180deg); // our spitter is on the back of the bot

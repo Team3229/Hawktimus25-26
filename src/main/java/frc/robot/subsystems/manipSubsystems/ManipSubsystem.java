@@ -66,6 +66,14 @@ public class ManipSubsystem extends SubsystemBase {
         return spitterSubsystem.shoot();
     }
 
+    public Command spinKicker() {
+        return spitterSubsystem.spinKicker();
+    }
+
+    public Command spinShooter() {
+        return spitterSubsystem.spinShooter();
+    }
+
     /**
      * 
      * runs intake and fires the balls
