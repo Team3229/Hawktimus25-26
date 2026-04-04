@@ -4,6 +4,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -34,21 +35,20 @@ import java.util.Date;
 
 public class SpitterSubsystem extends SubsystemBase {
     private static DriveSubsystem driveSubsystem;
-    private static double requestedShooterVelocity = 26;
-    private static double requestedFeederVelocity = 38;
-    private static double deadBand = 2.5;
+    private static double requestedShooterVelocity = 28;
+    private static double requestedFeederVelocity = 10;
+    private static double deadBand = 1;
 
     // change PID (if needed)
-    private double kP = 0.6;
-    private double kI = 0.25;
-    private double kD = 0.0001;
-    private double kV = 0.0;
-    private double kFF = 0;
+    private double kP = 0.12;
+    private double kV = 0.0675;
+    private double kA = 0.00225;
+    private double kS = 0.23;
 
-    private double fP = 0.1;
-    private double fI = 0.0;
-    private double fD = 0.0;
-    private double fV = 0.13;
+    private double fP = 0.225;
+    private double fV = 1.03;
+    private double fA = 0.0;
+    private double fS = 0.002;
 
     private static final int LS_CAN_ID = 10; 
     private TalonFX leftSpitter;
@@ -63,7 +63,12 @@ public class SpitterSubsystem extends SubsystemBase {
 
     private long spitTimer = 0;
 
+    private double feederSensorToMechanismRatio = 9;
+    private double shooterSensorToMechanismRatio = 0.5714285714285714;
+
     private static final Current CURRENT_LIMIT = Amps.of(40);
+
+    private boolean testMode = false;
 
     public record SpitterParams(double srps, double frps, double timeOfFlight) {}
 
@@ -78,8 +83,8 @@ public class SpitterSubsystem extends SubsystemBase {
 
     static {
         // SPITTER_MAP.put(1.782, new SpitterParams(1, 1, 1));
-        SPITTER_MAP.put(2.745, new SpitterParams(28, 40, 0.68));
-        SPITTER_MAP.put(3.6576, new SpitterParams(31, 41, 0.9));
+        SPITTER_MAP.put(2.917, new SpitterParams(28, 38, 0.68));
+        SPITTER_MAP.put(3.6576, new SpitterParams(30, 44, 0.9));
         SPITTER_MAP.put(4.44, new SpitterParams(35, 41, 1.2));
         SPITTER_MAP.put(5.33, new SpitterParams(39, 43, 1.34));
     }
@@ -88,6 +93,8 @@ public class SpitterSubsystem extends SubsystemBase {
 
     private static Sendable spitterSendable;
     private static Sendable spitterPIDSendable;
+    private static Sendable feederPIDSendable;
+
 
     public SpitterSubsystem(DriveSubsystem drive) {
         driveSubsystem = drive;
@@ -109,19 +116,23 @@ public class SpitterSubsystem extends SubsystemBase {
                     .withPeakForwardVoltage(12)
                     .withPeakReverseVoltage(-12)
                     .withSupplyVoltageTimeConstant(0)
+            )
+            .withFeedback(
+                new FeedbackConfigs()
+                    .withSensorToMechanismRatio(shooterSensorToMechanismRatio)
             );
 
-        shooterMotorConfig.Slot0.kP = kP;
-        shooterMotorConfig.Slot0.kI = kI;
-        shooterMotorConfig.Slot0.kD = kD;
-        shooterMotorConfig.Slot0.kV = kV;
+        shooterMotorConfig.Slot0.withKP(kP);
+        shooterMotorConfig.Slot0.withKV(kV);
+        shooterMotorConfig.Slot0.withKA(kA);
+        shooterMotorConfig.Slot0.withKS(kS);
         
         shooterMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         leftSpitter.getConfigurator().apply(shooterMotorConfig);
 
         rightSpitter = new TalonFX(RS_CAN_ID, CANBus.roboRIO()); 
         rightSpitter.getConfigurator().apply(shooterMotorConfig);
-        rightSpitter.setControl(new Follower(LS_CAN_ID, MotorAlignmentValue.Opposed));
+        rightSpitter.setControl(new Follower(LS_CAN_ID, MotorAlignmentValue.Opposed));        
 
         // initializes feeding motor
         feeder = new TalonFX(Feeder_CAN_ID, CANBus.roboRIO()); 
@@ -140,17 +151,17 @@ public class SpitterSubsystem extends SubsystemBase {
                     .withPeakForwardVoltage(12)
                     .withPeakReverseVoltage(-12)
                     .withSupplyVoltageTimeConstant(0)
-            );
-            // .withFeedback(
-            //     new FeedbackConfigs()
-            //         .withSensorToMechanismRatio(sensorToMechanismRatio)
-		    // );
+            )
+            .withFeedback(
+                new FeedbackConfigs()
+                    .withSensorToMechanismRatio(feederSensorToMechanismRatio)
+		    );
         
-        feederMotorConfig.Slot0.kP = fP;
-        feederMotorConfig.Slot0.kI = fI;
-        feederMotorConfig.Slot0.kD = fD;
-        feederMotorConfig.Slot0.kV = fV;
-        feederMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        feederMotorConfig.Slot0.withKP(fP);
+        feederMotorConfig.Slot0.withKV(fV);
+        feederMotorConfig.Slot0.withKA(fA);
+        feederMotorConfig.Slot0.withKS(fS);
+        feederMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         feeder.getConfigurator().apply(feederMotorConfig);
 
         spitterSendable = new Sendable() {
@@ -164,25 +175,37 @@ public class SpitterSubsystem extends SubsystemBase {
                 builder.addBooleanProperty("Ready to Shoot", () -> shooterIsReady(), null);
                 builder.addBooleanProperty("Feeder is ready", () -> feederIsReady(), null);
                 builder.addIntegerProperty("SpitTime", () -> spitTimer, null);
+                builder.addDoubleProperty("Spitter accel", () -> requestedShooterVelocity/1.5, null);
+                builder.addDoubleProperty("Left acceleration", () -> leftSpitter.getAcceleration().getValueAsDouble(), null);
+                builder.addDoubleProperty("Right acceleration", () -> rightSpitter.getAcceleration().getValueAsDouble(), null);
             };
         };
-		SmartDashboard.putData("Spitter", spitterSendable);
+        SmartDashboard.putData("Spitter", spitterSendable);
 
         spitterPIDSendable = new Sendable() {
             @Override
             public void initSendable(SendableBuilder builder) {
                 builder.addDoubleProperty("Spitter P", () -> kP, (newkP) -> editSpitterP(newkP));
-                builder.addDoubleProperty("Spitter I", () -> kI, (newkI) -> editSpitterI(newkI));
-                builder.addDoubleProperty("Spitter D", () -> kD, (newkD) -> editSpitterD(newkD));
                 builder.addDoubleProperty("Spitter V", () -> kV, (newkV) -> editSpitterV(newkV));
-                builder.addDoubleProperty("Feeder P", () -> fP, (newfP) -> editFeederP(newfP));
-                builder.addDoubleProperty("Feeder I", () -> fI, (newfI) -> editFeederI(newfI));
-                builder.addDoubleProperty("Feeder D", () -> fD, (newfD) -> editFeederD(newfD));
-                builder.addDoubleProperty("Feeder V", () -> fV, (newfV) -> editFeederV(newfV));
-                builder.addDoubleProperty("FeedForward", () -> kFF, (newkFF -> editSpitterkFF(newkFF)));
+                builder.addDoubleProperty("Spitter A", () -> kA, (newkA) -> editSpitterA(newkA));
+                builder.addDoubleProperty("Spitter S", () -> kS, (newkS) -> editSpitterS(newkS));
             }
         };
-        SmartDashboard.putData("ShooterPID", spitterPIDSendable);
+
+        feederPIDSendable = new Sendable() {
+            @Override
+            public void initSendable(SendableBuilder builder) {
+                builder.addDoubleProperty("Feeder P", () -> fP, (newfP) -> editFeederP(newfP));
+                builder.addDoubleProperty("Feeder V", () -> fV, (newfV) -> editFeederV(newfV));
+                builder.addDoubleProperty("Feeder A", () -> fA, (newfA) -> editFeederA(newfA));
+                builder.addDoubleProperty("Feeder S", () -> fS, (newfS) -> editFeederS(newfS));
+            }
+        };
+
+        if(testMode) {
+            SmartDashboard.putData("ShooterPID", spitterPIDSendable);
+            SmartDashboard.putData("FeederPID", feederPIDSendable);
+        }
     }
 
     public Command shoot() {
@@ -196,8 +219,8 @@ public class SpitterSubsystem extends SubsystemBase {
             }
             @Override
             public void execute() {
-                setSpitterSpeeds(); // REMOVE FOR MANUAL
-                leftSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0).withFeedForward(kFF));
+                // setSpitterSpeeds(); // REMOVE FOR MANUAL
+                leftSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0).withAcceleration(requestedShooterVelocity/1.5));
                 feeder.setControl(new VelocityVoltage(requestedFeederVelocity).withSlot(0));
                 if (shooterIsReady() && end == null) {
                     end = new Date();
@@ -227,22 +250,6 @@ public class SpitterSubsystem extends SubsystemBase {
 
     }
 
-    private void editSpitterI(double newkI) {
-        kI = newkI;
-        shooterMotorConfig.Slot0.kI = kI;
-
-        leftSpitter.getConfigurator().apply(shooterMotorConfig);
-        rightSpitter.getConfigurator().apply(shooterMotorConfig);
-    }
-
-    private void editSpitterD(double newkD) {
-        kD = newkD;
-        shooterMotorConfig.Slot0.kD = kD;
-
-        leftSpitter.getConfigurator().apply(shooterMotorConfig);
-        rightSpitter.getConfigurator().apply(shooterMotorConfig);
-    }
-
     private void editSpitterV(double newkV) {
         kV = newkV;
         shooterMotorConfig.Slot0.kV = kV;
@@ -251,8 +258,20 @@ public class SpitterSubsystem extends SubsystemBase {
         rightSpitter.getConfigurator().apply(shooterMotorConfig);
     }
 
-    private void editSpitterkFF(double newkFF) {
-        kFF = newkFF;
+    private void editSpitterA(double newkA) {
+        kA = newkA;
+        shooterMotorConfig.Slot0.kA = kA;
+
+        leftSpitter.getConfigurator().apply(shooterMotorConfig);
+        rightSpitter.getConfigurator().apply(shooterMotorConfig);
+    }
+
+    private void editSpitterS(double newkS) {
+        kS = newkS;
+        shooterMotorConfig.Slot0.kS = kS;
+
+        leftSpitter.getConfigurator().apply(shooterMotorConfig);
+        rightSpitter.getConfigurator().apply(shooterMotorConfig);
     }
 
     private void editFeederP(double newfP) {
@@ -262,23 +281,25 @@ public class SpitterSubsystem extends SubsystemBase {
         feeder.getConfigurator().apply(feederMotorConfig);
     }
 
-    private void editFeederI(double newkI) {
-        kI = newkI;
-        feederMotorConfig.Slot0.kI = kI;
-
-        feeder.getConfigurator().apply(feederMotorConfig);
-    }
-
-    private void editFeederD(double newkD) {
-        kD = newkD;
-        feederMotorConfig.Slot0.kD = kD;
-
-        feeder.getConfigurator().apply(feederMotorConfig);
-    }
-
-     private void editFeederV(double newfV) {
+    private void editFeederV(double newfV) {
+        System.out.println("old fV: " + fV);
         fV = newfV;
         feederMotorConfig.Slot0.kV = fV;
+
+        feeder.getConfigurator().apply(feederMotorConfig);
+        System.out.println("new fV: " + feederMotorConfig.Slot0.kV);
+    }
+
+    private void editFeederA(double newkA) {
+        fA = newkA;
+        feederMotorConfig.Slot0.kA = fA;
+
+        feeder.getConfigurator().apply(feederMotorConfig);
+    }
+
+    private void editFeederS(double newfS) {
+        fS = newfS;
+        feederMotorConfig.Slot0.kV = fS;
 
         feeder.getConfigurator().apply(feederMotorConfig);
     }
@@ -289,8 +310,7 @@ public class SpitterSubsystem extends SubsystemBase {
         if(requestedShooterVelocity == 0) {
             return false;
         } else {
-            return Math.abs(requestedShooterVelocity - leftVelocity) <= deadBand 
-            && Math.abs(requestedShooterVelocity - rightVelocity) <= deadBand;
+            return (Math.abs(requestedShooterVelocity - leftVelocity) + Math.abs(requestedShooterVelocity - rightVelocity))/2 <= deadBand;
         }
     }
    
@@ -299,34 +319,34 @@ public class SpitterSubsystem extends SubsystemBase {
         if(requestedFeederVelocity == 0) {
             return false;
         } else {
-            return Math.abs(requestedFeederVelocity - feederVelocity) <= deadBand; // i believe feeder is halfed or /2.5
+            return Math.abs(requestedFeederVelocity - feederVelocity) <= deadBand;
         }
     }
 
     public Command upSRPSCommand() {
         return runOnce(() -> {
-            requestedShooterVelocity = Math.min(requestedShooterVelocity + 1, 45); 
+            requestedShooterVelocity = Math.min(requestedShooterVelocity + 1, 100); 
             System.out.println("SRPS raised to: " + requestedShooterVelocity);
         });
     }
 
     public Command downSRPSCommand() {
         return runOnce(() -> {
-            requestedShooterVelocity = Math.max(requestedShooterVelocity - 1, 25);
+            requestedShooterVelocity = Math.max(requestedShooterVelocity - 1, 5);
             System.out.println("SRPS lowered to: " + requestedShooterVelocity);
         });
     }
     
     public Command upFRPSCommand() { 
         return runOnce(() -> {
-            requestedFeederVelocity = Math.min(requestedFeederVelocity + 1, 45);
+            requestedFeederVelocity = Math.min(requestedFeederVelocity + 1, 100);
             System.out.println("FRPS raised to: " + requestedFeederVelocity);
         });
     }
 
     public Command downFRPSCommand() {
         return runOnce(() -> {
-            requestedFeederVelocity = Math.max(requestedFeederVelocity - 1, 25);
+            requestedFeederVelocity = Math.max(requestedFeederVelocity - 1, 5);
             System.out.println("FRPS lowered to: " + requestedFeederVelocity);
         });
     }
