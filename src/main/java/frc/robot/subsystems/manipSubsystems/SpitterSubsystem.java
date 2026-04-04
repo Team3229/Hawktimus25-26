@@ -364,5 +364,4 @@ public class SpitterSubsystem extends SubsystemBase {
         setFeederSpeed(distanceFromHub);   
         setShooterSpeed(distanceFromHub);
     }
-
 }

@@ -4,9 +4,16 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -16,28 +23,50 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+
 import edu.wpi.first.wpilibj.DriverStation;
+
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
+
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+
 import frc.robot.inputs.ButtonBoard;
 import frc.robot.inputs.FlightStick;
 import frc.robot.subsystems.VisualizerSubsystem;
+
 import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.drive.DriveConstants;
+
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import frc.robot.subsystems.manipSubsystems.PathPlannerCommands;
 import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
-import swervelib.SwerveInputStream;
-import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
+
 
 public class RobotContainer {
+	public final DriveSubsystem drivetrain = DriveConstants.createDrivetrain();
+	private double MaxSpeed = 1.0 * DriveConstants.kSpeedAt12Volts.in(MetersPerSecond);
+    private double MaxAngularRate = RotationsPerSecond.of(1.205).in(RadiansPerSecond); 
+	// TODO: this needs to be tested bc idk if this is correct, it could be tho bc mathmatically that lines up with yagsl code
+	
+	CameraServer intakeCamera;
+
+	private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+		.withDeadband(MaxSpeed * 0.1)
+		.withRotationalDeadband(MaxAngularRate * 0.1) 
+		.withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+
+	private final SwerveRequest.RobotCentric robotRelative = new SwerveRequest.RobotCentric()
+		.withDeadband(MaxSpeed * 0.1)
+		.withRotationalDeadband(MaxAngularRate * 0.1) 
+		.withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
 	FlightStick driverController;
 	FlightStick manipController;
 	ButtonBoard buttonBoard;
-	DriveSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
 	SpitterSubsystem spitterSubsystem;
 	
@@ -50,17 +79,11 @@ public class RobotContainer {
 	CameraServer intakeCamera;
 
 	public RobotContainer() {
-
 		driverController = new FlightStick(0);
 		manipController = new FlightStick(1);
 
-		driveSubsystem = new DriveSubsystem(
-			"swerve",
-			TelemetryVerbosity.HIGH
-		);
-
-		manipSubsystem = new ManipSubsystem(driveSubsystem);
-		spitterSubsystem = new SpitterSubsystem(driveSubsystem);
+		manipSubsystem = new ManipSubsystem(drivetrain);
+		spitterSubsystem = new SpitterSubsystem(drivetrain);
 
 		pathPlannerCommands = new PathPlannerCommands(manipSubsystem);
 
@@ -75,7 +98,7 @@ public class RobotContainer {
 		NamedCommands.registerCommand("WheelSpinUp", pathPlannerCommands.pathSpinUp());
 		NamedCommands.registerCommand("Shoot", pathPlannerCommands.pathShoot());
 		NamedCommands.registerCommand("Stow", manipSubsystem.stow());
-		NamedCommands.registerCommand("ZeroGyroWithLimelight", driveSubsystem.zeroGyroWithLimelight());
+		NamedCommands.registerCommand("ZeroGyroWithLimelight", drivetrain.zeroGyroWithLimelight());
 
 		DriverStation.silenceJoystickConnectionWarning(true); // TODO: MAKE THIS FALSE FOR COMP!!!!!!!!!!!!!!!!
 		
@@ -83,8 +106,12 @@ public class RobotContainer {
 		configDriveControls();
 		configManipControls();
 		
+		final var idle = new SwerveRequest.Idle();
+        	RobotModeTriggers.disabled().whileTrue(
+            drivetrain.applyRequest(() -> idle).ignoringDisable(false) //check on this wording is weird I think should be false based on reading
+        );
 	}
-
+	
 	public void teleopInit() {
 
 		System.out.println("TELEOP INIT");
@@ -92,54 +119,44 @@ public class RobotContainer {
 	}
 
 	public void autoInit() {
-		driveSubsystem.zeroGyroCommand();
+		drivetrain.zeroGyroCommand();
 	}
 
 	private void configDriveControls() {
-
-		NamedCommands.registerCommand("Intake", pathPlannerCommands.pathIntake());
-		NamedCommands.registerCommand("ArmOut", manipSubsystem.intakeArmOut());
-		NamedCommands.registerCommand("WheelSpinUp", pathPlannerCommands.pathSpinUp());
-		NamedCommands.registerCommand("Shoot", pathPlannerCommands.pathShoot());
-		NamedCommands.registerCommand("Stow", pathPlannerCommands.pathStow());
-		NamedCommands.registerCommand("ZeroGyroWithLimelight", driveSubsystem.zeroGyroWithLimelight());
-
-		SwerveInputStream driveAngularVelocity = driveSubsystem.getInputStream(
-			() -> -driverController.a_Y(),
-			() -> -driverController.a_X(),
-			() -> -driverController.a_Z()
-		)
-			.deadband(0.1)
-			.cubeRotationControllerAxis(true)
-			.cubeTranslationControllerAxis(true)
-			.scaleTranslation(0.8)
-			.scaleRotation(0.9)
-			.allianceRelativeControl(() -> !DriverStation.isFMSAttached());
-			
-		driveSubsystem.setDefaultCommand(
-			driveSubsystem.driveFieldOriented(
-				driveAngularVelocity
-			)
-
-		);
+		drivetrain.setDefaultCommand(
+            // Drivetrain will execute this command periodically
+        	drivetrain.applyRequest(() ->
+				drive.withVelocityX(Math.pow(-driverController.a_Y(), 3) * MaxSpeed) // Drive forward with negative Y (forward)
+				.withVelocityY(Math.pow(-driverController.a_X(), 3) * MaxSpeed) // Drive left with negative X (left)
+				.withRotationalRate(Math.pow(-driverController.a_Z(), 3) * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            )
+        );
 
 		driverController.b_10().onTrue(
-			driveSubsystem.zeroGyroWithLimelight()
+			drivetrain.zeroGyroWithLimelight()
 		);
 
 		driverController.b_11().onTrue(
-			driveSubsystem.zeroGyroCommand()
+			drivetrain.zeroGyroCommand()
 		);
 
 		driverController.b_Hazard().onTrue(
 			Commands.runOnce(() -> {
-				driveSubsystem.getCurrentCommand().cancel();
+				drivetrain.getCurrentCommand().cancel();
 				// cancels ALL DRIVING on driver controller
 			})
 		);
 
+		driverController.p_Any().whileTrue(
+			drivetrain.applyRequest(() ->
+				robotRelative.withVelocityX(Math.pow(-driverController.a_Y(), 3) * MaxSpeed)
+				.withVelocityY(Math.pow(-driverController.a_X(), 3) * MaxSpeed)
+				.withRotationalRate(Math.pow(-driverController.a_Z(), 3) * MaxAngularRate)
+			)
+		);
+
 		driverController.b_Trigger().whileTrue(
-			driveSubsystem.toggleHubAlign()
+			drivetrain.toggleHubAlign()
 		);
 
 	}
@@ -215,7 +232,7 @@ public class RobotContainer {
 					new Rotation2d())).collect(Collectors.toList())
 				);
 			}
-			driveSubsystem.postTrajectoryToField(poses);
+			drivetrain.postTrajectoryToField(poses);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
