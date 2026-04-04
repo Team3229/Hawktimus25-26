@@ -90,16 +90,21 @@ public class GameState {
   public static boolean isMyHubActive() {
     switch (getCurrentPhase()) {
       case None:
+        return false;
       case Autonomous:
+        return true;
       case Transition:
+        return true;
       case EndGame:
         return true;
       case Shift1:
+       return autoWinner != myAlliance;
       case Shift3:
-        return autoWinner != null && myAlliance != null && autoWinner != myAlliance;
+        return autoWinner != myAlliance;
       case Shift2:
+        return autoWinner == myAlliance;
       case Shift4:
-        return autoWinner != null && myAlliance != null && autoWinner == myAlliance;
+        return autoWinner == myAlliance;
       default:
         return false;
     }
