@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import frc.robot.subsystems.drive.GameState;
 
 public class LEDSubsystem extends SubsystemBase {
     private AddressableLED led;
@@ -38,13 +39,21 @@ public class LEDSubsystem extends SubsystemBase {
        
         led.start();
        
-        this.setDefaultCommand(runPattern(setHawkBreathe()));
+        this.setDefaultCommand(hubActive());
        
     }
 
     @Override
     public void periodic() {
         led.setData(ledBuffer);
+    }
+
+    public Command hubActive() {
+        if (GameState.isMyHubActive() == true) {
+            return runPattern(setHawkBlink());
+        } else {
+            return runPattern(setHawkOffset());
+        }
     }
 
     public Command runPattern(LEDPattern pattern) {
@@ -116,7 +125,7 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     public LEDPattern setColorBlink(Color colorForBlink, Color secondColorForBlink) {
-        return setDiscontGradient(colorForBlink, secondColorForBlink).blink(Seconds.of(1));
+        return setDiscontGradient(colorForBlink, secondColorForBlink).blink(Seconds.of(0.4));
     }
 
     public LEDPattern setHawkBlink() {
