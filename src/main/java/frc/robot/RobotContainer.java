@@ -47,9 +47,8 @@ public class RobotContainer {
 	private SendableChooser<Command> autoChooser;
 	private Command autoCommand;
 
-	CameraServer intakeCamera;
-
 	public RobotContainer() {
+		CameraServer.startAutomaticCapture("Intake Camera", 0);
 
 		driverController = new FlightStick(0);
 		manipController = new FlightStick(1);
