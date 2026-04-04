@@ -24,6 +24,10 @@ public class GameState {
     final double countDownFrom;
     final double countDownUntil;
 
+    public static double timeLeftInPhase(GamePhase phase) {
+      return phase.remainingAt(getMatchTime());
+    }
+
     public double duration() {
       return countDownFrom - countDownUntil;
     }
@@ -92,19 +96,17 @@ public class GameState {
       case None:
         return false;
       case Autonomous:
-        return true;
       case Transition:
-        return true;
       case EndGame:
         return true;
       case Shift1:
-       return autoWinner != myAlliance;
+        return autoWinner != myAlliance || (autoWinner == myAlliance && DriveSubsystem.getToF(DriveSubsystem.distanceToTarget) <= GamePhase.timeLeftInPhase(GamePhase.Shift1));
       case Shift3:
-        return autoWinner != myAlliance;
+        return autoWinner != myAlliance || (autoWinner == myAlliance && DriveSubsystem.getToF(DriveSubsystem.distanceToTarget) <= GamePhase.timeLeftInPhase(GamePhase.Shift3));
       case Shift2:
-        return autoWinner == myAlliance;
+        return autoWinner == myAlliance || (autoWinner != myAlliance && DriveSubsystem.getToF(DriveSubsystem.distanceToTarget) <= GamePhase.timeLeftInPhase(GamePhase.Shift2));
       case Shift4:
-        return autoWinner == myAlliance;
+        return autoWinner == myAlliance || (autoWinner != myAlliance && DriveSubsystem.getToF(DriveSubsystem.distanceToTarget) <= GamePhase.timeLeftInPhase(GamePhase.Shift4));
       default:
         return false;
     }

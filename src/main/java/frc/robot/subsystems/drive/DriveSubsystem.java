@@ -74,7 +74,7 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
     public boolean hubAlign = false;
     public boolean isAimed = false;
     
-    public double distanceToTarget; 
+    public static double distanceToTarget; 
     
     private Translation2d currentTarget = DriveConstants.BLUE_HUB_CENTER;
     private double targetAngleRot;
@@ -354,7 +354,7 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
         field.getObject("Trajectory").setPoses(trajectory);
     }
 
-    public double getToF(double distanceMeters) {
+    public static double getToF(double distanceMeters) {
         return SpitterSubsystem.SPITTER_MAP.get(distanceMeters).timeOfFlight();
     }
 
