@@ -13,6 +13,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -45,6 +46,8 @@ public class RobotContainer {
 
 	private SendableChooser<Command> autoChooser;
 	private Command autoCommand;
+
+	CameraServer intakeCamera;
 
 	public RobotContainer() {
 
@@ -110,8 +113,7 @@ public class RobotContainer {
 			.cubeTranslationControllerAxis(true)
 			.scaleTranslation(0.8)
 			.scaleRotation(0.9)
-			.allianceRelativeControl(() -> !DriverStation.isFMSAttached())
-			.robotRelative(() -> driverController.p_Any().getAsBoolean());
+			.allianceRelativeControl(() -> !DriverStation.isFMSAttached());
 			
 		driveSubsystem.setDefaultCommand(
 			driveSubsystem.driveFieldOriented(
@@ -142,7 +144,7 @@ public class RobotContainer {
 	}
 
 	private void configManipControls() {
-		// CURRENTLY AVAILABLE: 7, 8, 9, 11, slider
+		// CURRENTLY AVAILABLE: 6, 7, 8, 9, 11, slider
 
 		manipController.b_Trigger().whileTrue(
 			manipSubsystem.shoot()
@@ -162,10 +164,6 @@ public class RobotContainer {
 
 		manipController.b_5().onTrue(
 			manipSubsystem.intakeArmOut()
-		);
-
-		manipController.b_6().whileTrue(
-			manipSubsystem.toggleStowSpin()
 		);
 
 		manipController.b_10().whileTrue(
