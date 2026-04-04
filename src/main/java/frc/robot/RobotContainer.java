@@ -207,13 +207,13 @@ public class RobotContainer {
 			manipSubsystem.downSRPSCommand()
 		);
 
-		manipController.p_Right().onTrue(
-			manipSubsystem.upFRPSCommand()
-		);
+		// manipController.p_Right().onTrue(
+		// 	manipSubsystem.upFRPSCommand()
+		// );
 
-		manipController.p_Left().onTrue(
-			manipSubsystem.downFRPSCommand()
-		);
+		// manipController.p_Left().onTrue(
+		// 	manipSubsystem.downFRPSCommand()
+		// );
 	}
 
 	public void initTelemetery() {

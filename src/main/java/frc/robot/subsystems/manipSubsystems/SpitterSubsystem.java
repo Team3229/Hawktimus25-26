@@ -64,29 +64,28 @@ public class SpitterSubsystem extends SubsystemBase {
     private long spitTimer = 0;
 
     private double feederSensorToMechanismRatio = 9;
-    private double shooterSensorToMechanismRatio = 1.75; //was 0.5714285714285714
+    private double shooterSensorToMechanismRatio = 1.75;
 
     private static final Current CURRENT_LIMIT = Amps.of(40);
 
     private boolean testMode = false; // TODO: 
 
-    public record SpitterParams(double srps, double frps, double timeOfFlight) {}
+    public record SpitterParams(double srps, double timeOfFlight) {}
 
     public static final InterpolatingTreeMap<Double, SpitterParams> SPITTER_MAP = new InterpolatingTreeMap<>(
         InverseInterpolator.forDouble(), 
         (start, end, t) -> new SpitterParams(
             MathUtil.interpolate(start.srps, end.srps, t), 
-            MathUtil.interpolate(start.frps, end.frps, t), 
             MathUtil.interpolate(start.timeOfFlight, end.timeOfFlight, t)
         )
     );
 
     static {
         // SPITTER_MAP.put(1.782, new SpitterParams(1, 1, 1));
-        SPITTER_MAP.put(2.917, new SpitterParams(28, 38, 0.68));
-        SPITTER_MAP.put(3.6576, new SpitterParams(30, 44, 0.9));
-        SPITTER_MAP.put(4.44, new SpitterParams(35, 41, 1.2));
-        SPITTER_MAP.put(5.33, new SpitterParams(39, 43, 1.34));
+        SPITTER_MAP.put(2.917, new SpitterParams(28, 0.68));
+        SPITTER_MAP.put(3.6576, new SpitterParams(30, 0.9));
+        SPITTER_MAP.put(4.44, new SpitterParams(35, 1.2));
+        SPITTER_MAP.put(5.33, new SpitterParams(39, 1.34));
     }
 
     public static final double SYSTEM_LATENCY_SECONDS = 0.3;
@@ -402,17 +401,12 @@ public class SpitterSubsystem extends SubsystemBase {
         });
     }
 
-    public void setFeederSpeed(double distanceMeters) {
-		requestedFeederVelocity = SPITTER_MAP.get(distanceMeters).frps();
-	}
-
     public void setShooterSpeed(double distanceMeters) {
         requestedShooterVelocity = SPITTER_MAP.get(distanceMeters).srps();
     }
 
     public void setSpitterSpeeds() {
         double distanceFromHub = driveSubsystem.distanceToTarget;
-        setFeederSpeed(distanceFromHub);   
         setShooterSpeed(distanceFromHub);
     }
 }

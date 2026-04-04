@@ -281,6 +281,7 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
         }
 
         distanceFromHub();
+        updateOdometry();
 
         if (hubAlign) {
             // overrides velocity on the z axis to align to the hub
@@ -289,13 +290,13 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
             
             Translation2d robotTranslation = currentPose.getTranslation();
             Translation2d spitterTranslation = robotTranslation.rotateBy(Rotation2d.k180deg); // our spitter is on the back of the bot
-                
+
             Translation2d botVelocity = 
                 new Translation2d(
                     currentSpeed.vxMetersPerSecond,
                     currentSpeed.vyMetersPerSecond
                 );
-                
+
             Translation2d tangentialVelocity = 
                 new Translation2d(
                     -currentSpeed.omegaRadiansPerSecond * SPITTER_OFFSET.getY(),
