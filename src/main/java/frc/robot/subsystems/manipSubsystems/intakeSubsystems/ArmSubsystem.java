@@ -25,6 +25,7 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -56,7 +57,6 @@ public class ArmSubsystem extends SubsystemBase {
 
 	public static final Angle HOME_ANGLE = Rotations.of(0.139);
 	public static final Angle STOW_ANGLE = Rotations.of(0.368);
-	public static Angle COLLECTION_POINT2 = Rotations.of(0.4722222222222222); // TODO: delete
 	public static final Angle COLLECTION_POINT = Rotations.of(0.5);
 
 	private static final Angle angleDeadBand = Rotations.of(0.0055555555555556);
@@ -260,7 +260,7 @@ public class ArmSubsystem extends SubsystemBase {
 
 			// @Override
 			// public boolean isFinished() {
-			// 	return armIsReady();
+
 			// }
 
 			@Override
@@ -274,8 +274,6 @@ public class ArmSubsystem extends SubsystemBase {
 		return out;
 	
 	}
-
-	
 
 	/** returns true when arm is within deadband */
 	private boolean armIsReady() {
@@ -319,6 +317,7 @@ public class ArmSubsystem extends SubsystemBase {
 		armMotorLeft.set(0);
 		armMotorLeft.setPosition(COLLECTION_POINT);
 		armMotorRight.setPosition(COLLECTION_POINT);
+		CommandScheduler.getInstance().cancelAll();
 		System.out.println("Extend limit hit, stopping motors and reseting position");
 	}
 
