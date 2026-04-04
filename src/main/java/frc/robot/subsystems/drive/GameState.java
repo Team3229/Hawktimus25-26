@@ -100,13 +100,13 @@ public class GameState {
       case EndGame:
         return true;
       case Shift1:
-        return autoWinner != myAlliance || (autoWinner == myAlliance && DriveSubsystem.getToF(DriveSubsystem.distanceToTarget) <= GamePhase.timeLeftInPhase(GamePhase.Shift1));
+        return autoWinner != myAlliance;
       case Shift3:
-        return autoWinner != myAlliance || (autoWinner == myAlliance && DriveSubsystem.getToF(DriveSubsystem.distanceToTarget) <= GamePhase.timeLeftInPhase(GamePhase.Shift3));
+        return autoWinner != myAlliance;
       case Shift2:
-        return autoWinner == myAlliance || (autoWinner != myAlliance && DriveSubsystem.getToF(DriveSubsystem.distanceToTarget) <= GamePhase.timeLeftInPhase(GamePhase.Shift2));
+        return autoWinner == myAlliance;
       case Shift4:
-        return autoWinner == myAlliance || (autoWinner != myAlliance && DriveSubsystem.getToF(DriveSubsystem.distanceToTarget) <= GamePhase.timeLeftInPhase(GamePhase.Shift4));
+        return autoWinner == myAlliance;
       default:
         return false;
     }
