@@ -269,7 +269,7 @@ public class SpitterSubsystem extends SubsystemBase {
             }
             @Override
             public void execute() {
-                // setSpitterSpeeds(); // REMOVE FOR MANUAL
+                // setShooterSpeed(); // REMOVE FOR MANUAL
                 leftSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0));
                 feeder.setControl(new VelocityVoltage(requestedFeederVelocity).withSlot(0));
                 if (shooterIsReady() && end == null) {
@@ -401,12 +401,9 @@ public class SpitterSubsystem extends SubsystemBase {
         });
     }
 
-    public void setShooterSpeed(double distanceMeters) {
-        requestedShooterVelocity = SPITTER_MAP.get(distanceMeters).srps();
+    public void setShooterSpeed() {
+        double distanceFromHub = driveSubsystem.distanceToTarget;
+        requestedShooterVelocity = SPITTER_MAP.get(distanceFromHub).srps();
     }
 
-    public void setSpitterSpeeds() {
-        double distanceFromHub = driveSubsystem.distanceToTarget;
-        setShooterSpeed(distanceFromHub);
-    }
 }

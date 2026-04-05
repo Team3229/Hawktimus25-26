@@ -50,7 +50,6 @@ public class RobotContainer {
 	public final DriveSubsystem drivetrain = DriveConstants.createDrivetrain();
 	private double MaxSpeed = 1.0 * DriveConstants.kSpeedAt12Volts.in(MetersPerSecond);
     private double MaxAngularRate = RotationsPerSecond.of(1.205).in(RadiansPerSecond); 
-	// TODO: this needs to be tested bc idk if this is correct, it could be tho bc mathmatically that lines up with yagsl code
 	
 	private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
 		.withDeadband(MaxSpeed * 0.1)
@@ -60,6 +59,11 @@ public class RobotContainer {
 	private final SwerveRequest.RobotCentric robotRelative = new SwerveRequest.RobotCentric()
 		.withDeadband(MaxSpeed * 0.1)
 		.withRotationalDeadband(MaxAngularRate * 0.1) 
+		.withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+
+	private final SwerveRequest.FieldCentricFacingAngle hubAlign = new SwerveRequest.FieldCentricFacingAngle()
+		.withDeadband(MaxSpeed * 0.1)
+		.withHeadingPID(2, 0, 0)
 		.withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
 	FlightStick driverController;
@@ -88,6 +92,7 @@ public class RobotContainer {
 
 		configureBindings();
 		initTelemetery();
+
 	}
 
 	private void configureBindings() {
@@ -124,11 +129,11 @@ public class RobotContainer {
 	private void configDriveControls() {
 		drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
-        	drivetrain.applyRequest(() ->
+			drivetrain.applyRequest(() ->
 				drive.withVelocityX(Math.pow(-driverController.a_Y(), 3) * MaxSpeed) // Drive forward with negative Y (forward)
 				.withVelocityY(Math.pow(-driverController.a_X(), 3) * MaxSpeed) // Drive left with negative X (left)
 				.withRotationalRate(Math.pow(-driverController.a_Z(), 3) * MaxAngularRate) // Drive counterclockwise with negative X (left)
-            )
+			) 
         );
 
 		driverController.b_10().onTrue(
@@ -155,7 +160,11 @@ public class RobotContainer {
 		);
 
 		driverController.b_Trigger().whileTrue(
-			drivetrain.toggleHubAlign()
+			drivetrain.applyRequest(() -> 
+				hubAlign.withTargetDirection(drivetrain.getTargetTranslation().getAngle().rotateBy(Rotation2d.k180deg))
+				.withVelocityX(Math.pow(-driverController.a_Y(), 3) * MaxSpeed)
+				.withVelocityY(Math.pow(-driverController.a_X(), 3) * MaxSpeed)
+			)
 		);
 
 	}

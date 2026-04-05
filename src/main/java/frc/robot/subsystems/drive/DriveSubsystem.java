@@ -13,7 +13,6 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
@@ -26,13 +25,10 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.util.Units;
 
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.util.sendable.Sendable;
@@ -45,6 +41,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
@@ -68,9 +65,7 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
     private static final double kSimLoopPeriod = 0.004; // 4 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
-    
-    private static Transform2d SPITTER_OFFSET = new Transform2d(0, Units.inchesToMeters(-10), Rotation2d.k180deg);
-    
+        
     public boolean hubAlign = false;
     public boolean isAimed = false;
     
@@ -178,6 +173,20 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
         SmartDashboard.putData("Field", field);
 
         setupPathPlanner();
+
+        driveSendable = new Sendable() {
+            @Override 
+            public void initSendable(SendableBuilder builder) {
+                builder.addDoubleProperty("PoseX", () -> getPose().getX(), null);
+                builder.addDoubleProperty("PoseY", () -> getPose().getY(), null);
+                builder.addDoubleProperty("Distance from hub", () -> distanceToTarget, null);
+                builder.addDoubleProperty("TargetX", () -> currentTarget.getX(), null);
+                builder.addDoubleProperty("TargetY", () -> currentTarget.getY(), null);
+                builder.addDoubleProperty("TargetRot", () -> targetAngleRot, null);
+                builder.addDoubleProperty("CurrentRot", () -> currentAngleRot, null);
+            }
+        };
+        SmartDashboard.putData("Drive", driveSendable);
     }
     
     /**
@@ -211,21 +220,6 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
             startSimThread();
         }
 
-        driveSendable = new Sendable() {
-            @Override 
-            public void initSendable(SendableBuilder builder) {
-                builder.addDoubleProperty("PoseX", () -> getPose().getX(), null);
-                builder.addDoubleProperty("PoseY", () -> getPose().getY(), null);
-                builder.addBooleanProperty("Align to Hub", () -> hubAlign, null);
-                builder.addBooleanProperty("Is Aimed", () -> isAimed, null);
-                builder.addDoubleProperty("Distance from hub", () -> distanceToTarget, null);
-                builder.addDoubleProperty("TargetX", () -> currentTarget.getX(), null);
-                builder.addDoubleProperty("TargetY", () -> currentTarget.getY(), null);
-                builder.addDoubleProperty("TargetRot", () -> targetAngleRot, null);
-                builder.addDoubleProperty("CurrentRot", () -> currentAngleRot, null);
-            }
-        };
-        SmartDashboard.putData("Drive", driveSendable);
     }
 
     /**
@@ -235,7 +229,7 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
      * @return Command to run
      */
     public Command applyRequest(Supplier<SwerveRequest> request) {
-        return run(() -> this.setControl(request.get()));
+        return run(() -> this.setControl(request.get())).alongWith(Commands.runOnce(() -> updateOdometry()));
     }
 
     /**
@@ -282,72 +276,6 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
 
         distanceFromHub();
         updateOdometry();
-
-        if (hubAlign) {
-            // overrides velocity on the z axis to align to the hub
-            Pose2d currentPose = getPose(); 
-            ChassisSpeeds currentSpeed = getState().Speeds;
-            
-            Translation2d robotTranslation = currentPose.getTranslation();
-            Translation2d spitterTranslation = robotTranslation.rotateBy(Rotation2d.k180deg); // our spitter is on the back of the bot
-
-            Translation2d botVelocity = 
-                new Translation2d(
-                    currentSpeed.vxMetersPerSecond,
-                    currentSpeed.vyMetersPerSecond
-                );
-
-            Translation2d tangentialVelocity = 
-                new Translation2d(
-                    -currentSpeed.omegaRadiansPerSecond * SPITTER_OFFSET.getY(),
-                    currentSpeed.omegaRadiansPerSecond * SPITTER_OFFSET.getX()
-                );
-            
-            Translation2d effectiveShooterVelocity = botVelocity.plus(tangentialVelocity);
-            Translation2d virtualTarget = getTargetTranslation();
-            currentTarget = virtualTarget;
-
-            // measures distance to our target in meters
-            double predictedDistance = spitterTranslation.getDistance(virtualTarget);
-
-            // time of flight, includes mechanical/system latency
-            double timeOfFlight = getToF(predictedDistance) + SpitterSubsystem.SYSTEM_LATENCY_SECONDS;
-
-            // calculate the distance the ball will drift
-            Translation2d predictedOffset = effectiveShooterVelocity.times(timeOfFlight);
-
-            // Shifts aim to be ahead of drift
-            virtualTarget = virtualTarget.minus(predictedOffset);
-
-            // Set distance for use in other commands
-            distanceToTarget = robotTranslation.getDistance(virtualTarget);
-
-            /* Calculate needed angle to target */
-            double targetAngleRad = Math.atan2(
-                virtualTarget.getY() - robotTranslation.getY(),
-                virtualTarget.getX() - robotTranslation.getX()
-            );
-
-            targetAngleRad += Math.PI; // trying to get back of bot to face forwards
-            
-            targetAngleRot = targetAngleRad / (2 * Math.PI);
-
-            double currentAngleRad = currentPose.getRotation().getRadians();
-
-            currentAngleRot = currentAngleRad / (2 * Math.PI);
-
-            double angularSpeedRps = DriveConstants.rotationPID.calculate(currentAngleRad, targetAngleRad);
-            
-            // will finish if the bot is correctly facing target
-            isAimed = DriveConstants.rotationPID.atSetpoint();	
-            
-            // overrides the drivers Z input with the calculated angle 
-            ChassisSpeeds driverSpeed = currentSpeed;
-            ChassisSpeeds newVelocity = new ChassisSpeeds(driverSpeed.vxMetersPerSecond, driverSpeed.vyMetersPerSecond, angularSpeedRps);
-            SwerveRequest fieldSpeedRequest = new ApplyFieldSpeeds().withSpeeds(newVelocity);
-            // running the bot in robot relative with the new calculated angle
-            applyRequest(() -> fieldSpeedRequest);
-        }
     }
 
     public void postTrajectoryToField(List<Pose2d> trajectory) {
@@ -542,20 +470,6 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
     public Optional<Pose2d> samplePoseAt(double timestampSeconds) {
         return super.samplePoseAt(Utils.fpgaToCurrentTime(timestampSeconds));
     }
-
-    public Command toggleHubAlign() {
-		return new Command() {
-			@Override
-			public void initialize() {
-				hubAlign = true;
-			}
-
-			@Override
-			public void end(boolean interrupted) {
-				hubAlign = false;
-			}
-		};
-	}
 
     /**Takes the robots pose and selects a target based on where it is.
 	 * Walks through your logic and sees if you are in the center field or the alliance zone then selects a target.
