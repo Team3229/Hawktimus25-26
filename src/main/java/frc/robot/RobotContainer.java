@@ -63,7 +63,7 @@ public class RobotContainer {
 
 	private final SwerveRequest.FieldCentricFacingAngle hubAlign = new SwerveRequest.FieldCentricFacingAngle()
 		.withDeadband(MaxSpeed * 0.1)
-		.withHeadingPID(2, 0, 0)
+		.withHeadingPID(8, 0, 0)
 		.withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
 	FlightStick driverController;

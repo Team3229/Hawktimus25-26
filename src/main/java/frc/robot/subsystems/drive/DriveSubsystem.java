@@ -18,6 +18,7 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -37,6 +38,7 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -44,7 +46,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-
+import frc.hawklibraries.utilities.Alliance.AllianceColor;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.drive.DriveConstants.TunerSwerveDrivetrain;
 import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
@@ -65,16 +67,7 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
     private static final double kSimLoopPeriod = 0.004; // 4 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
-        
-    public boolean hubAlign = false;
-    public boolean isAimed = false;
-    
-    public double distanceToTarget; 
-    
-    private Translation2d currentTarget = DriveConstants.BLUE_HUB_CENTER;
-    private double targetAngleRot;
-    private double currentAngleRot;
-    
+                
     private Sendable driveSendable;
     
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
@@ -179,14 +172,17 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
             public void initSendable(SendableBuilder builder) {
                 builder.addDoubleProperty("PoseX", () -> getPose().getX(), null);
                 builder.addDoubleProperty("PoseY", () -> getPose().getY(), null);
-                builder.addDoubleProperty("Distance from hub", () -> distanceToTarget, null);
-                builder.addDoubleProperty("TargetX", () -> currentTarget.getX(), null);
-                builder.addDoubleProperty("TargetY", () -> currentTarget.getY(), null);
-                builder.addDoubleProperty("TargetRot", () -> targetAngleRot, null);
-                builder.addDoubleProperty("CurrentRot", () -> currentAngleRot, null);
+                builder.addDoubleProperty("Distance from hub", () -> distanceFromHub(), null);
             }
         };
         SmartDashboard.putData("Drive", driveSendable);
+
+		resetOdometry(new Pose2d(2, 4, getStateCopy().RawHeading));
+
+        if (RobotBase.isSimulation()) {
+			field.setRobotPose(new Pose2d(2, 4, new Rotation2d()));
+		}
+
     }
     
     /**
@@ -219,7 +215,6 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
         if (Utils.isSimulation()) {
             startSimThread();
         }
-
     }
 
     /**
@@ -257,12 +252,12 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
     @Override
     public void periodic() {
         /*
-            * Periodically try to apply the operator perspective.
-            * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
-            * This allows us to correct the perspective in case the robot code restarts mid-match.
-            * Otherwise, only check and apply the operator perspective if the DS is disabled.
-            * This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
-            */
+        * Periodically try to apply the operator perspective.
+        * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
+        * This allows us to correct the perspective in case the robot code restarts mid-match.
+        * Otherwise, only check and apply the operator perspective if the DS is disabled.
+        * This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
+        */
         if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
             DriverStation.getAlliance().ifPresent(allianceColor -> {
                 setOperatorPerspectiveForward(
@@ -388,7 +383,11 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
      */	
 
     public Pose2d getPose() {
-        return getStateCopy().Pose;
+        if (RobotBase.isSimulation()) {
+			return field.getRobotPose();
+		} else {
+            return getStateCopy().Pose;
+        }
     }
 
     public void setIMUYaw(Rotation2d yaw) {
@@ -430,7 +429,6 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
      * @param visionRobotPoseMeters The pose of the robot as measured by the vision camera.
      * @param timestampSeconds The timestamp of the vision measurement in seconds.
      */
-    
     @Override
     public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds) {
         super.addVisionMeasurement(visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds));
@@ -449,7 +447,6 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
      * @param visionMeasurementStdDevs Standard deviations of the vision pose measurement
      *     in the form [x, y, theta]ᵀ, with units in meters and radians.
      */
-    
     @Override
     public void addVisionMeasurement(
         Pose2d visionRobotPoseMeters,
@@ -465,7 +462,6 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
      * @param timestampSeconds The timestamp of the pose in seconds.
      * @return The pose at the given timestamp (or Optional.empty() if the buffer is empty).
      */
-    
     @Override
     public Optional<Pose2d> samplePoseAt(double timestampSeconds) {
         return super.samplePoseAt(Utils.fpgaToCurrentTime(timestampSeconds));
@@ -475,7 +471,6 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
 	 * Walks through your logic and sees if you are in the center field or the alliance zone then selects a target.
 	 * @return Selected target Translation
 	 */
-
 	public Translation2d getTargetTranslation() {
 		Pose2d robotPose = getPose();
 		if (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)) {
@@ -488,7 +483,7 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
 			}	
 			return DriveConstants.RED_TARGET_RIGHT;
 		}
-		
+
 		if (robotPose.getMeasureX().lt(DriveConstants.BLUE_HUB_CENTER.getMeasureX())) {
 			return DriveConstants.BLUE_HUB_CENTER;
 		}
@@ -506,29 +501,39 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
 	}
 	
 	//Returns the distance from the robot to the hub 
-	private double distanceFromHub() {
+	public double distanceFromHub() {
 		return getPose().getTranslation().getDistance(getTargetTranslation());
 	}
 
-	public void setupPathPlanner() {
+    public void setupPathPlanner() {
 		RobotConfig config;
 
 		try {
 			config = RobotConfig.fromGUISettings();
 
-            final boolean enableFeedforward = true;
+			final boolean enableFeedforward = false;
 
-            AutoBuilder.configure(
-                () -> getPose(),
-                this::resetOdometry,
-                () -> getKinematics().toChassisSpeeds(),
-                (speedsRobotRelative, moduleFeedForwards) -> {
+			AutoBuilder.configure(
+				() -> {
+                // Robot pose supplier
+					if (RobotBase.isSimulation()) {
+						return field.getRobotPose();
+					} else {
+						return getPose();
+					}
+				},
+				// Method to reset odometry (will be called if your auto has a starting pose)
+				this::resetOdometry,
+				// ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+				() -> getStateCopy().Speeds,
+
+				(speedsRobotRelative, moduleFeedForwards) -> {
                     ApplyRobotSpeeds relativeRequest = new ApplyRobotSpeeds().withSpeeds(speedsRobotRelative);
 					if (enableFeedforward) {
                         relativeRequest
                             .withWheelForceFeedforwardsX(moduleFeedForwards.linearForces())
                             .withWheelForceFeedforwardsY(moduleFeedForwards.linearForces());
-                            applyRequest(() -> relativeRequest);
+                        applyRequest(() -> relativeRequest);
 					} else {
 						applyRequest(() -> relativeRequest);
 					}
@@ -541,9 +546,11 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
 				() -> DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red),
 				this
             );
-			PathfindingCommand.warmupCommand().schedule();
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+        
+		PathfindingCommand.warmupCommand().schedule();
 	}
 }
