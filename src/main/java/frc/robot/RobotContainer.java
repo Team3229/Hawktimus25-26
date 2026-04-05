@@ -6,7 +6,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,21 +47,21 @@ import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
 
 public class RobotContainer {
 	public final DriveSubsystem drivetrain = DriveConstants.createDrivetrain();
-	private double MaxSpeed = 1.0 * DriveConstants.kSpeedAt12Volts.in(MetersPerSecond);
-    private double MaxAngularRate = RotationsPerSecond.of(1.205).in(RadiansPerSecond); 
+	private double MaxSpeed = 0.8 * DriveConstants.kSpeedAt12Volts.in(MetersPerSecond);
+    private double MaxAngularRate = 0.4 * DriveConstants.kRotsAt12Volts.in(RadiansPerSecond); 
 	
 	private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-		.withDeadband(MaxSpeed * 0.1)
-		.withRotationalDeadband(MaxAngularRate * 0.1) 
+		// .withDeadband(MaxSpeed * 0.1)
+		.withRotationalDeadband(MaxAngularRate * 0.05) 
 		.withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
 	private final SwerveRequest.RobotCentric robotRelative = new SwerveRequest.RobotCentric()
-		.withDeadband(MaxSpeed * 0.1)
-		.withRotationalDeadband(MaxAngularRate * 0.1) 
+		// .withDeadband(MaxSpeed * 0.1)
+		.withRotationalDeadband(MaxAngularRate * 0.05) 
 		.withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
 	private final SwerveRequest.FieldCentricFacingAngle hubAlign = new SwerveRequest.FieldCentricFacingAngle()
-		.withDeadband(MaxSpeed * 0.1)
+		// .withDeadband(MaxSpeed * 0.1)
 		.withHeadingPID(8, 0, 0)
 		.withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 

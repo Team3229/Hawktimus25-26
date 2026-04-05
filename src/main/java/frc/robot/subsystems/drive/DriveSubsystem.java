@@ -18,7 +18,6 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -46,7 +45,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.hawklibraries.utilities.Alliance.AllianceColor;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.drive.DriveConstants.TunerSwerveDrivetrain;
 import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
@@ -69,7 +67,7 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
     private double m_lastSimTime;
                 
     private Sendable driveSendable;
-    
+
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
     private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
     /* Red alliance sees forward as 180 degrees (toward blue alliance wall) */
@@ -176,12 +174,6 @@ public class DriveSubsystem extends TunerSwerveDrivetrain implements Subsystem {
             }
         };
         SmartDashboard.putData("Drive", driveSendable);
-
-		resetOdometry(new Pose2d(2, 4, getStateCopy().RawHeading));
-
-        if (RobotBase.isSimulation()) {
-			field.setRobotPose(new Pose2d(2, 4, new Rotation2d()));
-		}
 
     }
     
