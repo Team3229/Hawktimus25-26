@@ -22,8 +22,6 @@ public class LEDSubsystem extends SubsystemBase {
     // THE LEDS ARE IN BGR NOT RGB
     private final Color purple = new Color(255, 0, 255);
     private final Color yellow = new Color(0, 100, 255);
-    @SuppressWarnings("unused")
-    private final Color red = new Color(0, 0, 255);
 
     private final int LEDPortNumber = 1;
     private final int LEDBuffer = 60;
