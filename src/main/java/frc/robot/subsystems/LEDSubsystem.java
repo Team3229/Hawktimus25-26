@@ -48,6 +48,10 @@ public class LEDSubsystem extends SubsystemBase {
         led.setData(ledBuffer);
     }
 
+    public static Color BGRPacker(int red, int green, int blue) {
+        return new Color(blue, green, red);
+    }
+
     public Command hubActive() {
         if (GameState.isMyHubActive() == true) {
             return runPattern(setHawkBlink());
