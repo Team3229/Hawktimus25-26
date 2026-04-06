@@ -20,8 +20,8 @@ public class LEDSubsystem extends SubsystemBase {
     private AddressableLEDBuffer ledBuffer;
     
     // THE LEDS ARE IN BGR NOT RGB
-    private final Color purple = new Color(255, 0, 255);
-    private final Color yellow = new Color(0, 100, 255);
+    private final Color purple = BGRPacker(255, 0, 255);
+    private final Color yellow = BGRPacker(255, 255, 0);
 
     private final int LEDPortNumber = 1;
     private final int LEDBuffer = 60;
