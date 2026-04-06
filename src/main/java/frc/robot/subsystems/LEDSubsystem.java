@@ -54,7 +54,7 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     public Command hubActive() {
-        if (GameState.isMyHubActive() == true) {
+        if (GameState.isMyHubActive()) {
             return runPattern(setHawkBlink());
         } else {
             return runPattern(setHawkOffset());
