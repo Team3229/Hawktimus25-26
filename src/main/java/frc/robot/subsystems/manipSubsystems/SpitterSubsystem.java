@@ -36,7 +36,7 @@ import java.util.Date;
 public class SpitterSubsystem extends SubsystemBase {
     private static DriveSubsystem driveSubsystem;
     private static double requestedShooterVelocity = 28;
-    private static double requestedFeederVelocity = 10;
+    private static double requestedFeederVelocity = 13;
     private static double deadBand = 1;
 
     // change PID (if needed)
@@ -61,7 +61,7 @@ public class SpitterSubsystem extends SubsystemBase {
 
     private long spitTimer = 0;
 
-    private double feederSensorToMechanismRatio = 9;
+    private double feederSensorToMechanismRatio = 6;
     private double shooterSensorToMechanismRatio = 1.75;
 
     private static final Current CURRENT_LIMIT = Amps.of(40);
@@ -156,7 +156,7 @@ public class SpitterSubsystem extends SubsystemBase {
         feederMotorConfig.Slot0.withKP(fP);
         feederMotorConfig.Slot0.withKV(fV);
         feederMotorConfig.Slot0.withKS(fS);
-        feederMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        feederMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         feeder.getConfigurator().apply(feederMotorConfig);
 
         spitterSendable = new Sendable() {
