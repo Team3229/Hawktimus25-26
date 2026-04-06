@@ -12,6 +12,7 @@ import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.StaticBrake;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -258,11 +259,6 @@ public class ArmSubsystem extends SubsystemBase {
 				}
 			}
 
-			// @Override
-			// public boolean isFinished() {
-
-			// }
-
 			@Override
 			public void end(boolean interrupted) {
 				armMotorLeft.setControl(new StaticBrake());
@@ -273,6 +269,28 @@ public class ArmSubsystem extends SubsystemBase {
 		out.addRequirements(this);
 		return out;
 	
+	}
+
+	public Command toCollection() {
+		Command out = new Command() {
+			@Override
+			public void initialize() {
+			}
+
+			@Override
+			public void execute() {
+				armMotorLeft.setControl(new VelocityVoltage(0.25));
+			}
+
+			@Override
+			public void end(boolean interrupted) {
+				armMotorLeft.setControl(new StaticBrake());
+			}
+
+		};
+
+		out.addRequirements(this);
+		return out;
 	}
 
 	/** returns true when arm is within deadband */
