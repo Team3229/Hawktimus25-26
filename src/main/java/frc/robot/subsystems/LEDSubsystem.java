@@ -46,6 +46,9 @@ public class LEDSubsystem extends SubsystemBase {
         led.setData(ledBuffer);
     }
 
+    /*
+     * Takes in RGB values and makes a new Color with the BGR values for the LEDs to use.
+     */
     public static Color BGRPacker(int red, int green, int blue) {
         return new Color(blue, green, red);
     }
