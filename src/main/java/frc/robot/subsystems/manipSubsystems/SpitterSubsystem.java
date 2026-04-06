@@ -40,15 +40,13 @@ public class SpitterSubsystem extends SubsystemBase {
     private static double deadBand = 1;
 
     // change PID (if needed)
-    private double kP = 0.08;
-    private double kV = 0.203;
-    private double kA = 0.00;
-    private double kS = 0.2;
+    private double kP = 0.2;
+    private double kV = 0.2027;
+    private double kS = 0.2111;
 
-    private double fP = 0.225;
-    private double fV = 1.03;
-    private double fA = 0.0;
-    private double fS = 0.002;
+    private double fP = 0.25;
+    private double fV = 0.71;
+    private double fS = 0.012;
 
     private static final int LS_CAN_ID = 10; 
     private TalonFX leftSpitter;
@@ -123,7 +121,6 @@ public class SpitterSubsystem extends SubsystemBase {
 
         shooterMotorConfig.Slot0.withKP(kP);
         shooterMotorConfig.Slot0.withKV(kV);
-        shooterMotorConfig.Slot0.withKA(kA);
         shooterMotorConfig.Slot0.withKS(kS);
         
         shooterMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -158,7 +155,6 @@ public class SpitterSubsystem extends SubsystemBase {
         
         feederMotorConfig.Slot0.withKP(fP);
         feederMotorConfig.Slot0.withKV(fV);
-        feederMotorConfig.Slot0.withKA(fA);
         feederMotorConfig.Slot0.withKS(fS);
         feederMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         feeder.getConfigurator().apply(feederMotorConfig);
@@ -186,7 +182,6 @@ public class SpitterSubsystem extends SubsystemBase {
             public void initSendable(SendableBuilder builder) {
                 builder.addDoubleProperty("Spitter P", () -> kP, (newkP) -> editSpitterP(newkP));
                 builder.addDoubleProperty("Spitter V", () -> kV, (newkV) -> editSpitterV(newkV));
-                builder.addDoubleProperty("Spitter A", () -> kA, (newkA) -> editSpitterA(newkA));
                 builder.addDoubleProperty("Spitter S", () -> kS, (newkS) -> editSpitterS(newkS));
             }
         };
@@ -196,7 +191,6 @@ public class SpitterSubsystem extends SubsystemBase {
             public void initSendable(SendableBuilder builder) {
                 builder.addDoubleProperty("Feeder P", () -> fP, (newfP) -> editFeederP(newfP));
                 builder.addDoubleProperty("Feeder V", () -> fV, (newfV) -> editFeederV(newfV));
-                builder.addDoubleProperty("Feeder A", () -> fA, (newfA) -> editFeederA(newfA));
                 builder.addDoubleProperty("Feeder S", () -> fS, (newfS) -> editFeederS(newfS));
             }
         };
@@ -308,14 +302,6 @@ public class SpitterSubsystem extends SubsystemBase {
         rightSpitter.getConfigurator().apply(shooterMotorConfig);
     }
 
-    private void editSpitterA(double newkA) {
-        kA = newkA;
-        shooterMotorConfig.Slot0.kA = kA;
-
-        leftSpitter.getConfigurator().apply(shooterMotorConfig);
-        rightSpitter.getConfigurator().apply(shooterMotorConfig);
-    }
-
     private void editSpitterS(double newkS) {
         kS = newkS;
         shooterMotorConfig.Slot0.kS = kS;
@@ -338,13 +324,6 @@ public class SpitterSubsystem extends SubsystemBase {
 
         feeder.getConfigurator().apply(feederMotorConfig);
         System.out.println("new fV: " + feederMotorConfig.Slot0.kV);
-    }
-
-    private void editFeederA(double newkA) {
-        fA = newkA;
-        feederMotorConfig.Slot0.kA = fA;
-
-        feeder.getConfigurator().apply(feederMotorConfig);
     }
 
     private void editFeederS(double newfS) {
