@@ -1,15 +1,70 @@
 {
   "version": 1.0,
-  "grid_size": 64,
+  "grid_size": 128,
   "tabs": [
     {
-      "name": "Match Start",
+      "name": "MatchStart",
       "grid_layout": {
         "layouts": [],
         "containers": [
           {
+            "title": "swerve",
+            "x": 1280.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "YAGSL Swerve Drive",
+            "properties": {
+              "topic": "/SmartDashboard/swerve",
+              "period": 0.06,
+              "show_robot_rotation": true,
+              "show_desired_states": true,
+              "angle_offset": 0.0
+            }
+          },
+          {
+            "title": "limelight-left",
+            "x": 1024.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/limelight-left",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          },
+          {
+            "title": "limelight-right",
+            "x": 1280.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/limelight-right",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          },
+          {
+            "title": "Distance from hub",
+            "x": 1024.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Drive/Distance from hub",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
             "title": "Autonomous Chooser",
-            "x": 0.0,
+            "x": 640.0,
             "y": 0.0,
             "width": 384.0,
             "height": 128.0,
@@ -21,596 +76,36 @@
             }
           },
           {
-            "title": "swerve",
-            "x": 0.0,
-            "y": 128.0,
-            "width": 384.0,
-            "height": 448.0,
-            "type": "YAGSL Swerve Drive",
-            "properties": {
-              "topic": "/SmartDashboard/swerve",
-              "period": 0.06,
-              "show_robot_rotation": true,
-              "show_desired_states": true,
-              "angle_offset": 0.0
-            }
-          },
-          {
-            "title": "Spitter has Coral",
-            "x": 1344.0,
-            "y": 384.0,
-            "width": 192.0,
-            "height": 192.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/CoralSubsystem/Spitter has Coral",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "limelight",
-            "x": 960.0,
-            "y": 0.0,
-            "width": 576.0,
-            "height": 384.0,
-            "type": "Camera Stream",
-            "properties": {
-              "topic": "/CameraPublisher/limelight",
-              "period": 0.06,
-              "rotation_turns": 0
-            }
-          },
-          {
             "title": "Field",
-            "x": 384.0,
+            "x": 0.0,
             "y": 0.0,
-            "width": 576.0,
-            "height": 320.0,
+            "width": 640.0,
+            "height": 512.0,
             "type": "Field",
             "properties": {
               "topic": "/SmartDashboard/Field",
               "period": 0.06,
-              "field_game": "Reefscape",
+              "field_game": "Rebuilt",
               "robot_width": 0.85,
               "robot_length": 0.85,
               "show_other_objects": true,
               "show_trajectories": true,
               "field_rotation": 0.0,
               "robot_color": 4294198070,
-              "trajectory_color": 4285005568
+              "trajectory_color": 4294967295,
+              "show_robot_outside_widget": true
             }
           }
         ]
       }
     },
     {
-      "name": "Autonomous",
-      "grid_layout": {
-        "layouts": [],
-        "containers": [
-          {
-            "title": "limelight",
-            "x": 960.0,
-            "y": 0.0,
-            "width": 576.0,
-            "height": 384.0,
-            "type": "Camera Stream",
-            "properties": {
-              "topic": "/CameraPublisher/limelight",
-              "period": 0.06,
-              "rotation_turns": 0
-            }
-          },
-          {
-            "title": "Field",
-            "x": 0.0,
-            "y": 0.0,
-            "width": 832.0,
-            "height": 384.0,
-            "type": "Field",
-            "properties": {
-              "topic": "/SmartDashboard/Field",
-              "period": 0.06,
-              "field_game": "Reefscape",
-              "robot_width": 0.85,
-              "robot_length": 0.85,
-              "show_other_objects": true,
-              "show_trajectories": true,
-              "field_rotation": 0.0,
-              "robot_color": 4294198070,
-              "trajectory_color": 4294967295
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "Teleoperated",
-      "grid_layout": {
-        "layouts": [],
-        "containers": [
-          {
-            "title": "limelight",
-            "x": 768.0,
-            "y": 0.0,
-            "width": 448.0,
-            "height": 384.0,
-            "type": "Camera Stream",
-            "properties": {
-              "topic": "/CameraPublisher/limelight",
-              "period": 0.06,
-              "rotation_turns": 0
-            }
-          },
-          {
-            "title": "Field",
-            "x": 0.0,
-            "y": 0.0,
-            "width": 768.0,
-            "height": 384.0,
-            "type": "Field",
-            "properties": {
-              "topic": "/SmartDashboard/Field",
-              "period": 0.06,
-              "field_game": "Reefscape",
-              "robot_width": 0.85,
-              "robot_length": 0.85,
-              "show_other_objects": false,
-              "show_trajectories": true,
-              "field_rotation": 0.0,
-              "robot_color": 4294198070,
-              "trajectory_color": 4294967295
-            }
-          },
-          {
-            "title": "Climb Position",
-            "x": 1216.0,
-            "y": 0.0,
-            "width": 320.0,
-            "height": 256.0,
-            "type": "Radial Gauge",
-            "properties": {
-              "topic": "/SmartDashboard/ClimbSubsystem/Climb Position",
-              "period": 0.06,
-              "data_type": "double",
-              "start_angle": -180.0,
-              "end_angle": 180.0,
-              "min_value": -180.0,
-              "max_value": 180.0,
-              "number_of_labels": 0,
-              "wrap_value": true,
-              "show_pointer": true,
-              "show_ticks": true
-            }
-          },
-          {
-            "title": "Catcher has Coral",
-            "x": 1216.0,
-            "y": 256.0,
-            "width": 320.0,
-            "height": 128.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/CoralSubsystem/Catcher has Coral",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "Spitter has Coral",
-            "x": 1216.0,
-            "y": 384.0,
-            "width": 320.0,
-            "height": 128.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/CoralSubsystem/Spitter has Coral",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "Done Lining Up",
-            "x": 0.0,
-            "y": 384.0,
-            "width": 1216.0,
-            "height": 128.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/Done Lining Up",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "Endgame",
-      "grid_layout": {
-        "layouts": [],
-        "containers": [
-          {
-            "title": "limelight",
-            "x": 768.0,
-            "y": 0.0,
-            "width": 448.0,
-            "height": 384.0,
-            "type": "Camera Stream",
-            "properties": {
-              "topic": "/CameraPublisher/limelight",
-              "period": 0.06,
-              "rotation_turns": 0
-            }
-          },
-          {
-            "title": "Climb Position",
-            "x": 1216.0,
-            "y": 0.0,
-            "width": 320.0,
-            "height": 256.0,
-            "type": "Radial Gauge",
-            "properties": {
-              "topic": "/SmartDashboard/ClimbSubsystem/Climb Position",
-              "period": 0.06,
-              "data_type": "double",
-              "start_angle": -180.0,
-              "end_angle": 180.0,
-              "min_value": -180.0,
-              "max_value": 180.0,
-              "number_of_labels": 0,
-              "wrap_value": true,
-              "show_pointer": true,
-              "show_ticks": true
-            }
-          },
-          {
-            "title": "Catcher has Coral",
-            "x": 1216.0,
-            "y": 256.0,
-            "width": 320.0,
-            "height": 128.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/CoralSubsystem/Catcher has Coral",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "Spitter has Coral",
-            "x": 1216.0,
-            "y": 384.0,
-            "width": 320.0,
-            "height": 128.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/CoralSubsystem/Spitter has Coral",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "Climb Camera",
-            "x": 0.0,
-            "y": 0.0,
-            "width": 768.0,
-            "height": 448.0,
-            "type": "Camera Stream",
-            "properties": {
-              "topic": "/CameraPublisher/Climb Camera",
-              "period": 0.06,
-              "rotation_turns": 0
-            }
-          },
-          {
-            "title": "Done Lining Up",
-            "x": 0.0,
-            "y": 448.0,
-            "width": 1216.0,
-            "height": 128.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/Done Lining Up",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "Swerve",
+      "name": "Match",
       "grid_layout": {
         "layouts": [
           {
-            "title": "backleft",
-            "x": 0.0,
-            "y": 256.0,
-            "width": 256.0,
-            "height": 256.0,
-            "type": "List Layout",
-            "properties": {
-              "label_position": "TOP"
-            },
-            "children": [
-              {
-                "title": "Absolute Encoder Read Issue",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Boolean Box",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/backleft/Absolute Encoder Read Issue",
-                  "period": 0.06,
-                  "data_type": "boolean",
-                  "true_color": 4283215696,
-                  "false_color": 4294198070,
-                  "true_icon": "None",
-                  "false_icon": "None"
-                }
-              },
-              {
-                "title": "Adjusted Absolute Encoder",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/backleft/Adjusted Absolute Encoder",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Angle Setpoint",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/backleft/Angle Setpoint",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Raw Absolute Encoder",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/backleft/Raw Absolute Encoder",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Raw Angle Encoder",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/backleft/Raw Angle Encoder",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Raw Drive Encoder",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/backleft/Raw Drive Encoder",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Raw Drive Velocity",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/backleft/Raw Drive Velocity",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Speed Setpoint",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/backleft/Speed Setpoint",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              }
-            ]
-          },
-          {
-            "title": "backright",
-            "x": 256.0,
-            "y": 256.0,
-            "width": 256.0,
-            "height": 256.0,
-            "type": "List Layout",
-            "properties": {
-              "label_position": "TOP"
-            },
-            "children": [
-              {
-                "title": "Absolute Encoder Read Issue",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Boolean Box",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/backright/Absolute Encoder Read Issue",
-                  "period": 0.06,
-                  "data_type": "boolean",
-                  "true_color": 4283215696,
-                  "false_color": 4294198070,
-                  "true_icon": "None",
-                  "false_icon": "None"
-                }
-              },
-              {
-                "title": "Adjusted Absolute Encoder",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/backright/Adjusted Absolute Encoder",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Angle Setpoint",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/backright/Angle Setpoint",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Raw Absolute Encoder",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/backright/Raw Absolute Encoder",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Raw Angle Encoder",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/backright/Raw Angle Encoder",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Raw Drive Encoder",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/backright/Raw Drive Encoder",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Raw Drive Velocity",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/backright/Raw Drive Velocity",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Speed Setpoint",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/backright/Speed Setpoint",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              }
-            ]
-          },
-          {
-            "title": "frontright",
-            "x": 256.0,
+            "title": "Spitter",
+            "x": 1024.0,
             "y": 0.0,
             "width": 256.0,
             "height": 256.0,
@@ -620,14 +115,58 @@
             },
             "children": [
               {
-                "title": "Absolute Encoder Read Issue",
+                "title": "SRPS",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Spitter/SRPS",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Ready to Shoot",
+                "x": 1024.0,
+                "y": 128.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/SmartDashboard/Spitter/Ready to Shoot",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              }
+            ]
+          },
+          {
+            "title": "Intake/Index",
+            "x": 1024.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Intaking",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "Boolean Box",
                 "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/frontright/Absolute Encoder Read Issue",
+                  "topic": "/SmartDashboard/Intake/Intaking",
                   "period": 0.06,
                   "data_type": "boolean",
                   "true_color": 4283215696,
@@ -637,108 +176,27 @@
                 }
               },
               {
-                "title": "Adjusted Absolute Encoder",
+                "title": "Indexing",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
-                "type": "Text Display",
+                "type": "Boolean Box",
                 "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/frontright/Adjusted Absolute Encoder",
+                  "topic": "/SmartDashboard/Index/Indexing",
                   "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Angle Setpoint",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/frontright/Angle Setpoint",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Raw Absolute Encoder",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/frontright/Raw Absolute Encoder",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Raw Angle Encoder",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/frontright/Raw Angle Encoder",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Raw Drive Encoder",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/frontright/Raw Drive Encoder",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Raw Drive Velocity",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/frontright/Raw Drive Velocity",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Speed Setpoint",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/frontright/Speed Setpoint",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
                 }
               }
             ]
           },
           {
-            "title": "frontleft",
-            "x": 0.0,
+            "title": "Drive",
+            "x": 512.0,
             "y": 0.0,
             "width": 256.0,
             "height": 256.0,
@@ -748,115 +206,42 @@
             },
             "children": [
               {
-                "title": "Absolute Encoder Read Issue",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Boolean Box",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/frontleft/Absolute Encoder Read Issue",
-                  "period": 0.06,
-                  "data_type": "boolean",
-                  "true_color": 4283215696,
-                  "false_color": 4294198070,
-                  "true_icon": "None",
-                  "false_icon": "None"
-                }
-              },
-              {
-                "title": "Adjusted Absolute Encoder",
+                "title": "Distance from hub",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "Text Display",
                 "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/frontleft/Adjusted Absolute Encoder",
+                  "topic": "/SmartDashboard/Drive/Distance from hub",
                   "period": 0.06,
                   "data_type": "double",
                   "show_submit_button": false
                 }
               },
               {
-                "title": "Angle Setpoint",
+                "title": "PoseX",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "Text Display",
                 "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/frontleft/Angle Setpoint",
+                  "topic": "/SmartDashboard/Drive/PoseX",
                   "period": 0.06,
                   "data_type": "double",
                   "show_submit_button": false
                 }
               },
               {
-                "title": "Raw Absolute Encoder",
+                "title": "PoseY",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "Text Display",
                 "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/frontleft/Raw Absolute Encoder",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Raw Angle Encoder",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/frontleft/Raw Angle Encoder",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Raw Drive Encoder",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/frontleft/Raw Drive Encoder",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Raw Drive Velocity",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/frontleft/Raw Drive Velocity",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Speed Setpoint",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/swerve/modules/frontleft/Speed Setpoint",
+                  "topic": "/SmartDashboard/Drive/PoseY",
                   "period": 0.06,
                   "data_type": "double",
                   "show_submit_button": false
@@ -868,10 +253,10 @@
         "containers": [
           {
             "title": "swerve",
-            "x": 512.0,
+            "x": 768.0,
             "y": 0.0,
-            "width": 512.0,
-            "height": 512.0,
+            "width": 256.0,
+            "height": 256.0,
             "type": "YAGSL Swerve Drive",
             "properties": {
               "topic": "/SmartDashboard/swerve",
@@ -880,55 +265,363 @@
               "show_desired_states": true,
               "angle_offset": 0.0
             }
+          },
+          {
+            "title": "limelight-right",
+            "x": 1280.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/limelight-right",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          },
+          {
+            "title": "limelight-left",
+            "x": 1280.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/limelight-left",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          },
+          {
+            "title": "Align to Hub",
+            "x": 0.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Drive/Align to Hub",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "Is Aimed",
+            "x": 128.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Drive/Is Aimed",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "Field",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 384.0,
+            "type": "Field",
+            "properties": {
+              "topic": "/SmartDashboard/Field",
+              "period": 0.06,
+              "field_game": "Rebuilt",
+              "robot_width": 0.85,
+              "robot_length": 0.85,
+              "show_other_objects": true,
+              "show_trajectories": true,
+              "field_rotation": 0.0,
+              "robot_color": 4294198070,
+              "trajectory_color": 4294967295,
+              "show_robot_outside_widget": true
+            }
           }
         ]
       }
     },
     {
-      "name": "Subsystems",
+      "name": "PID",
       "grid_layout": {
         "layouts": [
           {
-            "title": "ClimbSubsystem",
+            "title": "IndexPID",
+            "x": 1280.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Index P",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/IndexPID/Index P",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Index V",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/IndexPID/Index V",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "IntakeRodPID",
+            "x": 1024.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 384.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Rod P",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/IntakePID/Rod P",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Rod I",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/IntakePID/Rod I",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Rod D",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/IntakePID/Rod D",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Rod V",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/IntakePID/Rod V",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "IntakeArmVASG",
+            "x": 768.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 384.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Arm V",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/IntakePID/Arm V",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Arm A",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/IntakePID/Arm A",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Arm S",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/IntakePID/Arm S",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Arm G",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/IntakePID/Arm G",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "IntakeArmPID",
+            "x": 1280.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Arm P",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/IntakePID/Arm P",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Arm I",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/IntakePID/Arm I",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Arm D",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/IntakePID/Arm D",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "Spitter",
             "x": 0.0,
             "y": 0.0,
             "width": 256.0,
-            "height": 576.0,
+            "height": 256.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
             },
             "children": [
               {
-                "title": "Climb Position",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Radial Gauge",
-                "properties": {
-                  "topic": "/SmartDashboard/ClimbSubsystem/Climb Position",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "start_angle": 360.0,
-                  "end_angle": 0.0,
-                  "min_value": 0.0,
-                  "max_value": 360.0,
-                  "number_of_labels": 0,
-                  "wrap_value": true,
-                  "show_pointer": true,
-                  "show_ticks": true
-                }
-              },
-              {
-                "title": "Small",
+                "title": "FRPS",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "Text Display",
                 "properties": {
-                  "topic": "/SmartDashboard/ClimbSubsystem/Small",
+                  "topic": "/SmartDashboard/Spitter/FRPS",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "KickerVelocity",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Spitter/KickerVelocity",
                   "period": 0.06,
                   "data_type": "double",
                   "show_submit_button": false
@@ -937,177 +630,205 @@
             ]
           },
           {
-            "title": "CoralSubsystem",
+            "title": "Spitter",
+            "x": 0.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "LSpitterVelocity",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Spitter/LSpitterVelocity",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "RSpitterVelocity",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Spitter/RSpitterVelocity",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "SRPS",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Spitter/SRPS",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "ShooterPID",
             "x": 256.0,
             "y": 0.0,
             "width": 256.0,
-            "height": 576.0,
+            "height": 512.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
             },
             "children": [
               {
-                "title": "Catcher Angle",
+                "title": "Spitter P",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "Text Display",
                 "properties": {
-                  "topic": "/SmartDashboard/CoralSubsystem/Catcher Angle",
+                  "topic": "/SmartDashboard/ShooterPID/Spitter P",
                   "period": 0.06,
                   "data_type": "double",
                   "show_submit_button": false
                 }
               },
               {
-                "title": "Catcher Current",
+                "title": "Spitter V",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "Text Display",
                 "properties": {
-                  "topic": "/SmartDashboard/CoralSubsystem/Catcher Current",
+                  "topic": "/SmartDashboard/ShooterPID/Spitter V",
                   "period": 0.06,
                   "data_type": "double",
                   "show_submit_button": false
                 }
               },
               {
-                "title": "Catcher Limit Switch",
+                "title": "Spitter A",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
-                "type": "Boolean Box",
+                "type": "Text Display",
                 "properties": {
-                  "topic": "/SmartDashboard/CoralSubsystem/Catcher Limit Switch",
-                  "period": 0.06,
-                  "data_type": "boolean",
-                  "true_color": 4283215696,
-                  "false_color": 4294198070,
-                  "true_icon": "None",
-                  "false_icon": "None"
-                }
-              },
-              {
-                "title": "Catcher has Coral",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Boolean Box",
-                "properties": {
-                  "topic": "/SmartDashboard/CoralSubsystem/Catcher has Coral",
-                  "period": 0.06,
-                  "data_type": "boolean",
-                  "true_color": 4283215696,
-                  "false_color": 4294198070,
-                  "true_icon": "None",
-                  "false_icon": "None"
-                }
-              },
-              {
-                "title": "Spitter has Coral",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Boolean Box",
-                "properties": {
-                  "topic": "/SmartDashboard/CoralSubsystem/Spitter has Coral",
-                  "period": 0.06,
-                  "data_type": "boolean",
-                  "true_color": 4283215696,
-                  "false_color": 4294198070,
-                  "true_icon": "None",
-                  "false_icon": "None"
-                }
-              },
-              {
-                "title": "Elevator Height",
-                "x": 320.0,
-                "y": 384.0,
-                "width": 128.0,
-                "height": 448.0,
-                "type": "Number Bar",
-                "properties": {
-                  "topic": "/SmartDashboard/CoralSubsystem/Elevator Height",
+                  "topic": "/SmartDashboard/ShooterPID/Spitter A",
                   "period": 0.06,
                   "data_type": "double",
-                  "min_value": 0.0,
-                  "max_value": 45.0,
-                  "divisions": 2,
-                  "inverted": false,
-                  "orientation": "vertical"
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Spitter S",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/ShooterPID/Spitter S",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "FeedForward",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/ShooterPID/FeedForward",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
                 }
               }
             ]
           },
           {
-            "title": "AlgaeSubsystem",
+            "title": "FeederPID",
             "x": 512.0,
             "y": 0.0,
             "width": 256.0,
-            "height": 576.0,
+            "height": 512.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
             },
             "children": [
               {
-                "title": "Arm Angle",
+                "title": "Feeder P",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "Text Display",
                 "properties": {
-                  "topic": "/SmartDashboard/AlgaeSubsystem/Arm Angle",
+                  "topic": "/SmartDashboard/FeederPID/Feeder P",
                   "period": 0.06,
                   "data_type": "double",
                   "show_submit_button": false
                 }
               },
               {
-                "title": "Arm Current",
+                "title": "Feeder V",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "Text Display",
                 "properties": {
-                  "topic": "/SmartDashboard/AlgaeSubsystem/Arm Current",
+                  "topic": "/SmartDashboard/FeederPID/Feeder V",
                   "period": 0.06,
                   "data_type": "double",
                   "show_submit_button": false
                 }
               },
               {
-                "title": "Relative Angle",
+                "title": "Feeder A",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "Text Display",
                 "properties": {
-                  "topic": "/SmartDashboard/AlgaeSubsystem/Relative Angle",
+                  "topic": "/SmartDashboard/FeederPID/Feeder A",
                   "period": 0.06,
                   "data_type": "double",
                   "show_submit_button": false
                 }
               },
               {
-                "title": "Wheel Current",
+                "title": "Feeder S",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "Text Display",
                 "properties": {
-                  "topic": "/SmartDashboard/AlgaeSubsystem/Wheel Current",
+                  "topic": "/SmartDashboard/FeederPID/Feeder S",
                   "period": 0.06,
                   "data_type": "double",
                   "show_submit_button": false
@@ -1117,6 +838,182 @@
           }
         ],
         "containers": []
+      }
+    },
+    {
+      "name": "Test",
+      "grid_layout": {
+        "layouts": [
+          {
+            "title": "Spitter",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 384.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "LSpitterVelocity",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Spitter/LSpitterVelocity",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "RSpitterVelocity",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Spitter/RSpitterVelocity",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "SRPS",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Spitter/SRPS",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "SpitTime",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Spitter/SpitTime",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "Spitter",
+            "x": 256.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "FRPS",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Spitter/FRPS",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "KickerVelocity",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Spitter/KickerVelocity",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          }
+        ],
+        "containers": [
+          {
+            "title": "Ready to Shoot",
+            "x": 256.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Spitter/Ready to Shoot",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "Distance from hub",
+            "x": 0.0,
+            "y": 384.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Drive/Distance from hub",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "limelight-left",
+            "x": 512.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/limelight-left",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          },
+          {
+            "title": "limelight-right",
+            "x": 768.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/limelight-right",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          }
+        ]
       }
     }
   ]

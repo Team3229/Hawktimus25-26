@@ -9,62 +9,49 @@
           "data": {
             "commands": [
               {
-                "type": "path",
+                "type": "named",
                 "data": {
-                  "pathName": "S3-Hub3"
+                  "name": "ZeroGyroWithLimelight"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "WheelSpinUp"
+                  "name": "Stow"
                 }
               }
             ]
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "Shoot"
+            "pathName": "S2-BN"
           }
         },
         {
           "type": "parallel",
           "data": {
             "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Hub3-BNeutral"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "ArmOut"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake"
-                }
-              },
               {
                 "type": "path",
                 "data": {
                   "pathName": "BNeutral Grab"
                 }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake"
+                }
               }
             ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BNeutralEnd-Hub3"
           }
         },
         {
@@ -72,24 +59,30 @@
           "data": {
             "commands": [
               {
-                "type": "path",
+                "type": "named",
                 "data": {
-                  "pathName": "BNeutralEnd-Hub3"
+                  "name": "Shoot"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "WheelSpinUp"
+                  "name": "Stow"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Hub3-BNE"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Blue Better Autos",
   "choreoAuto": false
 }

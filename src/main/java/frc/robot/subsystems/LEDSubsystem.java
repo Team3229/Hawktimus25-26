@@ -13,16 +13,15 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import frc.robot.subsystems.drive.GameState;
 
 public class LEDSubsystem extends SubsystemBase {
     private AddressableLED led;
     private AddressableLEDBuffer ledBuffer;
     
     // THE LEDS ARE IN BGR NOT RGB
-    private final Color purple = new Color(255, 0, 255);
-    private final Color yellow = new Color(0, 100, 255);
-    @SuppressWarnings("unused")
-    private final Color red = new Color(0, 0, 255);
+    private final Color purple = BGRPacker(255, 0, 255);
+    private final Color yellow = BGRPacker(255, 255, 0);
 
     private final int LEDPortNumber = 1;
     private final int LEDBuffer = 60;
@@ -38,13 +37,28 @@ public class LEDSubsystem extends SubsystemBase {
        
         led.start();
        
-        this.setDefaultCommand(runPattern(setHawkBreathe()));
+        this.setDefaultCommand(hubActive());
        
     }
 
     @Override
     public void periodic() {
         led.setData(ledBuffer);
+    }
+
+    /*
+     * Takes in RGB values and makes a new Color with the BGR values for the LEDs to use.
+     */
+    public static Color BGRPacker(int red, int green, int blue) {
+        return new Color(blue, green, red);
+    }
+
+    public Command hubActive() {
+        if (GameState.isMyHubActive()) {
+            return runPattern(setHawkBlink());
+        } else {
+            return runPattern(setHawkOffset());
+        }
     }
 
     public Command runPattern(LEDPattern pattern) {
@@ -116,7 +130,7 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     public LEDPattern setColorBlink(Color colorForBlink, Color secondColorForBlink) {
-        return setDiscontGradient(colorForBlink, secondColorForBlink).blink(Seconds.of(1));
+        return setDiscontGradient(colorForBlink, secondColorForBlink).blink(Seconds.of(0.4));
     }
 
     public LEDPattern setHawkBlink() {

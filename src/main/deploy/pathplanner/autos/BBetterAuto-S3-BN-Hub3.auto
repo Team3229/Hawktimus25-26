@@ -9,56 +9,49 @@
           "data": {
             "commands": [
               {
-                "type": "path",
+                "type": "named",
                 "data": {
-                  "pathName": "S1-Depot"
+                  "name": "ZeroGyroWithLimelight"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "ArmOut"
+                  "name": "Stow"
                 }
               }
             ]
           }
         },
         {
-          "type": "parallel",
+          "type": "path",
+          "data": {
+            "pathName": "S3-BN"
+          }
+        },
+        {
+          "type": "race",
           "data": {
             "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "BNeutral Grab"
+                }
+              },
               {
                 "type": "named",
                 "data": {
                   "name": "Intake"
                 }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Depot Grab"
-                }
               }
             ]
           }
         },
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Depot-Hub1"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "WheelSpinUp"
-                }
-              }
-            ]
+            "pathName": "BNeutralEnd-Hub3"
           }
         },
         {
@@ -70,31 +63,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Hub1-TNeutral"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ArmOut"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Intake"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "TNeutral Grab"
+            "pathName": "Hub3-BNE"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Blue Better Autos",
   "choreoAuto": false
 }

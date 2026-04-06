@@ -5,57 +5,25 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "S2-Hub2"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "WheelSpinUp"
-                }
-              }
-            ]
-          }
-        },
-        {
           "type": "named",
           "data": {
-            "name": "Shoot"
+            "name": "Stow"
           }
         },
         {
-          "type": "sequential",
+          "type": "path",
+          "data": {
+            "pathName": "RS1-RBN"
+          }
+        },
+        {
+          "type": "race",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Hub2-TN"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "ArmOut"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "TNeutral Grab"
+                  "pathName": "RBN Grab"
                 }
               },
               {
@@ -66,11 +34,36 @@
               }
             ]
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RBNEnd-RHub1"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Shoot"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Stow"
+                }
+              }
+            ]
+          }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Red Better Autos",
   "choreoAuto": false
 }

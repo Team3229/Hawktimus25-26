@@ -5,15 +5,28 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "S2-HPStation"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "ZeroGyroWithLimelight"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Stow"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "ArmOut"
+            "pathName": "S2-TN"
           }
         },
         {
@@ -23,7 +36,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "HPStationGrab"
+                  "pathName": "TNeutral Grab"
                 }
               },
               {
@@ -42,28 +55,16 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "HPStation-Hub3"
+                  "pathName": "TNeutralEnd-Hub1"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "WheelSpinUp"
+                  "name": "Stow"
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Hub3-BNeutral"
           }
         },
         {
@@ -71,24 +72,30 @@
           "data": {
             "commands": [
               {
-                "type": "path",
+                "type": "named",
                 "data": {
-                  "pathName": "BNeutral Grab"
+                  "name": "Shoot"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "Intake"
+                  "name": "Stow"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Hub1-TNE"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Blue Better Autos",
   "choreoAuto": false
 }
