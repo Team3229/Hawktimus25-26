@@ -1,5 +1,5 @@
 package frc.robot.subsystems.manipSubsystems;
-
+ 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 
