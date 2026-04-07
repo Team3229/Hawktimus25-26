@@ -35,8 +35,8 @@ public class RollerSubsystem extends SubsystemBase {
 	private double rV = 0.13; 
 	private double rS = 0.0; 
 	
-	public static final double ROD_CW_SPEED = 100; 
-	public static final double ROD_CCW_SPEED = -100;
+	public static final double ROD_CW_SPEED = 85; 
+	public static final double ROD_CCW_SPEED = -85;
 
 	public static boolean stowSpin = false;
 
