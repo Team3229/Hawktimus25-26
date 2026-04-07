@@ -42,7 +42,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import frc.hawklibraries.utilities.Alliance.AllianceColor;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
 import frc.robot.utilities.LimelightHelpers;
@@ -450,6 +450,26 @@ public class DriveSubsystem extends SubsystemBase {
 
 	public Command zeroGyroCommand() {
 		return runOnce(() -> zeroGyro());
+	}
+
+		/**
+	 * This will zero (calibrate) the robot to assume the current position is facing
+	 * forward
+	 * <p>
+	 * If red alliance rotate the robot 180 after the drivebase zero command
+	 */
+	public void zeroGyroWithAlliance() {
+		if (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)) {
+			setIMUYaw(new Rotation2d(Math.PI));
+		} else {
+			zeroGyro();
+		}
+	}
+
+	public Command zeroGyroWithAllianceCommand() {
+		return runOnce(
+			this::zeroGyroWithAlliance
+		);
 	}
 
 	public void redGyro() {

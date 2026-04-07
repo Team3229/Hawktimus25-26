@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.Amps;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.VoltageConfigs;
@@ -27,19 +26,17 @@ public class RollerSubsystem extends SubsystemBase {
 	private static TalonFXConfiguration rodMotorConfig;
 
 	private static final int ROD_CAN_ID = 17; 
-
-	private static final double sensorToMechanismRatio = 1.714285714285714;
 	
 	private static final Current CURRENT_LIMIT = Amps.of(40);
 	
 	private double requestedVelocity;
 
 	private double rP = 0.1; 
-	private double rV = 0.1573; 
-	private double rS = 0.208; 
+	private double rV = 0.13; 
+	private double rS = 0.0; 
 	
-	public static final double ROD_CW_SPEED = 58; 
-	public static final double ROD_CCW_SPEED = -58;
+	public static final double ROD_CW_SPEED = 100; 
+	public static final double ROD_CCW_SPEED = -100;
 
 	public static boolean stowSpin = false;
 
@@ -65,11 +62,7 @@ public class RollerSubsystem extends SubsystemBase {
 		    		.withPeakForwardVoltage(12)
 		    		.withPeakReverseVoltage(-12)
 		    		.withSupplyVoltageTimeConstant(0)
-		    )
-			.withFeedback(
-				new FeedbackConfigs()
-					.withSensorToMechanismRatio(sensorToMechanismRatio)
-			);
+		    );
 
 		rodMotorConfig.Slot0.kP = rP;
 		rodMotorConfig.Slot0.kV = rV;
