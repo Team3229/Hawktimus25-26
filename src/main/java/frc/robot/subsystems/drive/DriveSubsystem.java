@@ -598,7 +598,7 @@ public class DriveSubsystem extends SubsystemBase {
 	/*
 	* Returns the distance from the robot to the hub 
 	*/
-	private double distanceFromHub() {
+	public double distanceFromHub() {
 		return getPose().getTranslation().getDistance(getTargetTranslation());
 	}
 	

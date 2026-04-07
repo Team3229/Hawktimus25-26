@@ -26,7 +26,6 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -340,9 +339,7 @@ public class ArmSubsystem extends SubsystemBase {
 		armMotorLeft.set(0);
 		armMotorLeft.setPosition(COLLECTION_POINT);
 		armMotorRight.setPosition(COLLECTION_POINT);
-		// CommandScheduler.getInstance().cancel(rotateTo(COLLECTION_POINT));
-		// CommandScheduler.getInstance().cancel(rotateTo(STOW_ANGLE));
-		// CommandScheduler.getInstance().cancel(toCollection());
+
 		System.out.println("Extend limit hit, stopping motors and reseting position");
 	}
 
