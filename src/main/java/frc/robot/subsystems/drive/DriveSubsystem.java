@@ -476,15 +476,6 @@ public class DriveSubsystem extends SubsystemBase {
 		);
 	}
 
-	public void redGyro() {
-		getIMU().setYaw(0);
-		swerveDrive.resetOdometry(new Pose2d(getPose().getX(), getPose().getY(), new Rotation2d(Math.PI)));
-	}
-
-	public Command zeroWithRedCommand() {
-		return runOnce(() -> redGyro());
-	}
-
 	/**
 	 * Zeros the gyro with the lime light based on 2d april tags
 	 */

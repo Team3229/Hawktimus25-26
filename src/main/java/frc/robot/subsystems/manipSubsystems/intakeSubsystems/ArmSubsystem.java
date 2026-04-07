@@ -339,7 +339,6 @@ public class ArmSubsystem extends SubsystemBase {
 		armMotorLeft.set(0);
 		armMotorLeft.setPosition(COLLECTION_POINT);
 		armMotorRight.setPosition(COLLECTION_POINT);
-
 		System.out.println("Extend limit hit, stopping motors and reseting position");
 	}
 

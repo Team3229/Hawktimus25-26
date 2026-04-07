@@ -112,7 +112,6 @@ public class RobotContainer {
 			driveSubsystem.driveFieldOriented(
 				driveAngularVelocity
 			)
-
 		);
 
 		driverController.b_10().onTrue(
@@ -123,9 +122,9 @@ public class RobotContainer {
 			driveSubsystem.zeroGyroWithAllianceCommand()
 		);
 
-		driverController.p_Any().whileTrue(
-			driveSubsystem.toggleRelativeMode()
-		);
+		// driverController.p_Any().whileTrue(
+		// 	driveSubsystem.toggleRelativeMode()
+		// );
 
 		driverController.b_Hazard().onTrue(
 			Commands.runOnce(() -> {
