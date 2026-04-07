@@ -97,6 +97,8 @@ public class DriveSubsystem extends SubsystemBase {
 	public boolean hubAlign = false;
 	public boolean isAimed = false;
 
+	public boolean relativeMode = false;
+
 	public double distanceToTarget; 
 
 	private Translation2d currentTarget = BLUE_HUB_CENTER;
@@ -417,6 +419,9 @@ public class DriveSubsystem extends SubsystemBase {
 				
 				// running the bot in robot relative with the new calculated angle
 				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(newVelocity, getIMUYaw()));
+			} else if (relativeMode) {
+				distanceToTarget = distanceFromHub();
+				swerveDrive.drive(ChassisSpeeds.fromRobotRelativeSpeeds(velocity.get(), getIMUYaw()));
 			} else {
 				distanceToTarget = distanceFromHub(); 
 				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(velocity.get(), getIMUYaw()));
@@ -610,6 +615,23 @@ public class DriveSubsystem extends SubsystemBase {
 			@Override
 			public void end(boolean interrupted) {
 				hubAlign = false;
+			}
+		};
+	}
+
+	/**
+	 * Toggles robot-relative driving 
+	 */
+	public Command toggleRelativeMode() {
+		return new Command() {
+			@Override
+			public void initialize() {
+				relativeMode = true;
+			}
+
+			@Override
+			public void end(boolean interrupted) {
+				relativeMode = false;
 			}
 		};
 	}

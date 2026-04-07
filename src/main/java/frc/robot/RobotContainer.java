@@ -123,6 +123,10 @@ public class RobotContainer {
 			driveSubsystem.zeroGyroWithAllianceCommand()
 		);
 
+		driverController.p_Any().whileTrue(
+			driveSubsystem.toggleRelativeMode()
+		);
+
 		driverController.b_Hazard().onTrue(
 			Commands.runOnce(() -> {
 				driveSubsystem.getCurrentCommand().cancel();

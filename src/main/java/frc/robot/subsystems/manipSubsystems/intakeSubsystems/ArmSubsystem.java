@@ -283,6 +283,11 @@ public class ArmSubsystem extends SubsystemBase {
 			}
 
 			@Override
+			public boolean isFinished() {
+				return extendLimitSwitch();
+			}
+
+			@Override
 			public void end(boolean interrupted) {
 				armMotorLeft.setControl(new StaticBrake());
 			}
@@ -335,9 +340,9 @@ public class ArmSubsystem extends SubsystemBase {
 		armMotorLeft.set(0);
 		armMotorLeft.setPosition(COLLECTION_POINT);
 		armMotorRight.setPosition(COLLECTION_POINT);
-		CommandScheduler.getInstance().cancel(rotateTo(COLLECTION_POINT));
-		CommandScheduler.getInstance().cancel(rotateTo(STOW_ANGLE));
-		CommandScheduler.getInstance().cancel(toCollection());
+		// CommandScheduler.getInstance().cancel(rotateTo(COLLECTION_POINT));
+		// CommandScheduler.getInstance().cancel(rotateTo(STOW_ANGLE));
+		// CommandScheduler.getInstance().cancel(toCollection());
 		System.out.println("Extend limit hit, stopping motors and reseting position");
 	}
 
