@@ -222,7 +222,7 @@ public class DriveSubsystem extends SubsystemBase {
 				builder.addDoubleProperty("PoseY", () -> getPose().getY(), null);
 				builder.addBooleanProperty("Align to Hub", () -> hubAlign, null);
 				builder.addBooleanProperty("Is Aimed", () -> isAimed, null);
-				builder.addDoubleProperty("Distance from hub", () -> distanceToTarget, null);
+				builder.addDoubleProperty("Distance from hub", () -> distanceToTarget * 3.2808399, null);
 				builder.addDoubleProperty("TargetX", () -> currentTarget.getX(), null);
 				builder.addDoubleProperty("TargetY", () -> currentTarget.getY(), null);
 				builder.addDoubleProperty("TargetRot", () -> targetAngleRot, null);
@@ -247,13 +247,13 @@ public class DriveSubsystem extends SubsystemBase {
                 () -> swerveDrive.getRobotVelocity(),
                 (speedsRobotRelative, moduleFeedForwards) -> {
 					if (enableFeedforward) {
-						swerveDrive.drive( // TODO: replace the .drive with (hopefully) a CTRE alternative
+						swerveDrive.drive( 
 							speedsRobotRelative,
 							swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
 							moduleFeedForwards.linearForces()
 						);
 					} else {
-						swerveDrive.setChassisSpeeds(speedsRobotRelative); // TODO: same here
+						swerveDrive.setChassisSpeeds(speedsRobotRelative); 
 					}
 				},
 				new PPHolonomicDriveController(
@@ -292,9 +292,6 @@ public class DriveSubsystem extends SubsystemBase {
 		return getIMU().getAngularVelocityZWorld().getValue();
 	}
 
-	// TODO: all four of these can be stolen for CTRE
-
-
 	/**
    * Updates the drivetrain odometry object to the robot's current position on the
    * field.
@@ -320,8 +317,6 @@ public class DriveSubsystem extends SubsystemBase {
 				if (Math.hypot(aprilTagPosition.getX(), aprilTagPosition.getZ()) <= 3.5) {
 					
 					swerveDrive.addVisionMeasurement(new Pose2d(estimate.pose.getX(), estimate.pose.getY(), getIMUYaw()), estimate.timestampSeconds);
-						//TODO: in order to switch to a different drive we need to change this
-						// create a SwervePoseEstimator and use the .addVisionMeasurment(with same stuff here) on it
 
 				}
 					
@@ -355,7 +350,6 @@ public class DriveSubsystem extends SubsystemBase {
 		}
 
         swerveDrive.resetOdometry(pose);
-		// TODO: simply steal the yagsl code that makes this (if no CTRE alternative)
     }
 
 	public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
@@ -423,9 +417,9 @@ public class DriveSubsystem extends SubsystemBase {
 				ChassisSpeeds newVelocity = new ChassisSpeeds(driverSpeed.vxMetersPerSecond, driverSpeed.vyMetersPerSecond, angularSpeedRps);
 				
 				// running the bot in robot relative with the new calculated angle
-				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(newVelocity, getIMUYaw())); //TODO: just this line of hubAlign needs to change
+				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(newVelocity, getIMUYaw()));
 			} else {
-				distanceToTarget = distanceFromHub(); // TODO: put this in the periodic for CTRE
+				distanceToTarget = distanceFromHub(); 
 				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(velocity.get(), getIMUYaw()));
 				// swerveDrive.driveFieldOriented(velocity.get()); //Field relative is relying on odemtry instead of IMUYaw
 			}
