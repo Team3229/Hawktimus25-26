@@ -23,8 +23,8 @@ public class LEDSubsystem extends SubsystemBase {
     private final Color purple = BGRPacker(255, 0, 255);
     private final Color yellow = BGRPacker(255, 255, 0);
 
-    private final int LEDPortNumber = 1;
-    private final int LEDBuffer = 60;
+    private final int LEDPortNumber = 0;
+    private final int LEDBuffer = 776;
 
     public LEDSubsystem() {
         led = new AddressableLED(LEDPortNumber);
@@ -37,7 +37,7 @@ public class LEDSubsystem extends SubsystemBase {
        
         led.start();
        
-        this.setDefaultCommand(hubActive());
+        this.setDefaultCommand(runPattern(setPurple()));
        
     }
 

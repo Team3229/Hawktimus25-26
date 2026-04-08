@@ -117,9 +117,9 @@ public class DriveSubsystem extends SubsystemBase {
 
 	private static final PIDConstants ROTATION_CONSTANTS =
 		new PIDConstants(
-			2.0,
+			3.4,
 			0.0,
-			0.0
+			0.3
 		);
 
     // Pathplanner PID
@@ -440,7 +440,11 @@ public class DriveSubsystem extends SubsystemBase {
 
 			} else if (relativeMode) {
 				distanceToTarget = distanceFromHub();
-				swerveDrive.drive(velocity.get());
+				if(DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)) {
+					swerveDrive.drive(velocity.get().times(-1)); // will invert on red
+				} else {
+					swerveDrive.drive(velocity.get());
+				}
 			} else {
 				distanceToTarget = distanceFromHub(); 
 				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(velocity.get(), getIMUYaw()));
