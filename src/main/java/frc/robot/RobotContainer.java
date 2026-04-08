@@ -28,6 +28,7 @@ import frc.robot.subsystems.VisualizerSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import frc.robot.subsystems.manipSubsystems.PathPlannerCommands;
+import frc.robot.subsystems.LEDSubsystem;
 import swervelib.SwerveInputStream;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
  
@@ -38,6 +39,7 @@ public class RobotContainer {
 	ButtonBoard buttonBoard;
 	DriveSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
+	LEDSubsystem ledSubsystem;
 	
 	VisualizerSubsystem visualizerSubsystem;
 	PathPlannerCommands pathPlannerCommands;
@@ -60,6 +62,9 @@ public class RobotContainer {
 
 		pathPlannerCommands = new PathPlannerCommands(manipSubsystem);
 
+		ledSubsystem = new LEDSubsystem();	
+		ledSubsystem.getDefaultCommand();
+		
 		configureBindings();
 		initTelemetery();
 	}

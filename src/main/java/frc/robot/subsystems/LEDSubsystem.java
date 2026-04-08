@@ -20,8 +20,8 @@ public class LEDSubsystem extends SubsystemBase {
     private AddressableLEDBuffer ledBuffer;
     
     // THE LEDS ARE IN BGR NOT RGB
-    private final Color purple = BGRPacker(255, 0, 255);
-    private final Color yellow = BGRPacker(255, 255, 0);
+    private final Color purple = GBRPacker(255, 0, 255);
+    private final Color yellow = GBRPacker(255, 255, 0);
 
     private final int LEDPortNumber = 0;
     private final int LEDBuffer = 776;
@@ -49,8 +49,8 @@ public class LEDSubsystem extends SubsystemBase {
     /*
      * Takes in RGB values and makes a new Color with the BGR values for the LEDs to use.
      */
-    public static Color BGRPacker(int red, int green, int blue) {
-        return new Color(blue, green, red);
+    public static Color GBRPacker(int red, int green, int blue) {
+        return new Color(green, blue, red);
     }
 
     public Command hubActive() {
