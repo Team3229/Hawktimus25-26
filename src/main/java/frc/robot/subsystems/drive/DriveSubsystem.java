@@ -425,13 +425,11 @@ public class DriveSubsystem extends SubsystemBase {
 
 				Pose2d currentPose = swerveDrive.getPose();
 
-				double currentAngleRad = currentPose.getRotation().getRadians();
+				double currentAngleRot = currentPose.getRotation().getRotations();
 
-				// This could be done better
-				// Current radians to rotations -> that to 4 different directions -> that rounded -> that to 1 direction (rotations) -> that to radians
-				double targetAngleRad = (Math.round((currentAngleRad / (2 * Math.PI)) * 4) / 4) * 2 * Math.PI;
+				double targetAngleRot = Math.round(currentAngleRot * 4) / 4;
 
-				double angularSpeedRps = rotationPID.calculate(currentAngleRad, targetAngleRad);
+				double angularSpeedRps = rotationPID.calculate(currentAngleRot, targetAngleRot * 2 * Math.PI);
 								
 				// overrides the drivers Z input with the calculated angle 
 				ChassisSpeeds driverSpeed = velocity.get();
