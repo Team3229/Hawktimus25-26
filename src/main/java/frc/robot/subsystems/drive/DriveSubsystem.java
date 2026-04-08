@@ -97,6 +97,8 @@ public class DriveSubsystem extends SubsystemBase {
 	public boolean hubAlign = false;
 	public boolean isAimed = false;
 
+	public boolean squareUp = false;
+
 	public boolean relativeMode = false;
 
 	public double distanceToTarget; 
@@ -419,6 +421,25 @@ public class DriveSubsystem extends SubsystemBase {
 				
 				// running the bot in robot relative with the new calculated angle
 				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(newVelocity, getIMUYaw()));
+			} else if (squareUp) {
+
+				Pose2d currentPose = swerveDrive.getPose();
+
+				double currentAngleRad = currentPose.getRotation().getRadians();
+
+				// This could be done better
+				// Current radians to rotations -> that to 4 different directions -> that rounded -> that to 1 direction (rotations) -> that to radians
+				double targetAngleRad = (Math.round((currentAngleRad / (2 * Math.PI)) * 4) / 4) * 2 * Math.PI;
+
+				double angularSpeedRps = rotationPID.calculate(currentAngleRad, targetAngleRad);
+								
+				// overrides the drivers Z input with the calculated angle 
+				ChassisSpeeds driverSpeed = velocity.get();
+				ChassisSpeeds newVelocity = new ChassisSpeeds(driverSpeed.vxMetersPerSecond, driverSpeed.vyMetersPerSecond, angularSpeedRps);
+				
+				// running the bot in robot relative with the new calculated angle
+				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(newVelocity, getIMUYaw()));
+
 			} else if (relativeMode) {
 				distanceToTarget = distanceFromHub();
 				swerveDrive.drive(velocity.get());
@@ -606,6 +627,20 @@ public class DriveSubsystem extends SubsystemBase {
 			@Override
 			public void end(boolean interrupted) {
 				hubAlign = false;
+			}
+		};
+	}
+
+	public Command toggleSquareUp() {
+		return new Command() {
+			@Override
+			public void initialize() {
+				squareUp = true;
+			}
+
+			@Override
+			public void end(boolean interrupted) {
+				squareUp = false;
 			}
 		};
 	}
