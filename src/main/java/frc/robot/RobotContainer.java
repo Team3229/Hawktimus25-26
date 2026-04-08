@@ -97,7 +97,7 @@ public class RobotContainer {
 			() -> -driverController.a_X(),
 			() -> -driverController.a_Z()
 		)
-			.deadband(0.1)
+			.deadband(0.05)
 			.cubeRotationControllerAxis(true)
 			.cubeTranslationControllerAxis(true)
 			.scaleTranslation(0.8)

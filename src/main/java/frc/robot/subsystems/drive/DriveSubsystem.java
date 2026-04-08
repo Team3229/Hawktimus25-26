@@ -421,7 +421,7 @@ public class DriveSubsystem extends SubsystemBase {
 				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(newVelocity, getIMUYaw()));
 			} else if (relativeMode) {
 				distanceToTarget = distanceFromHub();
-				swerveDrive.drive(ChassisSpeeds.fromRobotRelativeSpeeds(velocity.get(), getIMUYaw()));
+				swerveDrive.drive(velocity.get());
 			} else {
 				distanceToTarget = distanceFromHub(); 
 				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(velocity.get(), getIMUYaw()));
