@@ -64,6 +64,8 @@ public class SpitterSubsystem extends SubsystemBase {
     private double feederSensorToMechanismRatio = 6;
     private double shooterSensorToMechanismRatio = 1.75;
 
+    public boolean shooterIsRunning;
+
     private static final Current CURRENT_LIMIT = Amps.of(40);
 
     private boolean testMode = false; // TODO: 
@@ -263,6 +265,7 @@ public class SpitterSubsystem extends SubsystemBase {
             public void initialize() {
                 start = new Date();
                 end = null;
+                shooterIsRunning = true;
             }
             @Override
             public void execute() {
@@ -280,6 +283,7 @@ public class SpitterSubsystem extends SubsystemBase {
             public void end(boolean interrupted) {
                 leftSpitter.setControl(new CoastOut());
                 feeder.setControl(new CoastOut());
+                shooterIsRunning = false;
             }
         };
 

@@ -1,8 +1,6 @@
 package frc.robot.subsystems.manipSubsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class PathPlannerCommands extends SubsystemBase {
@@ -18,17 +16,11 @@ public class PathPlannerCommands extends SubsystemBase {
     }
 
     public Command pathSpinUp() {
-        return new ParallelCommandGroup(
-            manipSubsystem.spinUp().withTimeout(5.5),
-            Commands.runOnce(() -> manipSubsystem.driveSubsystem.distanceFromHub())
-        );
+        return manipSubsystem.spinUp().withTimeout(5.5);
     }
 
     public Command pathShoot() {
-        return new ParallelCommandGroup(
-            manipSubsystem.shoot().withTimeout(5.5),
-            Commands.runOnce(() -> manipSubsystem.driveSubsystem.distanceFromHub())
-        );
+        return manipSubsystem.shoot().withTimeout(5.5);
     }
 
     public Command pathExtake() {
