@@ -14,6 +14,7 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -48,7 +49,7 @@ public class RobotContainer {
 	private Command autoCommand;
 
 	public RobotContainer() {
-		CameraServer.startAutomaticCapture("Intake Camera", 0);
+		CameraServer.startAutomaticCapture("Intake Camera", 0); // TODO: remove if we don't have camera
 
 		driverController = new FlightStick(0);
 		manipController = new FlightStick(1);
@@ -63,7 +64,6 @@ public class RobotContainer {
 		pathPlannerCommands = new PathPlannerCommands(manipSubsystem);
 
 		ledSubsystem = new LEDSubsystem();	
-		// ledSubsystem.getDefaultCommand();
 		
 		configureBindings();
 		initTelemetery();
@@ -71,7 +71,7 @@ public class RobotContainer {
 
 	private void configureBindings() {
 
-		DriverStation.silenceJoystickConnectionWarning(true); // TODO: MAKE THIS FALSE FOR COMP!!!!!!!!!!!!!!!!
+		DriverStation.silenceJoystickConnectionWarning(false); // TODO: MAKE THIS FALSE FOR COMP!!!!!!!!!!!!!!!!
 
 		configDriveControls();
 		configManipControls();
@@ -107,6 +107,7 @@ public class RobotContainer {
 			.cubeTranslationControllerAxis(true)
 			.scaleTranslation(0.8)
 			.scaleRotation(0.7)
+			// .scaleRotation(MathUtil.clamp(((-driverController.a_Throttle() + 1.0) / 4.0) + 0.5, 0.5, 0.7))
 			.allianceRelativeControl(() -> !DriverStation.isFMSAttached());
 			
 		driveSubsystem.setDefaultCommand(
