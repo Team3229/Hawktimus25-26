@@ -63,7 +63,7 @@ public class RobotContainer {
 		pathPlannerCommands = new PathPlannerCommands(manipSubsystem);
 
 		ledSubsystem = new LEDSubsystem();	
-		ledSubsystem.getDefaultCommand();
+		// ledSubsystem.getDefaultCommand();
 		
 		configureBindings();
 		initTelemetery();
