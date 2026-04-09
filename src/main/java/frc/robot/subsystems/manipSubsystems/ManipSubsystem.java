@@ -28,7 +28,7 @@ public class ManipSubsystem extends SubsystemBase {
         return runOnce(() -> System.out.println("Intaking..."))
         .andThen(new ParallelCommandGroup(
             intakeSubsystem.intake(),
-            new ConditionalCommand(indexSubsystem.jitterIndex(), Commands.none(), () -> !spitterSubsystem.shooterIsReady())
+            new ConditionalCommand(indexSubsystem.jitterIndex(), Commands.none(), () -> !spitterSubsystem.shooterIsRunning)
         ));
     }
 
@@ -82,7 +82,6 @@ public class ManipSubsystem extends SubsystemBase {
         //AUTOSHOOT
         return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.3)
         .andThen(new ParallelCommandGroup(
-            // intakeSubsystem.agitateFuel(),
             spitterSubsystem.shoot(),
             indexSubsystem.index(indexSubsystem.forwards)
         ));
@@ -90,7 +89,6 @@ public class ManipSubsystem extends SubsystemBase {
         // //MANUAL SHOOT
         // return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
         // .andThen(new ParallelCommandGroup(
-        //     // intakeSubsystem.agitateFuel(),
         //     spitterSubsystem.shoot(),
         //     indexSubsystem.index(indexSubsystem.forwards)
         // ));
