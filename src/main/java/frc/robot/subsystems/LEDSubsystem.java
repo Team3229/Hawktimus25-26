@@ -62,7 +62,7 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     public Command runPattern(LEDPattern pattern) {
-        return run(() -> pattern.applyTo(ledBuffer));
+        return run(() -> pattern.applyTo(ledBuffer)).ignoringDisable(true);
     }
 
     public LEDPattern setColor(Color color) {
