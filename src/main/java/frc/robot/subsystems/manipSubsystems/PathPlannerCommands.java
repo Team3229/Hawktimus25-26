@@ -38,4 +38,5 @@ public class PathPlannerCommands extends SubsystemBase {
     public Command pathIntakeStop() {
         return manipSubsystem.intake().withTimeout(0.00001);
     }
+
 }
