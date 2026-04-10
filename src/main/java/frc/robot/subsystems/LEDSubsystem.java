@@ -40,7 +40,7 @@ public class LEDSubsystem extends SubsystemBase {
        
         led.start();
        
-        this.setDefaultCommand(hubActive());
+        this.setDefaultCommand(runPattern(setPurple()));
        
     }
 

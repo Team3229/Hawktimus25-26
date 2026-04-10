@@ -80,16 +80,23 @@ public class RobotContainer {
 
 	public void teleopInit() {
 
+		driveSubsystem.zeroGyroWithLimelight();
 		System.out.println("TELEOP INIT");
 	
 	}
 
 	public void autoInit() {
-		driveSubsystem.zeroGyroWithAllianceCommand();
+		driveSubsystem.zeroGyroCommand();
+		driveSubsystem.zeroGyroWithLimelight();
 	}
 
 	public void autoPeriodic() {
 		driveSubsystem.distanceToTarget = driveSubsystem.distanceFromHub();
+	}
+
+	public void robotInit() {
+		driveSubsystem.zeroGyroWithAllianceCommand();
+		driveSubsystem.zeroGyroWithLimelight();
 	}
 
 	private void configDriveControls() {

@@ -22,6 +22,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
       WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
       Elastic.selectTab("Match Start");
+      m_robotContainer.robotInit();
   }
 
   @Override
