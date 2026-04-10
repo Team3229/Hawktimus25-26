@@ -2,7 +2,9 @@
   "robotWidth": 0.845,
   "robotLength": 0.845,
   "holonomicMode": true,
-  "pathFolders": [],
+  "pathFolders": [
+    "New Folder"
+  ],
   "autoFolders": [
     "Blue Better Autos",
     "Easy Autos",

@@ -30,4 +30,12 @@ public class PathPlannerCommands extends SubsystemBase {
     public Command pathStow() {
         return manipSubsystem.stow().withTimeout(3);
     }
+
+    public Command pathIntakeArmOut() {
+        return manipSubsystem.intakeArmOut().withTimeout(3);
+    }
+
+    public Command pathIntakeStop() {
+        return manipSubsystem.intake().withTimeout(0.00001);
+    }
 }

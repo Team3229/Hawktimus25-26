@@ -30,9 +30,40 @@
           }
         },
         {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "TNeutralEnd-BTB"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stow"
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "TNeutralEnd-Hub1"
+            "pathName": "BTB-In"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BTB-Hub1"
           }
         },
         {
