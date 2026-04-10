@@ -60,13 +60,22 @@ public class IntakeSubsystem extends SubsystemBase{
 		return armSubsystem.rotateTo(HOME_ANGLE);
 	}
 
-    /**
-	 * creates a command that pushes the intake arm down to the collection point
-	 * and pushes the storage area out.
+	/**
+	 * creates a command that pushes the intake arm down to the collection point.
 	 * 
 	 * @return Command to rotate the arm
 	 */
 	public Command extendIntake() {
+		return armSubsystem.rotateTo(COLLECTION_POINT);
+	}
+
+    /**
+	 * creates a command that pushes the intake arm down to the collection point
+	 * with a velocity voltage in order to ignore deadzones.
+	 * 
+	 * @return Command to rotate the arm
+	 */
+	public Command forceExtendIntake() {
 		return armSubsystem.toCollection();
 	}
 

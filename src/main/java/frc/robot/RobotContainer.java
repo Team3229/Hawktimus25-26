@@ -150,7 +150,7 @@ public class RobotContainer {
 	}
 
 	private void configManipControls() {
-		// CURRENTLY AVAILABLE: 6, 7, 8, 9, 11, slider
+		// CURRENTLY AVAILABLE: 7, 8, 9, 11, slider
 
 		manipController.b_Trigger().whileTrue(
 			manipSubsystem.shoot()
@@ -170,6 +170,10 @@ public class RobotContainer {
 
 		manipController.b_5().onTrue(
 			manipSubsystem.intakeArmOut()
+		);
+
+		manipController.b_6().onTrue(
+			manipSubsystem.forceIntakeArmOut()
 		);
 
 		manipController.b_10().whileTrue(

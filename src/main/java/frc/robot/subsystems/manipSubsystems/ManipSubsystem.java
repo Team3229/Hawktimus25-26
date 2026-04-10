@@ -60,6 +60,15 @@ public class ManipSubsystem extends SubsystemBase {
     }
 
     /**
+     * forces the intake arm out with a velocity voltage (ignores deadzones)
+     */
+    public Command forceIntakeArmOut() {
+        return runOnce(() -> System.out.println("Beginning the extention"))
+        .andThen(intakeSubsystem.forceExtendIntake())
+        .andThen(runOnce(() -> System.out.println("Fully extended")));
+    }
+
+    /**
      * Spins the shooter wheel
      */
     public Command spinUp() {

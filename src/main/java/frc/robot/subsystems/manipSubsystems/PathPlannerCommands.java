@@ -32,7 +32,7 @@ public class PathPlannerCommands extends SubsystemBase {
     }
 
     public Command pathIntakeArmOut() {
-        return manipSubsystem.intakeArmOut().withTimeout(3);
+        return manipSubsystem.forceIntakeArmOut().withTimeout(3);
     }
 
     public Command pathIntakeStop() {
