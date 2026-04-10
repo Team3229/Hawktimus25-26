@@ -37,12 +37,12 @@ public class SpitterSubsystem extends SubsystemBase {
     private static DriveSubsystem driveSubsystem;
     private static double requestedShooterVelocity = 28;
     private static double requestedFeederVelocity = 13;
-    private static double deadBand = 1;
+    private static double deadBand = 1.25;
 
     // change PID (if needed)
-    private double kP = 0.2;
+    private double kP = 0.3;
     private double kV = 0.2027;
-    private double kS = 0.2111;
+    private double kS = 0.19;
 
     private double fP = 0.25;
     private double fV = 0.71;

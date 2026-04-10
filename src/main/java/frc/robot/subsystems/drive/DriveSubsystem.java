@@ -453,6 +453,10 @@ public class DriveSubsystem extends SubsystemBase {
 		}).ignoringDisable(false);
 	}
 
+	public boolean inRange() {
+		return Math.abs(distanceToTarget - 2.75) <= 0.25;
+	}
+
 	public double getToF(double distanceMeters) {
 		return SpitterSubsystem.SPITTER_MAP.get(distanceMeters).timeOfFlight();
 	}

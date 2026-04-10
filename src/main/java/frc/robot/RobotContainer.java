@@ -112,7 +112,7 @@ public class RobotContainer {
 			.scaleTranslation(0.8)
 			// .scaleRotation(0.7)
 			.scaleRotation(MathUtil.clamp(((-driverController.a_Throttle() + 1.0) / 4.0) + 0.5, 0.5, 0.9))
-			.allianceRelativeControl(() -> !DriverStation.isFMSAttached());
+			.allianceRelativeControl(true);
 			
 		driveSubsystem.setDefaultCommand(
 			driveSubsystem.driveFieldOriented(

@@ -51,8 +51,6 @@ public class GameState {
   private static Alliance autoWinner;
   private static Alliance myAlliance;
 
-  private static Alliance autoLooser;
-
   public static GamePhase getCurrentPhase() {
     if (!DriverStation.isDSAttached() && !DriverStation.isFMSAttached()) {
       return GamePhase.None;
@@ -88,12 +86,6 @@ public class GameState {
               case 'R' -> Alliance.Red;
               default -> null;
             };
-        autoLooser = 
-            switch (gameData.charAt(0)) {
-              case 'B' -> Alliance.Red;
-              case 'R' -> Alliance.Blue;
-              default -> null;
-            };
       }
     }
     return Optional.ofNullable(autoWinner);
@@ -103,13 +95,10 @@ public class GameState {
     if(getCurrentPhase() == GamePhase.None) {
       return false;
     } else if (getCurrentPhase() == GamePhase.Autonomous || getCurrentPhase() == GamePhase.Transition || getCurrentPhase() == GamePhase.EndGame) {
-      System.out.println("Hub active for both!");
       return true;
     } else if (getCurrentPhase() == GamePhase.Shift1 || getCurrentPhase() == GamePhase.Shift3) {
-      System.out.println("Hub active for " + autoLooser + " alliance!");
       return autoWinner != myAlliance;
     } else if (getCurrentPhase() == GamePhase.Shift2 || getCurrentPhase() == GamePhase.Shift4) {
-      System.out.println("Hub active for " + autoWinner + " alliance!");
       return autoWinner == myAlliance;
     } else {
       return false;
