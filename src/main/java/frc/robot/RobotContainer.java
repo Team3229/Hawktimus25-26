@@ -49,7 +49,7 @@ public class RobotContainer {
 	private Command autoCommand;
 
 	public RobotContainer() {
-		CameraServer.startAutomaticCapture("Intake Camera", 0); // TODO: remove if we don't have camera
+		CameraServer.startAutomaticCapture("Intake Camera", 0);
 
 		driverController = new FlightStick(0);
 		manipController = new FlightStick(1);
@@ -87,7 +87,6 @@ public class RobotContainer {
 
 	public void autoInit() {
 		driveSubsystem.zeroGyroCommand();
-		driveSubsystem.zeroGyroWithLimelight();
 	}
 
 	public void autoPeriodic() {
@@ -107,6 +106,8 @@ public class RobotContainer {
 		NamedCommands.registerCommand("Shoot", pathPlannerCommands.pathShoot());
 		NamedCommands.registerCommand("Stow", pathPlannerCommands.pathStow());
 		NamedCommands.registerCommand("IntakeStop", pathPlannerCommands.pathIntakeStop());
+		NamedCommands.registerCommand("ZeroGyro", driveSubsystem.zeroGyroWithAllianceCommand());
+
 
 		SwerveInputStream driveAngularVelocity = driveSubsystem.getInputStream(
 			() -> -driverController.a_Y(),
