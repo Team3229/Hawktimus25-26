@@ -5,9 +5,21 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "Stow"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "S1-TN"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ArmOut"
           }
         },
         {
