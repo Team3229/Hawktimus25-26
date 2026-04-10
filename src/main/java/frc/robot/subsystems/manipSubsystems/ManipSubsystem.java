@@ -80,7 +80,7 @@ public class ManipSubsystem extends SubsystemBase {
      */
     public Command shoot() {
         //AUTOSHOOT
-        return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.1)
+        return indexSubsystem.index(indexSubsystem.reverse).withTimeout(0.3)
         .andThen(new ParallelCommandGroup(
             spitterSubsystem.shoot(),
             indexSubsystem.index(indexSubsystem.forwards)
