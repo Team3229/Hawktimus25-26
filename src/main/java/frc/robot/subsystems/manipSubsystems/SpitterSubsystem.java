@@ -82,12 +82,12 @@ public class SpitterSubsystem extends SubsystemBase {
     );
 
     static {
-        // SPITTER_MAP.put(1.97, new SpitterParams(40, 14, 1));
-        SPITTER_MAP.put(2.42, new SpitterParams(42, 13, 1));
-        SPITTER_MAP.put(2.93, new SpitterParams(44, 13, 0.68));
-        SPITTER_MAP.put(3.42, new SpitterParams(50, 14, 1.2));
-        SPITTER_MAP.put(3.57, new SpitterParams(51, 14, 1.2));
-        SPITTER_MAP.put(3.83, new SpitterParams(55, 14, 0.9));
+        SPITTER_MAP.put(1.97, new SpitterParams(40, 14, 1));
+        SPITTER_MAP.put(2.42, new SpitterParams(42, 13, 1.125));
+        SPITTER_MAP.put(2.93, new SpitterParams(44, 13, 1.25));
+        SPITTER_MAP.put(3.42, new SpitterParams(50, 14, 1.5));
+        SPITTER_MAP.put(3.57, new SpitterParams(51, 14, 1.625));
+        SPITTER_MAP.put(3.83, new SpitterParams(55, 14, 1.75));
 
     }
 

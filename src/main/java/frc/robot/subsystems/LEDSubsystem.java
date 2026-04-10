@@ -57,11 +57,14 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     public Command hubActive() {
-        if (GameState.isMyHubActive()) {
-            return runPattern(setGreen());
-        } else {
-            return runPattern(setRed());
-        }
+        return run(() -> {
+            if (GameState.isMyHubActive()) {
+                runPattern(setGreen());
+            } else {
+                runPattern(setRed());
+            }  
+        });
+        
     }
 
     public Command runPattern(LEDPattern pattern) {
