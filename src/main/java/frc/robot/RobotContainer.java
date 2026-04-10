@@ -14,6 +14,7 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -28,7 +29,7 @@ import frc.robot.subsystems.VisualizerSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import frc.robot.subsystems.manipSubsystems.PathPlannerCommands;
-import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
+import frc.robot.subsystems.LEDSubsystem;
 import swervelib.SwerveInputStream;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
  
@@ -39,7 +40,7 @@ public class RobotContainer {
 	ButtonBoard buttonBoard;
 	DriveSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
-	SpitterSubsystem spitterSubsystem;
+	LEDSubsystem ledSubsystem;
 	
 	VisualizerSubsystem visualizerSubsystem;
 	PathPlannerCommands pathPlannerCommands;
@@ -48,7 +49,7 @@ public class RobotContainer {
 	private Command autoCommand;
 
 	public RobotContainer() {
-		CameraServer.startAutomaticCapture("Intake Camera", 0);
+		CameraServer.startAutomaticCapture("Intake Camera", 0); // TODO: remove if we don't have camera
 
 		driverController = new FlightStick(0);
 		manipController = new FlightStick(1);
@@ -59,25 +60,18 @@ public class RobotContainer {
 		);
 
 		manipSubsystem = new ManipSubsystem(driveSubsystem);
-		spitterSubsystem = new SpitterSubsystem(driveSubsystem);
 
 		pathPlannerCommands = new PathPlannerCommands(manipSubsystem);
 
+		ledSubsystem = new LEDSubsystem();	
+		
 		configureBindings();
 		initTelemetery();
 	}
 
 	private void configureBindings() {
 
-		NamedCommands.registerCommand("Intake", pathPlannerCommands.pathIntake());
-		NamedCommands.registerCommand("ArmOut", manipSubsystem.intakeArmOut());
-		NamedCommands.registerCommand("WheelSpinUp", pathPlannerCommands.pathSpinUp());
-		NamedCommands.registerCommand("Shoot", pathPlannerCommands.pathShoot());
-		NamedCommands.registerCommand("Stow", manipSubsystem.stow());
-		NamedCommands.registerCommand("ZeroGyroWithLimelight", driveSubsystem.zeroGyroWithLimelight());
-
-		DriverStation.silenceJoystickConnectionWarning(true); // TODO: MAKE THIS FALSE FOR COMP!!!!!!!!!!!!!!!!
-		
+		DriverStation.silenceJoystickConnectionWarning(false); // TODO: MAKE THIS FALSE FOR COMP!!!!!!!!!!!!!!!!
 
 		configDriveControls();
 		configManipControls();
@@ -91,28 +85,35 @@ public class RobotContainer {
 	}
 
 	public void autoInit() {
-		driveSubsystem.zeroGyroCommand();
+		driveSubsystem.zeroGyroWithAllianceCommand();
 	}
 
 	private void configDriveControls() {
+
+		NamedCommands.registerCommand("Intake", pathPlannerCommands.pathIntake());
+		NamedCommands.registerCommand("ArmOut", manipSubsystem.intakeArmOut());
+		NamedCommands.registerCommand("WheelSpinUp", pathPlannerCommands.pathSpinUp());
+		NamedCommands.registerCommand("Shoot", pathPlannerCommands.pathShoot());
+		NamedCommands.registerCommand("Stow", manipSubsystem.stow());
+		NamedCommands.registerCommand("ZeroGyroWithLimelight", driveSubsystem.zeroGyroWithLimelight());
 
 		SwerveInputStream driveAngularVelocity = driveSubsystem.getInputStream(
 			() -> -driverController.a_Y(),
 			() -> -driverController.a_X(),
 			() -> -driverController.a_Z()
 		)
-			.deadband(0.1)
+			.deadband(0.05)
 			.cubeRotationControllerAxis(true)
 			.cubeTranslationControllerAxis(true)
 			.scaleTranslation(0.8)
-			.scaleRotation(0.9)
+			// .scaleRotation(0.7)
+			.scaleRotation(MathUtil.clamp(((-driverController.a_Throttle() + 1.0) / 4.0) + 0.5, 0.5, 0.9))
 			.allianceRelativeControl(() -> !DriverStation.isFMSAttached());
 			
 		driveSubsystem.setDefaultCommand(
 			driveSubsystem.driveFieldOriented(
 				driveAngularVelocity
 			)
-
 		);
 
 		driverController.b_10().onTrue(
@@ -120,7 +121,15 @@ public class RobotContainer {
 		);
 
 		driverController.b_11().onTrue(
-			driveSubsystem.zeroGyroCommand()
+			driveSubsystem.zeroGyroWithAllianceCommand()
+		);
+
+		driverController.p_Any().whileTrue(
+			driveSubsystem.toggleRelativeMode()
+		);
+
+		driverController.b_3().whileTrue(
+			driveSubsystem.toggleSquareUp()
 		);
 
 		driverController.b_Hazard().onTrue(

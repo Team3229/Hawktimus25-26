@@ -42,7 +42,6 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
 import frc.robot.utilities.LimelightHelpers;
@@ -98,6 +97,10 @@ public class DriveSubsystem extends SubsystemBase {
 	public boolean hubAlign = false;
 	public boolean isAimed = false;
 
+	public boolean squareUp = false;
+
+	public boolean relativeMode = false;
+
 	public double distanceToTarget; 
 
 	private Translation2d currentTarget = BLUE_HUB_CENTER;
@@ -114,9 +117,9 @@ public class DriveSubsystem extends SubsystemBase {
 
 	private static final PIDConstants ROTATION_CONSTANTS =
 		new PIDConstants(
-			2.0,
+			3.4,
 			0.0,
-			0.0
+			0.3
 		);
 
     // Pathplanner PID
@@ -222,7 +225,7 @@ public class DriveSubsystem extends SubsystemBase {
 				builder.addDoubleProperty("PoseY", () -> getPose().getY(), null);
 				builder.addBooleanProperty("Align to Hub", () -> hubAlign, null);
 				builder.addBooleanProperty("Is Aimed", () -> isAimed, null);
-				builder.addDoubleProperty("Distance from hub", () -> distanceToTarget, null);
+				builder.addDoubleProperty("Distance from hub", () -> distanceToTarget * 3.2808399, null);
 				builder.addDoubleProperty("TargetX", () -> currentTarget.getX(), null);
 				builder.addDoubleProperty("TargetY", () -> currentTarget.getY(), null);
 				builder.addDoubleProperty("TargetRot", () -> targetAngleRot, null);
@@ -247,13 +250,13 @@ public class DriveSubsystem extends SubsystemBase {
                 () -> swerveDrive.getRobotVelocity(),
                 (speedsRobotRelative, moduleFeedForwards) -> {
 					if (enableFeedforward) {
-						swerveDrive.drive( // TODO: replace the .drive with (hopefully) a CTRE alternative
+						swerveDrive.drive( 
 							speedsRobotRelative,
 							swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
 							moduleFeedForwards.linearForces()
 						);
 					} else {
-						swerveDrive.setChassisSpeeds(speedsRobotRelative); // TODO: same here
+						swerveDrive.setChassisSpeeds(speedsRobotRelative); 
 					}
 				},
 				new PPHolonomicDriveController(
@@ -292,9 +295,6 @@ public class DriveSubsystem extends SubsystemBase {
 		return getIMU().getAngularVelocityZWorld().getValue();
 	}
 
-	// TODO: all four of these can be stolen for CTRE
-
-
 	/**
    * Updates the drivetrain odometry object to the robot's current position on the
    * field.
@@ -320,8 +320,6 @@ public class DriveSubsystem extends SubsystemBase {
 				if (Math.hypot(aprilTagPosition.getX(), aprilTagPosition.getZ()) <= 3.5) {
 					
 					swerveDrive.addVisionMeasurement(new Pose2d(estimate.pose.getX(), estimate.pose.getY(), getIMUYaw()), estimate.timestampSeconds);
-						//TODO: in order to switch to a different drive we need to change this
-						// create a SwervePoseEstimator and use the .addVisionMeasurment(with same stuff here) on it
 
 				}
 					
@@ -355,7 +353,6 @@ public class DriveSubsystem extends SubsystemBase {
 		}
 
         swerveDrive.resetOdometry(pose);
-		// TODO: simply steal the yagsl code that makes this (if no CTRE alternative)
     }
 
 	public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
@@ -423,9 +420,33 @@ public class DriveSubsystem extends SubsystemBase {
 				ChassisSpeeds newVelocity = new ChassisSpeeds(driverSpeed.vxMetersPerSecond, driverSpeed.vyMetersPerSecond, angularSpeedRps);
 				
 				// running the bot in robot relative with the new calculated angle
-				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(newVelocity, getIMUYaw())); //TODO: just this line of hubAlign needs to change
+				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(newVelocity, getIMUYaw()));
+			} else if (squareUp) {
+
+				Pose2d currentPose = swerveDrive.getPose();
+
+				double currentAngleRot = currentPose.getRotation().getRotations();
+
+				double targetAngleRot = ((double) Math.round(currentAngleRot * 4)) / 4;
+
+				double angularSpeedRps = rotationPID.calculate(currentAngleRot * 2 * Math.PI, targetAngleRot * 2 * Math.PI);
+								
+				// overrides the drivers Z input with the calculated angle 
+				ChassisSpeeds driverSpeed = velocity.get();
+				ChassisSpeeds newVelocity = new ChassisSpeeds(driverSpeed.vxMetersPerSecond, driverSpeed.vyMetersPerSecond, angularSpeedRps);
+				
+				// running the bot in robot relative with the new calculated angle
+				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(newVelocity, getIMUYaw()));
+
+			} else if (relativeMode) {
+				distanceToTarget = distanceFromHub();
+				if(DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)) {
+					swerveDrive.drive(velocity.get().times(-1)); // will invert on red
+				} else {
+					swerveDrive.drive(velocity.get());
+				}
 			} else {
-				distanceToTarget = distanceFromHub(); // TODO: put this in the periodic for CTRE
+				distanceToTarget = distanceFromHub(); 
 				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(velocity.get(), getIMUYaw()));
 				// swerveDrive.driveFieldOriented(velocity.get()); //Field relative is relying on odemtry instead of IMUYaw
 			}
@@ -458,13 +479,24 @@ public class DriveSubsystem extends SubsystemBase {
 		return runOnce(() -> zeroGyro());
 	}
 
-	public void redGyro() {
-		getIMU().setYaw(0);
-		swerveDrive.resetOdometry(new Pose2d(getPose().getX(), getPose().getY(), new Rotation2d(Math.PI)));
+	/**
+	 * This will zero (calibrate) the robot to assume the current position is facing
+	 * forward
+	 * <p>
+	 * If red alliance rotate the robot 180 after the drivebase zero command
+	 */
+	public void zeroGyroWithAlliance() {
+		if (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)) {
+			setIMUYaw(new Rotation2d(Math.PI));
+		} else {
+			zeroGyro();
+		}
 	}
 
-	public Command zeroWithRedCommand() {
-		return runOnce(() -> redGyro());
+	public Command zeroGyroWithAllianceCommand() {
+		return runOnce(
+			this::zeroGyroWithAlliance
+		);
 	}
 
 	/**
@@ -580,7 +612,7 @@ public class DriveSubsystem extends SubsystemBase {
 	/*
 	* Returns the distance from the robot to the hub 
 	*/
-	private double distanceFromHub() {
+	public double distanceFromHub() {
 		return getPose().getTranslation().getDistance(getTargetTranslation());
 	}
 	
@@ -597,6 +629,37 @@ public class DriveSubsystem extends SubsystemBase {
 			@Override
 			public void end(boolean interrupted) {
 				hubAlign = false;
+			}
+		};
+	}
+
+	public Command toggleSquareUp() {
+		return new Command() {
+			@Override
+			public void initialize() {
+				squareUp = true;
+			}
+
+			@Override
+			public void end(boolean interrupted) {
+				squareUp = false;
+			}
+		};
+	}
+
+	/**
+	 * Toggles robot-relative driving 
+	 */
+	public Command toggleRelativeMode() {
+		return new Command() {
+			@Override
+			public void initialize() {
+				relativeMode = true;
+			}
+
+			@Override
+			public void end(boolean interrupted) {
+				relativeMode = false;
 			}
 		};
 	}

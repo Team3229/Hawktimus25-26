@@ -67,7 +67,7 @@ public class IntakeSubsystem extends SubsystemBase{
 	 * @return Command to rotate the arm
 	 */
 	public Command extendIntake() {
-		return armSubsystem.rotateTo(COLLECTION_POINT);
+		return armSubsystem.toCollection();
 	}
 
 }

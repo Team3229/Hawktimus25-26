@@ -16,7 +16,7 @@ public class PathPlannerCommands extends SubsystemBase {
     }
 
     public Command pathSpinUp() {
-        return manipSubsystem.spinUp().withTimeout(6);
+        return manipSubsystem.spinUp().withTimeout(5.5);
     }
 
     public Command pathShoot() {

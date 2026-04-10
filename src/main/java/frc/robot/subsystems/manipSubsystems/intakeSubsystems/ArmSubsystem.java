@@ -12,6 +12,7 @@ import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.StaticBrake;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -25,7 +26,6 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -258,11 +258,6 @@ public class ArmSubsystem extends SubsystemBase {
 				}
 			}
 
-			// @Override
-			// public boolean isFinished() {
-
-			// }
-
 			@Override
 			public void end(boolean interrupted) {
 				armMotorLeft.setControl(new StaticBrake());
@@ -273,6 +268,33 @@ public class ArmSubsystem extends SubsystemBase {
 		out.addRequirements(this);
 		return out;
 	
+	}
+
+	public Command toCollection() {
+		Command out = new Command() {
+			@Override
+			public void initialize() {
+			}
+
+			@Override
+			public void execute() {
+				armMotorLeft.setControl(new VelocityVoltage(0.25));
+			}
+
+			@Override
+			public boolean isFinished() {
+				return extendLimitSwitch();
+			}
+
+			@Override
+			public void end(boolean interrupted) {
+				armMotorLeft.setControl(new StaticBrake());
+			}
+
+		};
+
+		out.addRequirements(this);
+		return out;
 	}
 
 	/** returns true when arm is within deadband */
@@ -317,7 +339,6 @@ public class ArmSubsystem extends SubsystemBase {
 		armMotorLeft.set(0);
 		armMotorLeft.setPosition(COLLECTION_POINT);
 		armMotorRight.setPosition(COLLECTION_POINT);
-		CommandScheduler.getInstance().cancelAll();
 		System.out.println("Extend limit hit, stopping motors and reseting position");
 	}
 

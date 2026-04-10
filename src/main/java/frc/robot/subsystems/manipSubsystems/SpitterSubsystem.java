@@ -1,5 +1,5 @@
 package frc.robot.subsystems.manipSubsystems;
-
+ 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 
@@ -36,7 +36,7 @@ import java.util.Date;
 public class SpitterSubsystem extends SubsystemBase {
     private static DriveSubsystem driveSubsystem;
     private static double requestedShooterVelocity = 28;
-    private static double requestedFeederVelocity = 10;
+    private static double requestedFeederVelocity = 13;
     private static double deadBand = 1;
 
     // change PID (if needed)
@@ -61,29 +61,34 @@ public class SpitterSubsystem extends SubsystemBase {
 
     private long spitTimer = 0;
 
-    private double feederSensorToMechanismRatio = 9;
+    private double feederSensorToMechanismRatio = 6;
     private double shooterSensorToMechanismRatio = 1.75;
+
+    public boolean shooterIsRunning;
 
     private static final Current CURRENT_LIMIT = Amps.of(40);
 
     private boolean testMode = false; // TODO: 
 
-    public record SpitterParams(double srps, double timeOfFlight) {}
+    public record SpitterParams(double srps, double frps, double timeOfFlight) {}
 
     public static final InterpolatingTreeMap<Double, SpitterParams> SPITTER_MAP = new InterpolatingTreeMap<>(
         InverseInterpolator.forDouble(), 
         (start, end, t) -> new SpitterParams(
             MathUtil.interpolate(start.srps, end.srps, t), 
+            MathUtil.interpolate(start.frps, end.frps, t), 
             MathUtil.interpolate(start.timeOfFlight, end.timeOfFlight, t)
         )
     );
 
     static {
-        // SPITTER_MAP.put(1.782, new SpitterParams(1, 1, 1));
-        SPITTER_MAP.put(2.917, new SpitterParams(28, 0.68));
-        SPITTER_MAP.put(3.6576, new SpitterParams(30, 0.9));
-        SPITTER_MAP.put(4.44, new SpitterParams(35, 1.2));
-        SPITTER_MAP.put(5.33, new SpitterParams(39, 1.34));
+        // SPITTER_MAP.put(1.97, new SpitterParams(40, 14, 1));
+        SPITTER_MAP.put(2.42, new SpitterParams(42, 13, 1));
+        SPITTER_MAP.put(2.93, new SpitterParams(44, 13, 0.68));
+        SPITTER_MAP.put(3.42, new SpitterParams(50, 14, 1.2));
+        SPITTER_MAP.put(3.57, new SpitterParams(51, 14, 1.2));
+        SPITTER_MAP.put(3.83, new SpitterParams(55, 14, 0.9));
+
     }
 
     public static final double SYSTEM_LATENCY_SECONDS = 0.3;
@@ -156,7 +161,7 @@ public class SpitterSubsystem extends SubsystemBase {
         feederMotorConfig.Slot0.withKP(fP);
         feederMotorConfig.Slot0.withKV(fV);
         feederMotorConfig.Slot0.withKS(fS);
-        feederMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        feederMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         feeder.getConfigurator().apply(feederMotorConfig);
 
         spitterSendable = new Sendable() {
@@ -260,10 +265,11 @@ public class SpitterSubsystem extends SubsystemBase {
             public void initialize() {
                 start = new Date();
                 end = null;
+                shooterIsRunning = true;
             }
             @Override
             public void execute() {
-                // setShooterSpeed(); // REMOVE FOR MANUAL
+                setShooterSpeed(); // REMOVE FOR MANUAL
                 leftSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0));
                 feeder.setControl(new VelocityVoltage(requestedFeederVelocity).withSlot(0));
                 if (shooterIsReady() && end == null) {
@@ -277,6 +283,7 @@ public class SpitterSubsystem extends SubsystemBase {
             public void end(boolean interrupted) {
                 leftSpitter.setControl(new CoastOut());
                 feeder.setControl(new CoastOut());
+                shooterIsRunning = false;
             }
         };
 
