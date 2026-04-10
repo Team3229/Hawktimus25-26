@@ -22,6 +22,8 @@ public class LEDSubsystem extends SubsystemBase {
     // THE LEDS ARE IN BGR NOT RGB
     private final Color purple = RGBPacker(255, 0, 255);
     private final Color yellow = RGBPacker(255, 255, 0);
+    private final Color red = RGBPacker(255, 0, 0);
+    private final Color green = RGBPacker(0, 255, 0);
 
     private final int LEDPortNumber = 0;
     private final int LEDBuffer = 776;
@@ -38,7 +40,7 @@ public class LEDSubsystem extends SubsystemBase {
        
         led.start();
        
-        this.setDefaultCommand(runPattern(setHawkBreathe()));
+        this.setDefaultCommand(hubActive());
        
     }
 
@@ -56,9 +58,9 @@ public class LEDSubsystem extends SubsystemBase {
 
     public Command hubActive() {
         if (GameState.isMyHubActive()) {
-            return runPattern(setHawkBlink());
+            return runPattern(setGreen());
         } else {
-            return runPattern(setHawkOffset());
+            return runPattern(setRed());
         }
     }
 
@@ -72,6 +74,18 @@ public class LEDSubsystem extends SubsystemBase {
 
     public LEDPattern setPurple() {
         return setColor(purple);
+    }
+
+    public LEDPattern setYellow() {
+        return setColor(yellow);
+    }
+
+    public LEDPattern setRed() {
+        return setColor(red);
+    }
+
+    public LEDPattern setGreen() {
+        return setColor(green);
     }
 
     public LEDPattern setColorsContinuous(Color c1, Color c2) {
