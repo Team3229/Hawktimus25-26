@@ -12,7 +12,7 @@ public class PathPlannerCommands extends SubsystemBase {
     }
 
     public Command pathIntake() {
-        return manipSubsystem.intake().withTimeout(9);
+        return manipSubsystem.intake().withTimeout(2.5);
     }
 
     public Command pathSpinUp() {
