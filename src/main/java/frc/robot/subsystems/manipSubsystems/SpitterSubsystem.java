@@ -269,7 +269,9 @@ public class SpitterSubsystem extends SubsystemBase {
             }
             @Override
             public void execute() {
-                setShooterSpeed(); // REMOVE FOR MANUAL
+                if(testMode == false) {
+                    setShooterSpeed();
+                }
                 leftSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0));
                 feeder.setControl(new VelocityVoltage(requestedFeederVelocity).withSlot(0));
                 if (shooterIsReady() && end == null) {

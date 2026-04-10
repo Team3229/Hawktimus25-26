@@ -230,6 +230,7 @@ public class DriveSubsystem extends SubsystemBase {
 				builder.addDoubleProperty("TargetY", () -> currentTarget.getY(), null);
 				builder.addDoubleProperty("TargetRot", () -> targetAngleRot, null);
 				builder.addDoubleProperty("CurrentRot", () -> currentAngleRot, null);
+				builder.addBooleanProperty("In range", () -> inRange(), null);
 			}
 		};
 		SmartDashboard.putData("Drive", driveSendable);
