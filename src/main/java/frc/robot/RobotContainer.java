@@ -88,6 +88,10 @@ public class RobotContainer {
 		driveSubsystem.zeroGyroWithAllianceCommand();
 	}
 
+	public void autoPeriodic() {
+		driveSubsystem.distanceToTarget = driveSubsystem.distanceFromHub();
+	}
+
 	private void configDriveControls() {
 
 		NamedCommands.registerCommand("Intake", pathPlannerCommands.pathIntake());
