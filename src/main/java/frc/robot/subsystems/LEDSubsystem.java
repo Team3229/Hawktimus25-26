@@ -24,7 +24,7 @@ public class LEDSubsystem extends SubsystemBase {
     // THE LEDS ARE IN BGR NOT RGB
     // private final Color purple = RGBPacker(50, 0, 255);
     // private final Color purple = RGBPacker(50, 0, 50); 
-    private final Color purple = RGBPacker(255, 0, 255);
+    private final Color purple = RGBPacker(230, 0, 255);
     private final Color yellow = RGBPacker(255, 255, 0);
     private final Color red = RGBPacker(255, 0, 0);
     private final Color green = RGBPacker(0, 255, 0);
@@ -56,14 +56,13 @@ public class LEDSubsystem extends SubsystemBase {
         ledChooser.addOption("None :(", Color.kBlack);
         SmartDashboard.putData("LED Chooser", ledChooser);
        
-        this.setDefaultCommand(runPattern(setPurple()));
+        this.setDefaultCommand(runPattern(setColor(Color.kBlack)));
 
     }
 
     @Override
     public void periodic() {
         led.setData(ledBuffer);
-        System.out.println(ledChooser.getSelected().blue * 255);
     }
 
     /*
