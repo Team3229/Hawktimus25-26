@@ -36,45 +36,25 @@
         "y": 5.455602409638555
       },
       "prevControl": {
-        "x": 4.89333734939759,
-        "y": 5.433746987951806
-      },
-      "nextControl": {
-        "x": 6.210998556340125,
-        "y": 5.511256470713139
-      },
-      "isLocked": false,
-      "linkedName": "BTB2"
-    },
-    {
-      "anchor": {
-        "x": 6.471526390870184,
-        "y": 7.198502139800285
-      },
-      "prevControl": {
-        "x": 5.798716119828815,
-        "y": 7.573723252496434
+        "x": 5.0150610790912795,
+        "y": 5.44607625904706
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "TopNeutral"
+      "linkedName": null
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 1.0459842519685014,
-      "rotationDegrees": -45.0
-    },
-    {
-      "waypointRelativePos": 1.926614173228336,
+      "waypointRelativePos": 1.071917808219179,
       "rotationDegrees": -45.0
     }
   ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 1.0128291694800906,
-      "maxWaypointRelativePos": 1.8879135719108802,
+      "minWaypointRelativePos": 1.0,
+      "maxWaypointRelativePos": 1.45,
       "constraints": {
         "maxVelocity": 3.0,
         "maxAcceleration": 3.0,
@@ -89,7 +69,7 @@
   "eventMarkers": [
     {
       "name": "ArmOut",
-      "waypointRelativePos": 2.212018906144495,
+      "waypointRelativePos": 1.6,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -104,7 +84,7 @@
   },
   "goalEndState": {
     "velocity": 1.5,
-    "rotation": -23.552263672894444
+    "rotation": -45.0
   },
   "reversed": false,
   "folder": null,
