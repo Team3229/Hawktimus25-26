@@ -32,14 +32,14 @@ public class IndexSubsystem extends SubsystemBase {
 
     private double requestedSpeed;
 
+    private static Sendable indexSendable;
     private static Sendable indexPIDSendable;
 
     private double sensorToMechanismRatio = 5;
     
     private static double kP = 0.5;
-    private static double kI = 0;
-    private static double kD = 0;
     private static double kV = 0.13;
+    private static double kS = 0;
 
     //change ID
     private static final int index_CAN_ID = 6;
@@ -70,19 +70,26 @@ public class IndexSubsystem extends SubsystemBase {
 			        .withSensorToMechanismRatio(sensorToMechanismRatio)
 		    );
         indexMotorConfig.Slot0.kP = kP;
-        indexMotorConfig.Slot0.kI = kI;
-        indexMotorConfig.Slot0.kD = kD;
         indexMotorConfig.Slot0.kV = kV;
+        indexMotorConfig.Slot0.kS = kS;
         indexMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         indexMotor.getConfigurator().apply(indexMotorConfig);
         
-            indexPIDSendable = new Sendable() {
+        indexSendable = new Sendable () {
+            @Override 
+            public void initSendable(SendableBuilder builder) {
+                builder.addBooleanProperty("Indexing", ()-> isReady(), null);
+                builder.addDoubleProperty("Index Velocity", () -> indexMotor.getVelocity().getValueAsDouble(), null);
+            }
+        };
+        SmartDashboard.putData("Index", indexSendable);
+
+        indexPIDSendable = new Sendable() {
 	    	@Override
 	    	public void initSendable(SendableBuilder builder) {
 	    		builder.addDoubleProperty("Index P", () -> kP, (newkP) -> editIndexP(newkP));
-	    		builder.addDoubleProperty("Index I", () -> kI, (newkI) -> editIndexI(newkI));
-	    		builder.addDoubleProperty("Index D", () -> kD, (newkD) -> editIndexD(newkD));
 	    		builder.addDoubleProperty("Index V", () -> kV, (newkV) -> editIndexV(newkV));
+	    		builder.addDoubleProperty("Index S", () -> kS, (newkS) -> editIndexS(newkS));
 	    	}
 	    };
         SmartDashboard.putData("IndexPID", indexPIDSendable);
@@ -109,14 +116,6 @@ public class IndexSubsystem extends SubsystemBase {
                 indexMotor.setControl(new VelocityVoltage(0).withSlot(0));
             }
         };
-        SmartDashboard.putData("Index", new Sendable() {
-            @Override 
-            public void initSendable(SendableBuilder builder) {
-                builder.addBooleanProperty("Indexing", ()-> isReady(), null);
-                builder.addDoubleProperty("Index Velocity", () -> indexMotor.getVelocity().getValueAsDouble(), null);
-
-            }
-        });
 
         out.addRequirements(this);
         return out;
@@ -148,20 +147,6 @@ public class IndexSubsystem extends SubsystemBase {
         indexMotor.getConfigurator().apply(indexMotorConfig);
     }
 
-    private void editIndexI(double newkI) {
-        kP = newkI;
-        indexMotorConfig.Slot0.kI = kI;
-
-        indexMotor.getConfigurator().apply(indexMotorConfig);
-    }
-
-    private void editIndexD(double newkD) {
-        kV = newkD;
-        indexMotorConfig.Slot0.kD = kD;
-
-        indexMotor.getConfigurator().apply(indexMotorConfig);
-    }
-
     private void editIndexV(double newkV) {
         kV = newkV;
         indexMotorConfig.Slot0.kV = kV;
@@ -170,4 +155,10 @@ public class IndexSubsystem extends SubsystemBase {
         System.out.println(indexMotorConfig.Slot0.kV);
     }
 
+    private void editIndexS(double newkS) {
+        kS = newkS;
+        indexMotorConfig.Slot0.kS = kS;
+
+        indexMotor.getConfigurator().apply(indexMotorConfig);
+    }
 }

@@ -1,12 +1,10 @@
 package frc.robot.subsystems;
 
-
 import static edu.wpi.first.units.Units.Percent;
 import static edu.wpi.first.units.Units.Seconds;
 
 import java.util.Map;
 
-import edu.wpi.first.units.measure.Dimensionless;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.LEDPattern;
@@ -49,19 +47,23 @@ public class LEDSubsystem extends SubsystemBase {
        
         led.start();
        
-        this.setDefaultCommand(runPattern(setColor(purple)));
+        ledChooser = new SendableChooser<Color>();
         ledChooser.setDefaultOption("Purple", purple);
         ledChooser.addOption("Yellow", yellow);
         ledChooser.addOption("Blue", blue);
         ledChooser.addOption("Green", green);
         ledChooser.addOption("Red", red);
-        SmartDashboard.putData(ledChooser);
+        ledChooser.addOption("None :(", Color.kBlack);
+        SmartDashboard.putData("LED Chooser", ledChooser);
        
+        this.setDefaultCommand(runPattern(setPurple()));
+
     }
 
     @Override
     public void periodic() {
         led.setData(ledBuffer);
+        System.out.println(ledChooser.getSelected().blue * 255);
     }
 
     /*
@@ -74,16 +76,17 @@ public class LEDSubsystem extends SubsystemBase {
     public Command hubActive() {
         return run(() -> {
             if (GameState.isMyHubActive()) {
-                setGreen();
+                setGreen().applyTo(ledBuffer);
             } else {
-                setRed();
+                setRed().applyTo(ledBuffer);
             }  
         }).ignoringDisable(true);
         
     }
 
     public Command runColorWithSendable() {
-        return run(() -> setColor(ledChooser.getSelected())).ignoringDisable(true);
+        return run(() -> setColor(ledChooser.getSelected()).applyTo(ledBuffer))
+            .ignoringDisable(true);
     }
 
     public Command runPattern(LEDPattern pattern) {
@@ -91,7 +94,7 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     public LEDPattern setColor(Color color) {
-        return LEDPattern.solid(color).atBrightness(Dimensionless.ofRelativeUnits(50, Percent));
+        return LEDPattern.solid(color).atBrightness(Percent.of(50));
     }
 
     public LEDPattern setPurple() {

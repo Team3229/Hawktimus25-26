@@ -68,6 +68,10 @@ public class ManipSubsystem extends SubsystemBase {
         .andThen(runOnce(() -> System.out.println("Fully extended")));
     }
 
+    public Command justIndex() {
+        return indexSubsystem.index(indexSubsystem.forwards);
+    }
+
     /**
      * Spins the shooter wheel
      */
