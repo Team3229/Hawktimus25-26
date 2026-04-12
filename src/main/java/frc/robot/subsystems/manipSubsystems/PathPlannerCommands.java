@@ -20,7 +20,7 @@ public class PathPlannerCommands extends SubsystemBase {
     }
 
     public Command pathShoot() {
-        return manipSubsystem.shoot().withTimeout(3.5);
+        return manipSubsystem.shoot().withTimeout(4.5);
     }
 
     public Command pathExtake() {
