@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "ZeroGyro"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "S2-TN"
@@ -18,25 +24,6 @@
                 "type": "path",
                 "data": {
                   "pathName": "TNeutral Grab"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "TNeutralGrab-BTB"
                 }
               },
               {
@@ -67,28 +54,28 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "Shoot"
+          }
+        },
+        {
           "type": "parallel",
           "data": {
             "commands": [
               {
                 "type": "named",
                 "data": {
-                  "name": "Shoot"
+                  "name": "Stow"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "Stow"
+                  "name": "Shoot"
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Hub1-TNE"
           }
         }
       ]

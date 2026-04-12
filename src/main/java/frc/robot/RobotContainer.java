@@ -107,6 +107,7 @@ public class RobotContainer {
 		NamedCommands.registerCommand("Stow", pathPlannerCommands.pathStow());
 		NamedCommands.registerCommand("IntakeStop", pathPlannerCommands.pathIntakeStop());
 		NamedCommands.registerCommand("ZeroGyro", driveSubsystem.zeroGyroWithAllianceCommand());
+		NamedCommands.registerCommand("SnowBlow", pathPlannerCommands.pathIntakeAndShoot());
 
 
 		SwerveInputStream driveAngularVelocity = driveSubsystem.getInputStream(
@@ -168,20 +169,25 @@ public class RobotContainer {
 
 		//TODO: delete
 
+		
 		manipController.b_Trigger().whileTrue(
 			manipSubsystem.shoot()
 		);
-
+			
 		manipController.b_Hazard().onTrue(
 			manipSubsystem.stow()
 		);
-
+				
 		manipController.b_3().whileTrue(
 			manipSubsystem.spinUp()
 		);
-
+					
 		manipController.b_4().whileTrue(
 			manipSubsystem.intake()
+		);
+						
+		manipController.b_Trigger().and(manipController.b_4()).whileTrue(
+			manipSubsystem.intakeAndShoot() // should kill previous commands bc it was inputted later but may not TODO test
 		);
 
 		manipController.b_5().onTrue(

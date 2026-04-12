@@ -32,6 +32,14 @@ public class ManipSubsystem extends SubsystemBase {
         ));
     }
 
+    public Command intakeAndShoot() {
+        return runOnce(() -> System.out.println("Snow blowing..."))
+        .andThen(new ParallelCommandGroup(
+            intakeSubsystem.intake(),
+            shoot()
+        ));
+    }
+
     /**
      * moves intake arm to be vertical
      */

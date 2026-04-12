@@ -69,33 +69,8 @@
                 "data": {
                   "name": "Shoot"
                 }
-              },
-              {
-                "type": "parallel",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Stow"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Shoot"
-                      }
-                    }
-                  ]
-                }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ArmOut"
           }
         },
         {
@@ -111,7 +86,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Intake"
+                  "name": "SnowBlow"
                 }
               }
             ]
