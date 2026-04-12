@@ -16,41 +16,55 @@
     },
     {
       "anchor": {
-        "x": 0.6533855421686747,
+        "x": 0.7785164051355205,
         "y": 0.6583373493989892
       },
       "prevControl": {
-        "x": 0.4035542011640909,
-        "y": 0.66751890982472
+        "x": 0.9662843436484805,
+        "y": 0.4932822032611206
       },
       "nextControl": {
-        "x": 1.3012973334555331,
-        "y": 0.6345259203031715
+        "x": 0.5801807916401693,
+        "y": 0.832681883024252
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.1504819277042695,
-        "y": 0.6583373493989892
+        "x": 2.6028673323823104,
+        "y": 2.0230385164051357
       },
       "prevControl": {
-        "x": 2.4001293014671683,
-        "y": 0.6716109613146455
+        "x": 1.9947503566333804,
+        "y": 1.9065905848787452
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Hub3"
     }
   ],
   "rotationTargets": [],
-  "constraintZones": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0,
+      "maxWaypointRelativePos": 1.1451721809587792,
+      "constraints": {
+        "maxVelocity": 2.0,
+        "maxAcceleration": 5.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 360.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 2.0,
-    "maxAcceleration": 1.0,
+    "maxVelocity": 5.0,
+    "maxAcceleration": 5.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 360.0,
     "nominalVoltage": 12.0,
@@ -58,7 +72,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -134.01716196801215
   },
   "reversed": false,
   "folder": null,
