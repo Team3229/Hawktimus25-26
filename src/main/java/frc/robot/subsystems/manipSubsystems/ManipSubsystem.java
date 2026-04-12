@@ -17,7 +17,7 @@ public class ManipSubsystem extends SubsystemBase {
     public ManipSubsystem(DriveSubsystem drive) {
         intakeSubsystem = new IntakeSubsystem();
         spitterSubsystem = new SpitterSubsystem(drive);
-        indexSubsystem = new IndexSubsystem(spitterSubsystem);
+        indexSubsystem = new IndexSubsystem();
         driveSubsystem = drive;
     }
 

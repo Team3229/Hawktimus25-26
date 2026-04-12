@@ -7,7 +7,9 @@ import java.util.Map;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.LEDPattern.GradientType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -56,7 +58,7 @@ public class LEDSubsystem extends SubsystemBase {
         ledChooser.addOption("None :(", Color.kBlack);
         SmartDashboard.putData("LED Chooser", ledChooser);
        
-        this.setDefaultCommand(runPattern(setColor(Color.kBlack)));
+        this.setDefaultCommand(runColorWithSendable());
 
     }
 
@@ -86,6 +88,16 @@ public class LEDSubsystem extends SubsystemBase {
     public Command runColorWithSendable() {
         return run(() -> setColor(ledChooser.getSelected()).applyTo(ledBuffer))
             .ignoringDisable(true);
+    }
+
+    public Command runWithAlliance() {
+        return run(() -> {
+            if(DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)) {
+                setColor(red).applyTo(ledBuffer);
+            } else {
+                setColor(blue).applyTo(ledBuffer);
+            }
+        }).ignoringDisable(true);
     }
 
     public Command runPattern(LEDPattern pattern) {

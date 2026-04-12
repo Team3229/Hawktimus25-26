@@ -185,7 +185,7 @@ public class RobotContainer {
 		manipController.b_4().whileTrue(
 			manipSubsystem.intake()
 		);
-						
+
 		manipController.b_Trigger().and(manipController.b_4()).whileTrue(
 			manipSubsystem.intakeAndShoot() // should kill previous commands bc it was inputted later but may not TODO test
 		);
