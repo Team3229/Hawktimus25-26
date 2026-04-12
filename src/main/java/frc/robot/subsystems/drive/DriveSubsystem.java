@@ -230,6 +230,7 @@ public class DriveSubsystem extends SubsystemBase {
 				builder.addDoubleProperty("TargetY", () -> currentTarget.getY(), null);
 				builder.addDoubleProperty("TargetRot", () -> targetAngleRot, null);
 				builder.addDoubleProperty("CurrentRot", () -> currentAngleRot, null);
+				builder.addBooleanProperty("In range", () -> inRange(), null);
 			}
 		};
 		SmartDashboard.putData("Drive", driveSendable);
@@ -451,6 +452,10 @@ public class DriveSubsystem extends SubsystemBase {
 				// swerveDrive.driveFieldOriented(velocity.get()); //Field relative is relying on odemtry instead of IMUYaw
 			}
 		}).ignoringDisable(false);
+	}
+
+	public boolean inRange() {
+		return Math.abs(distanceToTarget - 2.75) <= 0.25;
 	}
 
 	public double getToF(double distanceMeters) {
