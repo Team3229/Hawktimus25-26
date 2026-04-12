@@ -11,9 +11,16 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "S1-TN"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "S1-TN"
+                }
+              }
+            ]
           }
         },
         {

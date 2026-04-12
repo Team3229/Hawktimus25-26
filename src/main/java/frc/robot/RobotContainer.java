@@ -121,8 +121,9 @@ public class RobotContainer {
 			.scaleTranslation(0.8)
 			// .scaleTranslation(MathUtil.clamp(((-driverController.a_Throttle() + 1.0) / 4.0) + 0.5, 0.8, 1.0)) // currently not working
 			.scaleRotation(0.7)
+			// .scaleRotation(MathUtil.clamp(((-driverController.a_Throttle() + 1.0) / 4.0) + 0.5, 0.5, 0.9))
 			.allianceRelativeControl(true);
-			
+
 		driveSubsystem.setDefaultCommand(
 			driveSubsystem.driveFieldOriented(
 				driveAngularVelocity
