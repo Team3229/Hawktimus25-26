@@ -37,9 +37,9 @@ public class IndexSubsystem extends SubsystemBase {
 
     private double sensorToMechanismRatio = 5;
     
-    private static double kP = 0.5;
-    private static double kV = 0.13;
-    private static double kS = 0;
+    private static double kP = 0.11;
+    private static double kV = 0.479;
+    private static double kS = 0.31;
 
     //change ID
     private static final int index_CAN_ID = 6;
@@ -48,7 +48,7 @@ public class IndexSubsystem extends SubsystemBase {
     private static final Current CURRENT_LIMIT = Amps.of(40);
     
     // variables are halved when ran for some reason :(
-    public final int forwards = 40;
+    public final int forwards = 20;
     public final int reverse = -20;
 
     public IndexSubsystem(SpitterSubsystem spit) {
