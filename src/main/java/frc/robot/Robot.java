@@ -46,7 +46,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     if (m_robotContainer.getAutonomousCommand() != null) {
-      m_robotContainer.getAutonomousCommand().schedule();
+      CommandScheduler.getInstance().schedule(m_robotContainer.getAutonomousCommand());
     }
     Elastic.selectTab("Match");
   }
