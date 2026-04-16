@@ -71,7 +71,7 @@ public class RobotContainer {
 
 	private void configureBindings() {
 
-		DriverStation.silenceJoystickConnectionWarning(false); // TODO: MAKE THIS FALSE FOR COMP!!!!!!!!!!!!!!!!
+		DriverStation.silenceJoystickConnectionWarning(true); // TODO: MAKE THIS FALSE FOR COMP!!!!!!!!!!!!!!!!
 
 		configDriveControls();
 		configManipControls();
@@ -161,15 +161,6 @@ public class RobotContainer {
 
 	private void configManipControls() {
 		// CURRENTLY AVAILABLE: 7, 8, 9, 11, slider
-
-		//TODO: delete
-
-		manipController.b_7().whileTrue(
-			manipSubsystem.justIndex()
-		);
-
-		//TODO: delete
-
 		
 		manipController.b_Trigger().whileTrue(
 			manipSubsystem.shoot()

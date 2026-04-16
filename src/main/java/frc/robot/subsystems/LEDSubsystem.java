@@ -22,9 +22,6 @@ public class LEDSubsystem extends SubsystemBase {
     private AddressableLED led;
     private AddressableLEDBuffer ledBuffer;
     
-    // THE LEDS ARE IN BGR NOT RGB
-    // private final Color purple = RGBPacker(50, 0, 255);
-    // private final Color purple = RGBPacker(50, 0, 50); 
     private final Color purple = RGBPacker(230, 0, 255);
     private final Color yellow = RGBPacker(255, 255, 0);
     private final Color red = RGBPacker(255, 0, 0);
@@ -47,7 +44,7 @@ public class LEDSubsystem extends SubsystemBase {
         // led.setColorOrder(ColorOrder.kGRB);
        
         led.start();
-       
+       // new led chooser for the LEDPatterns, command that runs the pattern we choose with the colors we choose
         ledChooser = new SendableChooser<Color>();
         ledChooser.setDefaultOption("Purple", purple);
         ledChooser.addOption("Yellow", yellow);
@@ -56,8 +53,8 @@ public class LEDSubsystem extends SubsystemBase {
         ledChooser.addOption("Red", red);
         ledChooser.addOption("None :(", Color.kBlack);
         SmartDashboard.putData("LED Chooser", ledChooser);
-       
-        this.setDefaultCommand(runColorWithSendable());
+        
+        this.setDefaultCommand(runPattern(setHawkBreathe()));
 
     }
 
@@ -172,7 +169,7 @@ public class LEDSubsystem extends SubsystemBase {
     // }
 
     public LEDPattern setColorBreathe(Color colorForBreathe, Color secondColorForBreathe) {
-        return setDiscontGradientHawk().breathe(Seconds.of(3));
+        return setColor(purple).breathe(Seconds.of(3)).atBrightness(Percent.of(50));
     }
 
     public LEDPattern setHawkBreathe() {
