@@ -57,7 +57,7 @@ public class LEDSubsystem extends SubsystemBase {
         ledChooser.addOption("None :(", Color.kBlack);
         SmartDashboard.putData("LED Chooser", ledChooser);
        
-        this.setDefaultCommand(runPattern(setColor(Color.kBlack)));
+        this.setDefaultCommand(runColorWithSendable());
 
     }
 
