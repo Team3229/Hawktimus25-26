@@ -32,6 +32,14 @@ public class ManipSubsystem extends SubsystemBase {
         ));
     }
 
+    public Command intakeAndShoot() {
+        return runOnce(() -> System.out.println("Snow blowing..."))
+        .andThen(new ParallelCommandGroup(
+            intakeSubsystem.intake(),
+            shoot()
+        ));
+    }
+
     /**
      * moves intake arm to be vertical
      */
@@ -57,6 +65,19 @@ public class ManipSubsystem extends SubsystemBase {
         return runOnce(() -> System.out.println("Beginning the extention"))
         .andThen(intakeSubsystem.extendIntake())
         .andThen(runOnce(() -> System.out.println("Fully extended")));
+    }
+
+    /**
+     * forces the intake arm out with a velocity voltage (ignores deadzones)
+     */
+    public Command forceIntakeArmOut() {
+        return runOnce(() -> System.out.println("Beginning the extention"))
+        .andThen(intakeSubsystem.forceExtendIntake())
+        .andThen(runOnce(() -> System.out.println("Fully extended")));
+    }
+
+    public Command justIndex() {
+        return indexSubsystem.index(indexSubsystem.forwards);
     }
 
     /**

@@ -22,6 +22,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
       WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
       Elastic.selectTab("Match Start");
+      m_robotContainer.robotInit();
   }
 
   @Override
@@ -45,13 +46,15 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     if (m_robotContainer.getAutonomousCommand() != null) {
-      m_robotContainer.getAutonomousCommand().schedule();
+      CommandScheduler.getInstance().schedule(m_robotContainer.getAutonomousCommand());
     }
     Elastic.selectTab("Match");
   }
 
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+    m_robotContainer.autoPeriodic();
+  }
 
   @Override
   public void autonomousExit() {}
