@@ -429,7 +429,7 @@ public class DriveSubsystem extends SubsystemBase {
 
 				double currentAngleRot = currentPose.getRotation().getRotations();
 
-				double targetAngleRot = ((double) Math.round(currentAngleRot * 4)) / 4;
+				double targetAngleRot = Math.round(currentAngleRot * 4) / 4;
 
 				double angularSpeedRps = rotationPID.calculate(currentAngleRot * 2 * Math.PI, targetAngleRot * 2 * Math.PI);
 								
