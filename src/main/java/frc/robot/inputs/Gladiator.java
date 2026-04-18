@@ -17,5 +17,5 @@ public class Gladiator {
     public Trigger b_Trigger() {return controller.button(1);}
     public Trigger b_FullTrigger() {return controller.button(2);}
     public Trigger b_3() {return controller.button(3);}
-
+    public Trigger b_21() {return controller.button(21);}
 }

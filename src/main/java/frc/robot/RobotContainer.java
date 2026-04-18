@@ -151,6 +151,10 @@ public class RobotContainer {
 		manipController.b_3().whileTrue(
 			manipSubsystem.intake()
 		);
+
+		manipController.b_21().whileTrue(
+			manipSubsystem.stow()
+		);
 	}
 
 	public void initTelemetery() {
