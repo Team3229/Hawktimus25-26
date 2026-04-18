@@ -10,7 +10,7 @@ public class Gladiator {
 
     private static final double kControllerDeadzone = 0.1;
 
-    public FlightStick(int port) {
+    public Gladiator(int port) {
         controller = new CommandGenericHID(port);
     }
 

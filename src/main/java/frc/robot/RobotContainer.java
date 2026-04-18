@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.inputs.ButtonBoard;
 import frc.robot.inputs.FlightStick;
+import frc.robot.inputs.Gladiator;
 import frc.robot.subsystems.VisualizerSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
@@ -49,7 +50,7 @@ public class RobotContainer {
 	public RobotContainer() {
 
 		driverController = new FlightStick(0);
-		manipController = new FlightStick(1);
+		manipController = new Gladiator(1);
 
 		driveSubsystem = new DriveSubsystem(
 			"swerve",
@@ -139,15 +140,15 @@ public class RobotContainer {
 	private void configManipControls() {
 		// CURRENTLY AVAILABLE: 6, 11, slider
 
-		manipcontroller.b_Trigger().whileTrue(
+		manipController.b_Trigger().whileTrue(
 			manipSubsystem.spinUp()
 		);
 
-		manipcontroller.b_FullTrigger().whileTrue(
+		manipController.b_FullTrigger().whileTrue(
 			manipSubsystem.shoot()
 		);
 
-		manipcontroller.b_3().whileTrue(
+		manipController.b_3().whileTrue(
 			manipSubsystem.intake()
 		);
 	}
