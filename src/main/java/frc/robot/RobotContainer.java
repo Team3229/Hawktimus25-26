@@ -33,7 +33,7 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 public class RobotContainer {
 
 	FlightStick driverController;
-	FlightStick manipController;
+	Gladiator manipController;
 	ButtonBoard buttonBoard;
 	DriveSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
@@ -139,57 +139,17 @@ public class RobotContainer {
 	private void configManipControls() {
 		// CURRENTLY AVAILABLE: 6, 11, slider
 
-		manipController.b_Trigger().whileTrue(
-			manipSubsystem.shoot()
-		);
-
-		manipController.b_Hazard().onTrue(
-			manipSubsystem.stow()
-		);
-
-		manipController.b_3().whileTrue(
+		manipcontroller.b_Trigger().whileTrue(
 			manipSubsystem.spinUp()
 		);
 
-		manipController.b_4().whileTrue(
+		manipcontroller.b_FullTrigger().whileTrue(
+			manipSubsystem.shoot()
+		);
+
+		manipcontroller.b_3().whileTrue(
 			manipSubsystem.intake()
 		);
-
-		manipController.b_5().onTrue(
-			manipSubsystem.intakeArmOut()
-		);
-
-		manipController.b_6().whileTrue(
-			manipSubsystem.stowSpinCommand()
-		);
-
-		manipController.b_10().whileTrue(
-			manipSubsystem.extake()
-		);
-
-		manipController.b_12().onTrue(
-			Commands.runOnce(() -> {
-				manipSubsystem.getCurrentCommand().cancel(); // TODO: currently crashes bot
-				// cancels ALL manipING on manip controller
-			})
-		);
-
-		manipController.p_Up().onTrue(
-			manipSubsystem.upSRPSCommand()
-		);
-
-		manipController.p_Down().onTrue(
-			manipSubsystem.downSRPSCommand()
-		);
-
-		manipController.p_Right().onTrue(
-			manipSubsystem.upFRPSCommand()
-		);
-
-		manipController.p_Left().onTrue(
-			manipSubsystem.downFRPSCommand()
-		);
-
 	}
 
 	public void initTelemetery() {
