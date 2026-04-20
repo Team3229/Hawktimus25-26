@@ -6,9 +6,17 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class PathPlannerCommands extends SubsystemBase {
 
 	ManipSubsystem manipSubsystem;
+    
+    public static PathPlannerCommands instance;
+	public static PathPlannerCommands getInstance() {
+		if(instance == null) {
+			instance = new PathPlannerCommands();
+		}
+		return instance;
+	}
 	
-    public PathPlannerCommands(ManipSubsystem man) {
-        manipSubsystem = man;
+    private PathPlannerCommands() {
+        manipSubsystem = ManipSubsystem.getInstance();
     }
 
     public Command pathIntake() {
@@ -20,7 +28,7 @@ public class PathPlannerCommands extends SubsystemBase {
     }
 
     public Command pathShoot() {
-        return manipSubsystem.shoot().withTimeout(5.5);
+        return manipSubsystem.shoot().withTimeout(3.5);
     }
 
     public Command pathExtake() {
@@ -28,6 +36,19 @@ public class PathPlannerCommands extends SubsystemBase {
     }
 
     public Command pathStow() {
-        return manipSubsystem.stow().withTimeout(3);
+        return manipSubsystem.stow();
     }
+
+    public Command pathIntakeArmOut() {
+        return manipSubsystem.forceIntakeArmOut();
+    }
+
+    public Command pathIntakeStop() {
+        return manipSubsystem.intake().withTimeout(0.00001);
+    }
+
+    public Command pathIntakeAndShoot() {
+        return manipSubsystem.intakeAndShoot().withTimeout(9);
+    }
+
 }

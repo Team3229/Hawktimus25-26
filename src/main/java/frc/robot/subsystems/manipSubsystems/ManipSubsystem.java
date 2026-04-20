@@ -5,20 +5,23 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.manipSubsystems.intakeSubsystems.IntakeSubsystem;
 
 public class ManipSubsystem extends SubsystemBase {
     IntakeSubsystem intakeSubsystem;
     IndexSubsystem indexSubsystem;
     SpitterSubsystem spitterSubsystem;
-    DriveSubsystem driveSubsystem;
+
+    private static ManipSubsystem instance;
+    public static ManipSubsystem getInstance() {
+        if (instance == null) instance = new ManipSubsystem();
+        return instance;
+    } 
     
-    public ManipSubsystem(DriveSubsystem drive) {
-        intakeSubsystem = new IntakeSubsystem();
-        spitterSubsystem = new SpitterSubsystem(drive);
-        indexSubsystem = new IndexSubsystem(spitterSubsystem);
-        driveSubsystem = drive;
+    private ManipSubsystem() {
+        intakeSubsystem = IntakeSubsystem.getInstance();
+        spitterSubsystem = SpitterSubsystem.getInstance();
+        indexSubsystem = IndexSubsystem.getInstance();
     }
 
     /**
@@ -29,6 +32,14 @@ public class ManipSubsystem extends SubsystemBase {
         .andThen(new ParallelCommandGroup(
             intakeSubsystem.intake(),
             new ConditionalCommand(indexSubsystem.jitterIndex(), Commands.none(), () -> !spitterSubsystem.shooterIsRunning)
+        ));
+    }
+
+    public Command intakeAndShoot() {
+        return runOnce(() -> System.out.println("Snow blowing..."))
+        .andThen(new ParallelCommandGroup(
+            intakeSubsystem.intake(),
+            shoot()
         ));
     }
 
@@ -60,18 +71,19 @@ public class ManipSubsystem extends SubsystemBase {
     }
 
     /**
+     * forces the intake arm out with a velocity voltage (ignores deadzones)
+     */
+    public Command forceIntakeArmOut() {
+        return runOnce(() -> System.out.println("Beginning the extention"))
+        .andThen(intakeSubsystem.forceExtendIntake())
+        .andThen(runOnce(() -> System.out.println("Fully extended")));
+    }
+
+    /**
      * Spins the shooter wheel
      */
     public Command spinUp() {
         return spitterSubsystem.shoot();
-    }
-
-    public Command spinKicker() {
-        return spitterSubsystem.spinKicker();
-    }
-
-    public Command spinShooter() {
-        return spitterSubsystem.spinShooter();
     }
 
     /**

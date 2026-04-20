@@ -25,7 +25,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.inputs.ButtonBoard;
 import frc.robot.inputs.FlightStick;
-import frc.robot.subsystems.VisualizerSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import frc.robot.subsystems.manipSubsystems.PathPlannerCommands;
@@ -42,28 +41,24 @@ public class RobotContainer {
 	ManipSubsystem manipSubsystem;
 	LEDSubsystem ledSubsystem;
 	
-	VisualizerSubsystem visualizerSubsystem;
 	PathPlannerCommands pathPlannerCommands;
 
 	private SendableChooser<Command> autoChooser;
 	private Command autoCommand;
 
 	public RobotContainer() {
-		CameraServer.startAutomaticCapture("Intake Camera", 0); // TODO: remove if we don't have camera
+		CameraServer.startAutomaticCapture("Intake Camera", 0);
 
 		driverController = new FlightStick(0);
 		manipController = new FlightStick(1);
 
-		driveSubsystem = new DriveSubsystem(
-			"swerve",
-			TelemetryVerbosity.HIGH
-		);
+		driveSubsystem = DriveSubsystem.getInstance();
 
-		manipSubsystem = new ManipSubsystem(driveSubsystem);
+		manipSubsystem = ManipSubsystem.getInstance();
 
-		pathPlannerCommands = new PathPlannerCommands(manipSubsystem);
+		pathPlannerCommands = PathPlannerCommands.getInstance();
 
-		ledSubsystem = new LEDSubsystem();	
+		ledSubsystem = LEDSubsystem.getInstance();	
 		
 		configureBindings();
 		initTelemetery();
@@ -71,7 +66,7 @@ public class RobotContainer {
 
 	private void configureBindings() {
 
-		DriverStation.silenceJoystickConnectionWarning(false); // TODO: MAKE THIS FALSE FOR COMP!!!!!!!!!!!!!!!!
+		DriverStation.silenceJoystickConnectionWarning(true); // TODO: MAKE THIS FALSE FOR COMP!!!!!!!!!!!!!!!!
 
 		configDriveControls();
 		configManipControls();
@@ -80,22 +75,35 @@ public class RobotContainer {
 
 	public void teleopInit() {
 
+		driveSubsystem.zeroGyroWithLimelight();
 		System.out.println("TELEOP INIT");
 	
 	}
 
 	public void autoInit() {
+		driveSubsystem.zeroGyroCommand();
+	}
+
+	public void autoPeriodic() {
+		driveSubsystem.distanceToTarget = driveSubsystem.distanceFromHub();
+	}
+
+	public void robotInit() {
 		driveSubsystem.zeroGyroWithAllianceCommand();
+		driveSubsystem.zeroGyroWithLimelight();
 	}
 
 	private void configDriveControls() {
 
 		NamedCommands.registerCommand("Intake", pathPlannerCommands.pathIntake());
-		NamedCommands.registerCommand("ArmOut", manipSubsystem.intakeArmOut());
+		NamedCommands.registerCommand("ArmOut", pathPlannerCommands.pathIntakeArmOut());
 		NamedCommands.registerCommand("WheelSpinUp", pathPlannerCommands.pathSpinUp());
 		NamedCommands.registerCommand("Shoot", pathPlannerCommands.pathShoot());
-		NamedCommands.registerCommand("Stow", manipSubsystem.stow());
-		NamedCommands.registerCommand("ZeroGyroWithLimelight", driveSubsystem.zeroGyroWithLimelight());
+		NamedCommands.registerCommand("Stow", pathPlannerCommands.pathStow());
+		NamedCommands.registerCommand("IntakeStop", pathPlannerCommands.pathIntakeStop());
+		NamedCommands.registerCommand("ZeroGyro", driveSubsystem.zeroGyroWithAllianceCommand());
+		NamedCommands.registerCommand("SnowBlow", pathPlannerCommands.pathIntakeAndShoot());
+
 
 		SwerveInputStream driveAngularVelocity = driveSubsystem.getInputStream(
 			() -> -driverController.a_Y(),
@@ -106,10 +114,11 @@ public class RobotContainer {
 			.cubeRotationControllerAxis(true)
 			.cubeTranslationControllerAxis(true)
 			.scaleTranslation(0.8)
-			// .scaleRotation(0.7)
-			.scaleRotation(MathUtil.clamp(((-driverController.a_Throttle() + 1.0) / 4.0) + 0.5, 0.5, 0.9))
-			.allianceRelativeControl(() -> !DriverStation.isFMSAttached());
-			
+			// .scaleTranslation(MathUtil.clamp(((-driverController.a_Throttle() + 1.0) / 4.0) + 0.5, 0.8, 1.0)) // currently not working
+			.scaleRotation(0.7)
+			// .scaleRotation(MathUtil.clamp(((-driverController.a_Throttle() + 1.0) / 4.0) + 0.5, 0.5, 0.9))
+			.allianceRelativeControl(true);
+
 		driveSubsystem.setDefaultCommand(
 			driveSubsystem.driveFieldOriented(
 				driveAngularVelocity
@@ -146,26 +155,34 @@ public class RobotContainer {
 	}
 
 	private void configManipControls() {
-		// CURRENTLY AVAILABLE: 6, 7, 8, 9, 11, slider
-
+		// CURRENTLY AVAILABLE: 7, 8, 9, 11, slider
+		
 		manipController.b_Trigger().whileTrue(
 			manipSubsystem.shoot()
 		);
-
+			
 		manipController.b_Hazard().onTrue(
 			manipSubsystem.stow()
 		);
-
+				
 		manipController.b_3().whileTrue(
 			manipSubsystem.spinUp()
 		);
-
+					
 		manipController.b_4().whileTrue(
 			manipSubsystem.intake()
 		);
 
+		manipController.b_Trigger().and(manipController.b_4()).whileTrue(
+			manipSubsystem.intakeAndShoot() // should kill previous commands bc it was inputted later but may not TODO test
+		);
+
 		manipController.b_5().onTrue(
 			manipSubsystem.intakeArmOut()
+		);
+
+		manipController.b_6().onTrue(
+			manipSubsystem.forceIntakeArmOut()
 		);
 
 		manipController.b_10().whileTrue(

@@ -37,12 +37,12 @@ public class SpitterSubsystem extends SubsystemBase {
     private static DriveSubsystem driveSubsystem;
     private static double requestedShooterVelocity = 28;
     private static double requestedFeederVelocity = 13;
-    private static double deadBand = 1;
+    private static double deadBand = 1.25;
 
     // change PID (if needed)
-    private double kP = 0.2;
+    private double kP = 0.3;
     private double kV = 0.2027;
-    private double kS = 0.2111;
+    private double kS = 0.19;
 
     private double fP = 0.25;
     private double fV = 0.71;
@@ -82,12 +82,12 @@ public class SpitterSubsystem extends SubsystemBase {
     );
 
     static {
-        // SPITTER_MAP.put(1.97, new SpitterParams(40, 14, 1));
-        SPITTER_MAP.put(2.42, new SpitterParams(42, 13, 1));
-        SPITTER_MAP.put(2.93, new SpitterParams(44, 13, 0.68));
-        SPITTER_MAP.put(3.42, new SpitterParams(50, 14, 1.2));
-        SPITTER_MAP.put(3.57, new SpitterParams(51, 14, 1.2));
-        SPITTER_MAP.put(3.83, new SpitterParams(55, 14, 0.9));
+        SPITTER_MAP.put(1.97, new SpitterParams(40, 14, 1));
+        SPITTER_MAP.put(2.42, new SpitterParams(42, 13, 1.125));
+        SPITTER_MAP.put(2.93, new SpitterParams(44, 13, 1.25));
+        SPITTER_MAP.put(3.42, new SpitterParams(50, 14, 1.5));
+        SPITTER_MAP.put(3.57, new SpitterParams(51, 14, 1.625));
+        SPITTER_MAP.put(3.83, new SpitterParams(55, 14, 1.75));
 
     }
 
@@ -97,9 +97,17 @@ public class SpitterSubsystem extends SubsystemBase {
     private static Sendable spitterPIDSendable;
     private static Sendable feederPIDSendable;
 
+    private static SpitterSubsystem instance;
+    public static SpitterSubsystem getInstance() {
+        if(instance == null) {
+            instance = new SpitterSubsystem();
+        }
+        return instance;
+    }
 
-    public SpitterSubsystem(DriveSubsystem drive) {
-        driveSubsystem = drive;
+    private SpitterSubsystem() {
+        driveSubsystem = DriveSubsystem.getInstance();
+           
 
         // initializes shooting motor
         leftSpitter = new TalonFX(LS_CAN_ID, CANBus.roboRIO()); 
@@ -206,57 +214,6 @@ public class SpitterSubsystem extends SubsystemBase {
         }
     }
 
-    //TODO: delete
-    public Command spinShooter() {
-        Command out = new Command() {
-            Date start;
-            Date end;
-            @Override
-            public void initialize() {
-                start = new Date();
-                end = null;
-            }
-            @Override
-            public void execute() {
-                leftSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0));
-                if (shooterIsReady() && end == null) {
-                    end = new Date();
-                    spitTimer = end.getTime() - start.getTime();
-                    System.out.println("got to speed in: " + spitTimer + " milliseconds");
-                }
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                leftSpitter.setControl(new CoastOut());
-            }
-        };
-
-        out.addRequirements(this);
-
-        return out;
-    }
-
-    public Command spinKicker() {
-        Command out = new Command() {
-            @Override
-            public void execute() {
-                // setSpitterSpeeds(); // REMOVE FOR MANUAL
-                feeder.setControl(new VelocityVoltage(requestedFeederVelocity).withSlot(0));
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                feeder.setControl(new CoastOut());
-            }
-        };
-
-        out.addRequirements(this);
-
-        return out;
-    }
-    //TODO: delete
-
     public Command shoot() {
         Command out = new Command() {
             Date start;
@@ -269,7 +226,9 @@ public class SpitterSubsystem extends SubsystemBase {
             }
             @Override
             public void execute() {
-                setShooterSpeed(); // REMOVE FOR MANUAL
+                if(testMode == false) {
+                    setShooterSpeed();
+                }
                 leftSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0));
                 feeder.setControl(new VelocityVoltage(requestedFeederVelocity).withSlot(0));
                 if (shooterIsReady() && end == null) {

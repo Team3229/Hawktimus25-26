@@ -40,4 +40,15 @@ public class VisionSubsystem {
 
     }
     
+    public static boolean canSeeTag(String[] limelightNames) {
+        boolean seen = false;
+        
+        for (String limelight : limelightNames) {
+            seen = LimelightHelpers.getTV("limelight-" + limelight);
+            if (seen) break;
+        }
+        
+        return seen;
+    }
+    
 }

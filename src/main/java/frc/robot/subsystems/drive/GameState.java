@@ -92,24 +92,35 @@ public class GameState {
   }
 
   public static boolean isMyHubActive() {
-    switch (getCurrentPhase()) {
-      case None:
-        return false;
-      case Autonomous:
-      case Transition:
-      case EndGame:
-        return true;
-      case Shift1:
-        return autoWinner != myAlliance;
-      case Shift3:
-        return autoWinner != myAlliance;
-      case Shift2:
-        return autoWinner == myAlliance;
-      case Shift4:
-        return autoWinner == myAlliance;
-      default:
-        return false;
+    if(getCurrentPhase() == GamePhase.None) {
+      return false;
+    } else if (getCurrentPhase() == GamePhase.Autonomous || getCurrentPhase() == GamePhase.Transition || getCurrentPhase() == GamePhase.EndGame) {
+      return true;
+    } else if (getCurrentPhase() == GamePhase.Shift1 || getCurrentPhase() == GamePhase.Shift3) {
+      return autoWinner != myAlliance;
+    } else if (getCurrentPhase() == GamePhase.Shift2 || getCurrentPhase() == GamePhase.Shift4) {
+      return autoWinner == myAlliance;
+    } else {
+      return false;
     }
+    // switch (getCurrentPhase()) {
+    //   case None:
+    //     return false;
+    //   case Autonomous:
+    //   case Transition:
+    //   case EndGame:
+    //     return true;
+    //   case Shift1:
+    //     return autoWinner != myAlliance;
+    //   case Shift3:
+    //     return autoWinner != myAlliance;
+    //   case Shift2:
+    //     return autoWinner == myAlliance;
+    //   case Shift4:
+    //     return autoWinner == myAlliance;
+    //   default:
+    //     return false;
+    // }
   }
 
   public static double getMatchTime() {
