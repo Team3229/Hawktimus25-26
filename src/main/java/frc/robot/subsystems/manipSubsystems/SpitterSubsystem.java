@@ -97,9 +97,17 @@ public class SpitterSubsystem extends SubsystemBase {
     private static Sendable spitterPIDSendable;
     private static Sendable feederPIDSendable;
 
+    private static SpitterSubsystem instance;
+    public static SpitterSubsystem getInstance() {
+        if(instance == null) {
+            instance = new SpitterSubsystem();
+        }
+        return instance;
+    }
 
-    public SpitterSubsystem(DriveSubsystem drive) {
-        driveSubsystem = drive;
+    private SpitterSubsystem() {
+        driveSubsystem = DriveSubsystem.getInstance();
+           
 
         // initializes shooting motor
         leftSpitter = new TalonFX(LS_CAN_ID, CANBus.roboRIO()); 
@@ -205,57 +213,6 @@ public class SpitterSubsystem extends SubsystemBase {
             SmartDashboard.putData("FeederPID", feederPIDSendable);
         }
     }
-
-    //TODO: delete
-    public Command spinShooter() {
-        Command out = new Command() {
-            Date start;
-            Date end;
-            @Override
-            public void initialize() {
-                start = new Date();
-                end = null;
-            }
-            @Override
-            public void execute() {
-                leftSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0));
-                if (shooterIsReady() && end == null) {
-                    end = new Date();
-                    spitTimer = end.getTime() - start.getTime();
-                    System.out.println("got to speed in: " + spitTimer + " milliseconds");
-                }
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                leftSpitter.setControl(new CoastOut());
-            }
-        };
-
-        out.addRequirements(this);
-
-        return out;
-    }
-
-    public Command spinKicker() {
-        Command out = new Command() {
-            @Override
-            public void execute() {
-                // setSpitterSpeeds(); // REMOVE FOR MANUAL
-                feeder.setControl(new VelocityVoltage(requestedFeederVelocity).withSlot(0));
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                feeder.setControl(new CoastOut());
-            }
-        };
-
-        out.addRequirements(this);
-
-        return out;
-    }
-    //TODO: delete
 
     public Command shoot() {
         Command out = new Command() {

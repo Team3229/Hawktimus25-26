@@ -6,9 +6,17 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class PathPlannerCommands extends SubsystemBase {
 
 	ManipSubsystem manipSubsystem;
+    
+    public static PathPlannerCommands instance;
+	public static PathPlannerCommands getInstance() {
+		if(instance == null) {
+			instance = new PathPlannerCommands();
+		}
+		return instance;
+	}
 	
-    public PathPlannerCommands(ManipSubsystem man) {
-        manipSubsystem = man;
+    private PathPlannerCommands() {
+        manipSubsystem = ManipSubsystem.getInstance();
     }
 
     public Command pathIntake() {

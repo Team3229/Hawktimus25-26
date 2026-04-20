@@ -25,7 +25,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.inputs.ButtonBoard;
 import frc.robot.inputs.FlightStick;
-import frc.robot.subsystems.VisualizerSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import frc.robot.subsystems.manipSubsystems.PathPlannerCommands;
@@ -42,7 +41,6 @@ public class RobotContainer {
 	ManipSubsystem manipSubsystem;
 	LEDSubsystem ledSubsystem;
 	
-	VisualizerSubsystem visualizerSubsystem;
 	PathPlannerCommands pathPlannerCommands;
 
 	private SendableChooser<Command> autoChooser;
@@ -54,16 +52,13 @@ public class RobotContainer {
 		driverController = new FlightStick(0);
 		manipController = new FlightStick(1);
 
-		driveSubsystem = new DriveSubsystem(
-			"swerve",
-			TelemetryVerbosity.HIGH
-		);
+		driveSubsystem = DriveSubsystem.getInstance();
 
-		manipSubsystem = new ManipSubsystem(driveSubsystem);
+		manipSubsystem = ManipSubsystem.getInstance();
 
-		pathPlannerCommands = new PathPlannerCommands(manipSubsystem);
+		pathPlannerCommands = PathPlannerCommands.getInstance();
 
-		ledSubsystem = new LEDSubsystem();	
+		ledSubsystem = LEDSubsystem.getInstance();	
 		
 		configureBindings();
 		initTelemetery();

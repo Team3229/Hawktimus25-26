@@ -31,6 +31,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class ArmSubsystem extends SubsystemBase {
+	public static ArmSubsystem instance;
+
+	public static ArmSubsystem getInstance() {
+		if (instance == null) {
+			instance = new ArmSubsystem();
+		}
+
+		return instance;
+	}
 
 	RollerSubsystem rollerSubsystem;
 
@@ -82,11 +91,11 @@ public class ArmSubsystem extends SubsystemBase {
 	private static Sendable intakeSendable;
 	private static Sendable armPIDSendable;
 	
-	public ArmSubsystem(RollerSubsystem roll) {
+	private ArmSubsystem() {
 
 		super();
 
-		rollerSubsystem = roll;
+		rollerSubsystem = RollerSubsystem.getInstance();
 
 		homeLimitSwitch = new DigitalInput(HOME_LIMIT_PORT);
 		

@@ -167,6 +167,14 @@ public class DriveSubsystem extends SubsystemBase {
 		new Constraints(ROT_MAX_VEL.in(RadiansPerSecond), ROT_MAX_ACCEL.in(RadiansPerSecondPerSecond))
 	);
 
+	private static DriveSubsystem instance;
+	public static DriveSubsystem getInstance() {
+		if (instance == null) {
+			instance = new DriveSubsystem(); 
+		}
+		return instance;
+	}
+
     /**
 	 * Swerve drive object.
 	 */
@@ -180,10 +188,7 @@ public class DriveSubsystem extends SubsystemBase {
 	 * @param initialPose        The initial pose of the robot.
 	 * @param verbosity          The verbosity level for telemetry.
 	 */
-	public DriveSubsystem(
-		String path,
-		TelemetryVerbosity verbosity
-	) {
+	private DriveSubsystem() {
 		super();
 		
 		rotationPID.enableContinuousInput(0, 2 * Math.PI);
@@ -192,11 +197,11 @@ public class DriveSubsystem extends SubsystemBase {
 		yTranslationPID.setTolerance(TRANS_ERR_TOL.in(Meters), TRANS_VEL_TOL.in(MetersPerSecond));
 		rotationPID.setTolerance(ROT_ERR_TOL.in(Radians), ROT_VEL_TOL.in(RadiansPerSecond));
 		
-		SwerveDriveTelemetry.verbosity = verbosity;
+		SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
 
 		try { 
 			swerveDrive = new SwerveParser(
-				new File(Filesystem.getDeployDirectory(), path))
+				new File(Filesystem.getDeployDirectory(), "swerve"))
 				.createSwerveDrive(
 					MAX_VELOCITY.in(MetersPerSecond),
 					new Pose2d(2, 4, new Rotation2d())// sets the position to the bottom right (paper view)

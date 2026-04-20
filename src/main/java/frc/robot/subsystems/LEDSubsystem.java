@@ -33,7 +33,13 @@ public class LEDSubsystem extends SubsystemBase {
 
     private SendableChooser<Color> ledChooser;
 
-    public LEDSubsystem() {
+    private static LEDSubsystem instance;
+    public static LEDSubsystem getInstance() {
+        if (instance == null) instance = new LEDSubsystem();
+        return instance;
+    } 
+
+    private LEDSubsystem() {
         led = new AddressableLED(LEDPortNumber);
 
         ledBuffer = new AddressableLEDBuffer(LEDBuffer);    
