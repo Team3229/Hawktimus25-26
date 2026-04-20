@@ -25,7 +25,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.inputs.ButtonBoard;
 import frc.robot.inputs.FlightStick;
-import frc.robot.subsystems.VisualizerSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import frc.robot.subsystems.manipSubsystems.PathPlannerCommands;
@@ -42,7 +41,6 @@ public class RobotContainer {
 	ManipSubsystem manipSubsystem;
 	LEDSubsystem ledSubsystem;
 	
-	VisualizerSubsystem visualizerSubsystem;
 	PathPlannerCommands pathPlannerCommands;
 
 	private SendableChooser<Command> autoChooser;
@@ -54,16 +52,13 @@ public class RobotContainer {
 		driverController = new FlightStick(0);
 		manipController = new FlightStick(1);
 
-		driveSubsystem = new DriveSubsystem(
-			"swerve",
-			TelemetryVerbosity.HIGH
-		);
+		driveSubsystem = DriveSubsystem.getInstance();
 
-		manipSubsystem = new ManipSubsystem(driveSubsystem);
+		manipSubsystem = ManipSubsystem.getInstance();
 
-		pathPlannerCommands = new PathPlannerCommands(manipSubsystem);
+		pathPlannerCommands = PathPlannerCommands.getInstance();
 
-		ledSubsystem = new LEDSubsystem();	
+		ledSubsystem = LEDSubsystem.getInstance();	
 		
 		configureBindings();
 		initTelemetery();
@@ -160,7 +155,7 @@ public class RobotContainer {
 	}
 
 	private void configManipControls() {
-		// CURRENTLY AVAILABLE: 7, 8, 9, 11, slider
+		// CURRENTLY AVAILABLE: 7, 9, 11, slider
 		
 		manipController.b_Trigger().whileTrue(
 			manipSubsystem.shoot()
@@ -188,6 +183,10 @@ public class RobotContainer {
 
 		manipController.b_6().onTrue(
 			manipSubsystem.forceIntakeArmOut()
+		);
+
+		manipController.b_8().onTrue(
+			manipSubsystem.resetVelocity()
 		);
 
 		manipController.b_10().whileTrue(

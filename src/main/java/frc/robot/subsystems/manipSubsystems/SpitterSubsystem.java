@@ -97,10 +97,16 @@ public class SpitterSubsystem extends SubsystemBase {
     private static Sendable spitterSendable;
     private static Sendable spitterPIDSendable;
     private static Sendable feederPIDSendable;
+    private static SpitterSubsystem instance;
+    public static SpitterSubsystem getInstance() {
+        if (instance == null) {
+         instance = new SpitterSubsystem();   
+        }
+        return instance;
+    }
 
-
-    public SpitterSubsystem(DriveSubsystem drive) {
-        driveSubsystem = drive;
+    private SpitterSubsystem() {
+        driveSubsystem = driveSubsystem.getInstance();
 
         // initializes shooting motor
         leftSpitter = new TalonFX(LS_CAN_ID, CANBus.roboRIO()); 
@@ -342,5 +348,12 @@ public class SpitterSubsystem extends SubsystemBase {
     public void setShooterSpeed() {
         double distanceFromHub = driveSubsystem.distanceToTarget;
         requestedShooterVelocity = SPITTER_MAP.get(distanceFromHub).srps();
+    }
+
+    public Command resetVelocities() {
+        return runOnce(() -> {
+            requestedShooterVelocity = 20;
+            requestedFeederVelocity = 13;
+        });
     }
 }

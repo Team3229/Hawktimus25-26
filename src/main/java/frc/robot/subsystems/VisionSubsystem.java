@@ -13,6 +13,14 @@ public class VisionSubsystem {
      * @return
      */
     
+    private static VisionSubsystem instance;
+	public static VisionSubsystem getInstance() {
+		if (instance == null) {
+			instance = new VisionSubsystem();
+		}
+		return instance;
+	}
+
     public static PoseEstimate getMT2Pose(Rotation2d robotRotation, double robotRotationRate, String limelightName) {
         LimelightHelpers.SetRobotOrientation("limelight-" + limelightName, robotRotation.getDegrees(), robotRotationRate, 0, 0, 0, 0);
         PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-" + limelightName);

@@ -18,9 +18,15 @@ public class IntakeSubsystem extends SubsystemBase{
 	public static final Angle STOW_ANGLE = ArmSubsystem.STOW_ANGLE;
 	public static final Angle COLLECTION_POINT = ArmSubsystem.COLLECTION_POINT;
 
-    public IntakeSubsystem() {
-		rollerSubsystem = new RollerSubsystem();
-        armSubsystem = new ArmSubsystem(rollerSubsystem);
+	private static IntakeSubsystem instance;
+	public static IntakeSubsystem getInstance() {
+		if (instance == null) instance = new IntakeSubsystem();
+		return instance;
+	}
+
+    private IntakeSubsystem() {
+		rollerSubsystem = RollerSubsystem.getInstance();
+        armSubsystem = ArmSubsystem.getInstance();
     }
 
     /**

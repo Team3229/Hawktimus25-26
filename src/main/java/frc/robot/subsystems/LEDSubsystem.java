@@ -19,6 +19,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.drive.GameState;
 
 public class LEDSubsystem extends SubsystemBase {
+    private static LEDSubsystem instance;
+	public static LEDSubsystem getInstance() {
+		if (instance == null) {
+			instance = new LEDSubsystem();
+		}
+		return instance;
+	}
     private AddressableLED led;
     private AddressableLEDBuffer ledBuffer;
     
@@ -33,7 +40,7 @@ public class LEDSubsystem extends SubsystemBase {
 
     private SendableChooser<Color> ledChooser;
 
-    public LEDSubsystem() {
+    private LEDSubsystem() {
         led = new AddressableLED(LEDPortNumber);
 
         ledBuffer = new AddressableLEDBuffer(LEDBuffer);    

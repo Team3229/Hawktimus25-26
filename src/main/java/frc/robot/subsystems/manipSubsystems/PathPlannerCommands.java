@@ -4,11 +4,17 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class PathPlannerCommands extends SubsystemBase {
-
+    private static PathPlannerCommands instance;
+	public static PathPlannerCommands getInstance() {
+		if (instance == null) {
+			instance = new PathPlannerCommands();
+		}
+		return instance;
+	}
 	ManipSubsystem manipSubsystem;
 	
-    public PathPlannerCommands(ManipSubsystem man) {
-        manipSubsystem = man;
+    public PathPlannerCommands() {
+        manipSubsystem = ManipSubsystem.getInstance();
     }
 
     public Command pathIntake() {

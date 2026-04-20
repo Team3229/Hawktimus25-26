@@ -9,16 +9,23 @@ import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.manipSubsystems.intakeSubsystems.IntakeSubsystem;
 
 public class ManipSubsystem extends SubsystemBase {
+    private static ManipSubsystem instance;
+	public static ManipSubsystem getInstance() {
+		if (instance == null) {
+			instance = new ManipSubsystem();
+		}
+		return instance;
+	}
     IntakeSubsystem intakeSubsystem;
     IndexSubsystem indexSubsystem;
     SpitterSubsystem spitterSubsystem;
     DriveSubsystem driveSubsystem;
     
-    public ManipSubsystem(DriveSubsystem drive) {
-        intakeSubsystem = new IntakeSubsystem();
-        spitterSubsystem = new SpitterSubsystem(drive);
-        indexSubsystem = new IndexSubsystem(spitterSubsystem);
-        driveSubsystem = drive;
+    public ManipSubsystem() {
+        intakeSubsystem = IntakeSubsystem.getInstance();
+        spitterSubsystem = SpitterSubsystem.getInstance();
+        indexSubsystem = IndexSubsystem.getInstance();
+        driveSubsystem = DriveSubsystem.getInstance();
     }
 
     /**
@@ -74,6 +81,13 @@ public class ManipSubsystem extends SubsystemBase {
         return runOnce(() -> System.out.println("Beginning the extention"))
         .andThen(intakeSubsystem.forceExtendIntake())
         .andThen(runOnce(() -> System.out.println("Fully extended")));
+        
+    }
+
+
+
+    public Command resetVelocity() {
+        return spitterSubsystem.resetVelocities();
     }
 
     /**

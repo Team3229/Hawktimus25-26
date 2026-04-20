@@ -42,8 +42,16 @@ public class RollerSubsystem extends SubsystemBase {
 
 	private static Sendable intakeRodSendable;
 	private static Sendable intakeRodPIDSendable;
+
+	private static RollerSubsystem instance;
+	public static RollerSubsystem getInstance() {
+		if(instance == null) {
+			instance = new RollerSubsystem();
+		}
+		return instance;
+	}
 	
-	public RollerSubsystem() {
+	private RollerSubsystem() {
         super();
 		
 		rodMotor = new TalonFX(ROD_CAN_ID, CANBus.roboRIO());

@@ -51,8 +51,16 @@ public class IndexSubsystem extends SubsystemBase {
     public final int forwards = 20;
     public final int reverse = -20;
 
-    public IndexSubsystem(SpitterSubsystem spit) {
-        spitterSubsystem = spit;
+    private static IndexSubsystem instance;
+	public static IndexSubsystem getInstance() {
+		if(instance == null) {
+			instance = new IndexSubsystem();
+		}
+		return instance;
+	}
+
+    private IndexSubsystem() {
+        spitterSubsystem = SpitterSubsystem.getInstance();
         // initializes motor
         indexMotor = new TalonFX(index_CAN_ID, CANBus.roboRIO()); // placeholder name for the canbus
         indexMotorConfig = new TalonFXConfiguration()
