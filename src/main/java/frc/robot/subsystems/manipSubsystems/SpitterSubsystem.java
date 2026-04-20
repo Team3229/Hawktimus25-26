@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 
 import static edu.wpi.first.units.Units.Amps;
@@ -35,7 +36,7 @@ import java.util.Date;
 
 public class SpitterSubsystem extends SubsystemBase {
     private static DriveSubsystem driveSubsystem;
-    private static double requestedShooterVelocity = 28;
+    private static double requestedShooterVelocity = 20;
     private static double requestedFeederVelocity = 13;
     private static double deadBand = 1.25;
 
@@ -68,7 +69,7 @@ public class SpitterSubsystem extends SubsystemBase {
 
     private static final Current CURRENT_LIMIT = Amps.of(40);
 
-    private boolean testMode = false; // TODO: 
+    private boolean testMode = false; // TODO:  
 
     public record SpitterParams(double srps, double frps, double timeOfFlight) {}
 
@@ -206,57 +207,6 @@ public class SpitterSubsystem extends SubsystemBase {
         }
     }
 
-    //TODO: delete
-    public Command spinShooter() {
-        Command out = new Command() {
-            Date start;
-            Date end;
-            @Override
-            public void initialize() {
-                start = new Date();
-                end = null;
-            }
-            @Override
-            public void execute() {
-                leftSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0));
-                if (shooterIsReady() && end == null) {
-                    end = new Date();
-                    spitTimer = end.getTime() - start.getTime();
-                    System.out.println("got to speed in: " + spitTimer + " milliseconds");
-                }
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                leftSpitter.setControl(new CoastOut());
-            }
-        };
-
-        out.addRequirements(this);
-
-        return out;
-    }
-
-    public Command spinKicker() {
-        Command out = new Command() {
-            @Override
-            public void execute() {
-                // setSpitterSpeeds(); // REMOVE FOR MANUAL
-                feeder.setControl(new VelocityVoltage(requestedFeederVelocity).withSlot(0));
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                feeder.setControl(new CoastOut());
-            }
-        };
-
-        out.addRequirements(this);
-
-        return out;
-    }
-    //TODO: delete
-
     public Command shoot() {
         Command out = new Command() {
             Date start;
@@ -269,7 +219,7 @@ public class SpitterSubsystem extends SubsystemBase {
             }
             @Override
             public void execute() {
-                if(testMode == false) {
+                if(testMode == false || VisionSubsystem.canSeeTag(new String[] {"left", "right"})) {
                     setShooterSpeed();
                 }
                 leftSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0));
@@ -393,5 +343,4 @@ public class SpitterSubsystem extends SubsystemBase {
         double distanceFromHub = driveSubsystem.distanceToTarget;
         requestedShooterVelocity = SPITTER_MAP.get(distanceFromHub).srps();
     }
-
 }

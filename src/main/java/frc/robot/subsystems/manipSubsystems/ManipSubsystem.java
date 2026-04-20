@@ -76,23 +76,11 @@ public class ManipSubsystem extends SubsystemBase {
         .andThen(runOnce(() -> System.out.println("Fully extended")));
     }
 
-    public Command justIndex() {
-        return indexSubsystem.index(indexSubsystem.forwards);
-    }
-
     /**
      * Spins the shooter wheel
      */
     public Command spinUp() {
         return spitterSubsystem.shoot();
-    }
-
-    public Command spinKicker() {
-        return spitterSubsystem.spinKicker();
-    }
-
-    public Command spinShooter() {
-        return spitterSubsystem.spinShooter();
     }
 
     /**
