@@ -225,7 +225,7 @@ public class SpitterSubsystem extends SubsystemBase {
             }
             @Override
             public void execute() {
-                if(testMode == false || VisionSubsystem.canSeeTag(new String[] {"left", "right"})) {
+                if(testMode == false && VisionSubsystem.canSeeTag(new String[] {"left", "right"})) {
                     setShooterSpeed();
                 }
                 leftSpitter.setControl(new VelocityVoltage(requestedShooterVelocity).withSlot(0));
