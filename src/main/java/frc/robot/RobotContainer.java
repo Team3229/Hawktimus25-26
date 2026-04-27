@@ -33,7 +33,7 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 public class RobotContainer {
 
-	FlightStick driverController;
+	Gladiator driverController;
 	Gladiator manipController;
 	ButtonBoard buttonBoard;
 	DriveSubsystem driveSubsystem;
@@ -49,7 +49,7 @@ public class RobotContainer {
 
 	public RobotContainer() {
 
-		driverController = new FlightStick(0);
+		driverController = new Gladiator(0);
 		manipController = new Gladiator(1);
 
 		driveSubsystem = new DriveSubsystem(
@@ -116,15 +116,15 @@ public class RobotContainer {
 
 		);
 
-		driverController.b_10().onTrue(
+		driverController.b_3().onTrue(
 			driveSubsystem.zeroGyroWithLimelight()
 		);
 
-		driverController.b_11().onTrue(
+		driverController.b_4().onTrue(
 			driveSubsystem.zeroGyroCommand()
 		);
 
-		driverController.b_Hazard().onTrue(
+		driverController.b_5().onTrue(
 			Commands.runOnce(() -> {
 				driveSubsystem.getCurrentCommand().cancel();
 				// cancels ALL DRIVING on driver controller
@@ -152,7 +152,7 @@ public class RobotContainer {
 			manipSubsystem.intake()
 		);
 
-		manipController.b_TopTriggerUp().whileTrue(
+		manipController.b_TopTriggerUp().onTrue(
 			manipSubsystem.stow()
 		);
 
@@ -160,9 +160,29 @@ public class RobotContainer {
 			manipSubsystem.extake()
 		);
 
-		manipController.b_4().whileTrue(
+		manipController.b_4().onTrue(
 			manipSubsystem.intakeArmOut()
 		);
+
+		manipController.b_POV0Up().onTrue(
+			manipSubsystem.upSRPSCommand()
+		);
+
+		manipController.b_POV0Down().onTrue(
+			manipSubsystem.downSRPSCommand()
+		);
+
+		manipController.b_POV0Left().onTrue(
+			manipSubsystem.upFRPSCommand()
+		);
+
+		manipController.b_POV0Right().onTrue(
+			manipSubsystem.downFRPSCommand()
+		);
+
+		// manipController.b_POV0Pushed().whileTrue(
+		// 	manipSubsystem.
+		// );
 	}
 
 	public void initTelemetery() {

@@ -13,13 +13,16 @@ public class Gladiator {
     public Gladiator(int port) {
         controller = new CommandGenericHID(port);
     }
-
-    public double a_X() {return applyDeadzone(controller.getRawAxis(0));}
-    public double a_Y() {return applyDeadzone(controller.getRawAxis(1));}
-    public double a_Z() {return applyDeadzone(controller.getRawAxis(2));}
-    public double a_Throttle() {return controller.getRawAxis(3);}
-    public double a_Switch() {return controller.getRawAxis(4);}
-    public double a_Dial() {return controller.getRawAxis(5);}
+    public double a_X() {return (controller.getRawAxis(0));}
+    public double a_Z() {return (controller.getRawAxis(5));}
+    public double a_Y() {return (controller.getRawAxis(1));}
+    
+    // public double a_X() {return applyDeadzone(controller.getRawAxis(0));}
+    // public double a_Y() {return applyDeadzone(controller.getRawAxis(1));}
+    // public double a_Z() {return applyDeadzone(controller.getRawAxis(5));}
+    public double a_Throttle() {return controller.getRawAxis(2);}
+    public double a_Switch() {return controller.getRawAxis(3);}
+    public double a_Dial() {return controller.getRawAxis(4);}
 
     public Trigger b_Trigger() {return controller.button(1);}
     public Trigger b_FullTrigger() {return controller.button(2).and(controller.button(1));}
