@@ -1,10 +1,13 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Percent;
 import static edu.wpi.first.units.Units.Seconds;
 
 import java.util.Map;
 
+import edu.wpi.first.units.FrequencyUnit;
+import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -38,7 +41,9 @@ public class LEDSubsystem extends SubsystemBase {
     private final int LEDPortNumber = 0;
     private final int LEDBuffer = 776;
 
-    private SendableChooser<Color> ledChooser;
+    private SendableChooser<Color> colorChooser;
+
+    private SendableChooser<LEDPattern> paternChooser;
 
     private LEDSubsystem() {
         led = new AddressableLED(LEDPortNumber);
@@ -52,16 +57,25 @@ public class LEDSubsystem extends SubsystemBase {
        
         led.start();
        // new led chooser for the LEDPatterns, command that runs the pattern we choose with the colors we choose
-        ledChooser = new SendableChooser<Color>();
-        ledChooser.setDefaultOption("Purple", purple);
-        ledChooser.addOption("Yellow", yellow);
-        ledChooser.addOption("Blue", blue);
-        ledChooser.addOption("Green", green);
-        ledChooser.addOption("Red", red);
-        ledChooser.addOption("None :(", Color.kBlack);
-        SmartDashboard.putData("LED Chooser", ledChooser);
+        colorChooser = new SendableChooser<Color>();
+        colorChooser.setDefaultOption("Purple", purple);
+        colorChooser.addOption("Yellow", yellow);
+        colorChooser.addOption("Blue", blue);
+        colorChooser.addOption("Green", green);
+        colorChooser.addOption("Red", red);
+        colorChooser.addOption("None :(", Color.kBlack);
+        SmartDashboard.putData("LED Color Chooser", colorChooser);
+
+        paternChooser = new SendableChooser<LEDPattern>();
+        paternChooser.setDefaultOption("Solid", setColor(selectColor()));
+        paternChooser.addOption("Breath", setColorBreathe(selectColor()));
+        paternChooser.addOption("Blink", setColorBlink(selectColor()));
+        paternChooser.addOption("Scroll", setColorScroll(selectColor(), Color.kBlack));
+        SmartDashboard.putData("LED Pattern Chooser", paternChooser);
+
+
         
-        this.setDefaultCommand(runPattern(setHawkBreathe()));
+        this.setDefaultCommand(runPatternWithSendable());
 
     }
 
@@ -88,8 +102,16 @@ public class LEDSubsystem extends SubsystemBase {
         
     }
 
+    public Command runPatternWithSendable() {
+        return run(() -> paternChooser.getSelected().applyTo(ledBuffer)).ignoringDisable(true);
+    }
+
+    public Color selectColor() {
+        return colorChooser.getSelected();
+    }
+
     public Command runColorWithSendable() {
-        return run(() -> setColor(ledChooser.getSelected()).applyTo(ledBuffer))
+        return run(() -> setColor(colorChooser.getSelected()).applyTo(ledBuffer))
             .ignoringDisable(true);
     }
 
@@ -167,28 +189,20 @@ public class LEDSubsystem extends SubsystemBase {
         return setColorReverse(purple, yellow);
     }
 
-    // public LEDPattern setColorScroll(Color colorForScroll, Color secondColorForScroll) {
-    //     return setDiscontGradient(colorForScroll, secondColorForScroll).scrollAtRelativeSpeed(new Frequency.of(1));
-    // }
-
-    // public LEDPattern setHawkScroll() {
-    //     return setColorScroll(purple, yellow);
-    // }
-
-    public LEDPattern setColorBreathe(Color colorForBreathe, Color secondColorForBreathe) {
-        return setColor(purple).breathe(Seconds.of(3)).atBrightness(Percent.of(50));
+    public LEDPattern setColorScroll(Color colorForScroll, Color secondColorForScroll) {
+        return setDiscontGradient(colorForScroll, secondColorForScroll).scrollAtRelativeSpeed(Frequency.ofBaseUnits(0.25, Hertz));
     }
 
-    public LEDPattern setHawkBreathe() {
-        return setColorBreathe(yellow, purple);
+    public LEDPattern setHawkScroll() {
+        return setColorScroll(purple, yellow);
     }
 
-    public LEDPattern setColorBlink(Color colorForBlink, Color secondColorForBlink) {
-        return setDiscontGradient(colorForBlink, secondColorForBlink).blink(Seconds.of(0.4));
+    public LEDPattern setColorBreathe(Color colorForBreathe) {
+        return setColor(colorForBreathe).breathe(Seconds.of(3)).atBrightness(Percent.of(50));
     }
 
-    public LEDPattern setHawkBlink() {
-        return setColorBlink(purple, yellow);
+    public LEDPattern setColorBlink(Color colorForBlink) {
+        return setColor(colorForBlink).blink(Seconds.of(0.4));
     }
 
     public LEDPattern setColorBrightness(Color colorForBrightness, Color secondColorForBrightness, double constantBrightnessLevelIsCool) {
