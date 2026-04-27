@@ -148,12 +148,20 @@ public class RobotContainer {
 			manipSubsystem.shoot()
 		);
 
-		manipController.b_3().whileTrue(
+		manipController.b_TopTriggerDown().whileTrue(
 			manipSubsystem.intake()
 		);
 
-		manipController.b_21().whileTrue(
+		manipController.b_TopTriggerUp().whileTrue(
 			manipSubsystem.stow()
+		);
+
+		manipController.b_3().whileTrue(
+			manipSubsystem.extake()
+		);
+
+		manipController.b_4().whileTrue(
+			manipSubsystem.intakeArmOut()
 		);
 	}
 
