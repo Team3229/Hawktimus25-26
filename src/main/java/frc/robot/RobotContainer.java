@@ -14,7 +14,7 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.math.MathUtil;
+// import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -24,14 +24,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.inputs.ButtonBoard;
-import frc.robot.inputs.FlightStick;
+// import frc.robot.inputs.FlightStick;
 import frc.robot.inputs.Gladiator;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import frc.robot.subsystems.manipSubsystems.PathPlannerCommands;
 import frc.robot.subsystems.LEDSubsystem;
 import swervelib.SwerveInputStream;
-import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
+// import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
  
 public class RobotContainer {
 

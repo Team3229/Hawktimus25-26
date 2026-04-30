@@ -8,14 +8,15 @@ public class Gladiator {
     
     private CommandGenericHID controller;
 
-    private static final double kControllerDeadzone = 0.1;
+    // private static final double kControllerDeadzone = 0.1;
 
     public Gladiator(int port) {
         controller = new CommandGenericHID(port);
     }
     public double a_X() {return (controller.getRawAxis(0));}
-    public double a_Z() {return (controller.getRawAxis(5));}
     public double a_Y() {return (controller.getRawAxis(1));}
+    public double a_Z() {return (-controller.getRawAxis(5));}
+
     
     // public double a_X() {return applyDeadzone(controller.getRawAxis(0));}
     // public double a_Y() {return applyDeadzone(controller.getRawAxis(1));}
@@ -54,9 +55,9 @@ public class Gladiator {
     public Trigger p_Any() {return controller.povCenter().negate();}
 
 
-    private static double applyDeadzone(double input) {
-        return (Math.abs(input) > kControllerDeadzone) ? 
-        input
-        : 0;
-    }
+    // private static double applyDeadzone(double input) {
+    //     return (Math.abs(input) > kControllerDeadzone) ? 
+    //     input
+    //     : 0;
+    // }
 }
