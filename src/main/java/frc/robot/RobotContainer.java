@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.inputs.ButtonBoard;
 import frc.robot.inputs.FlightStick;
+import frc.robot.inputs.Gladiator;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import frc.robot.subsystems.manipSubsystems.PathPlannerCommands;
@@ -34,8 +35,8 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
  
 public class RobotContainer {
 
-	FlightStick driverController;
-	FlightStick manipController;
+	Gladiator driverController;
+	Gladiator manipController;
 	ButtonBoard buttonBoard;
 	DriveSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
@@ -49,8 +50,8 @@ public class RobotContainer {
 	public RobotContainer() {
 		CameraServer.startAutomaticCapture("Intake Camera", 0);
 
-		driverController = new FlightStick(0);
-		manipController = new FlightStick(1);
+		driverController = new Gladiator(0);
+		manipController = new Gladiator(1);
 
 		driveSubsystem = DriveSubsystem.getInstance();
 
@@ -125,11 +126,11 @@ public class RobotContainer {
 			)
 		);
 
-		driverController.b_10().onTrue(
+		driverController.b_3().onTrue(
 			driveSubsystem.zeroGyroWithLimelight()
 		);
 
-		driverController.b_11().onTrue(
+		driverController.b_4().onTrue(
 			driveSubsystem.zeroGyroWithAllianceCommand()
 		);
 
@@ -137,11 +138,11 @@ public class RobotContainer {
 			driveSubsystem.toggleRelativeMode()
 		);
 
-		driverController.b_3().whileTrue(
+		driverController.b_POV0Pushed().whileTrue(
 			driveSubsystem.toggleSquareUp()
 		);
 
-		driverController.b_Hazard().onTrue(
+		driverController.b_5().onTrue(
 			Commands.runOnce(() -> {
 				driveSubsystem.getCurrentCommand().cancel();
 				// cancels ALL DRIVING on driver controller
@@ -157,19 +158,19 @@ public class RobotContainer {
 	private void configManipControls() {
 		// CURRENTLY AVAILABLE: 7, 8, 9, 11, slider
 		
-		manipController.b_Trigger().whileTrue(
+		manipController.b_FullTrigger().whileTrue(
 			manipSubsystem.shoot()
 		);
 			
-		manipController.b_Hazard().onTrue(
+		manipController.b_TopTriggerUp().onTrue(
 			manipSubsystem.stow()
 		);
 				
-		manipController.b_3().whileTrue(
+		manipController.b_Trigger().whileTrue(
 			manipSubsystem.spinUp()
 		);
 					
-		manipController.b_4().whileTrue(
+		manipController.b_TopTriggerDown().whileTrue(
 			manipSubsystem.intake()
 		);
 
@@ -177,15 +178,15 @@ public class RobotContainer {
 			manipSubsystem.intakeAndShoot() // should kill previous commands bc it was inputted later but may not TODO test
 		);
 
-		manipController.b_5().onTrue(
+		manipController.b_3().onTrue(
 			manipSubsystem.intakeArmOut()
 		);
 
-		manipController.b_6().onTrue(
+		manipController.b_4().onTrue(
 			manipSubsystem.forceIntakeArmOut()
 		);
 
-		manipController.b_10().whileTrue(
+		manipController.b_5().whileTrue(
 			manipSubsystem.extake()
 		);
 
