@@ -59,7 +59,7 @@ import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
-public class DriveSubsystem extends SubsystemBase {
+public class YagslSubsystem extends SubsystemBase {
     
     public static LinearVelocity MAX_VELOCITY = MetersPerSecond.of(5);
     
@@ -167,10 +167,10 @@ public class DriveSubsystem extends SubsystemBase {
 		new Constraints(ROT_MAX_VEL.in(RadiansPerSecond), ROT_MAX_ACCEL.in(RadiansPerSecondPerSecond))
 	);
 
-	private static DriveSubsystem instance;
-	public static DriveSubsystem getInstance() {
+	private static YagslSubsystem instance;
+	public static YagslSubsystem getInstance() {
 		if (instance == null) {
-			instance = new DriveSubsystem(); 
+			instance = new YagslSubsystem(); 
 		}
 		return instance;
 	}
@@ -188,7 +188,7 @@ public class DriveSubsystem extends SubsystemBase {
 	 * @param initialPose        The initial pose of the robot.
 	 * @param verbosity          The verbosity level for telemetry.
 	 */
-	private DriveSubsystem() {
+	private YagslSubsystem() {
 		super();
 		
 		rotationPID.enableContinuousInput(0, 2 * Math.PI);

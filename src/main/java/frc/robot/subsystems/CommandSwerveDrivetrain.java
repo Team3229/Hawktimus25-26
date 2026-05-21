@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -14,8 +15,12 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
@@ -25,6 +30,8 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
+import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
+import frc.robot.utilities.LimelightHelpers;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -299,5 +306,171 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     @Override
     public Optional<Pose2d> samplePoseAt(double timestampSeconds) {
         return super.samplePoseAt(Utils.fpgaToCurrentTime(timestampSeconds));
+    } 
+
+    
+public void setIMUYaw(Rotation2d yaw) {
+		getIMU().setYaw(yaw.getMeasure());
+		swerveDrive.resetOdometry(new Pose2d(getPose().getX(), getPose().getY(), yaw));
+	}
+
+	public Pigeon2 getIMU() {
+		return ((Pigeon2) swerveDrive.getGyro().getIMU());
+	}
+
+	public Rotation2d getIMUYaw() {
+		return getIMU().getRotation2d();
+	}
+
+	public AngularVelocity getIMUYawRate() {
+		return getIMU().getAngularVelocityZWorld().getValue();
+	}
+
+
+	public void updateOdometry() {
+
+		for (String side : new String[] {"left", "right"}) {
+
+			LimelightHelpers.SetRobotOrientation(
+				"limelight-" + side, getIMUYaw().getDegrees(), 
+				getIMUYawRate().in(DegreesPerSecond), 
+				0, 0, 0, 0
+			);
+
+			LimelightHelpers.PoseEstimate estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-" + side);
+
+			if (estimate != null && estimate.tagCount > 0) {
+
+				Translation3d aprilTagPosition = LimelightHelpers.getTargetPose3d_RobotSpace("limelight-" + side).getTranslation();
+
+				if (Math.hypot(aprilTagPosition.getX(), aprilTagPosition.getZ()) <= 3.5) {
+					
+					swerveDrive.addVisionMeasurement(new Pose2d(estimate.pose.getX(), estimate.pose.getY(), getIMUYaw()), estimate.timestampSeconds);
+
+				}
+					
+			}
+
+		}
+
     }
+
+    public void resetOdometry(Pose2d pose) {
+		if (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)) {
+            if (pose == null) {
+                swerveDrive.resetOdometry(startingRedPose);
+                return;
+            }
+        } else if (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)) {
+            if (pose == null) {
+				swerveDrive.resetOdometry(startingBluePose);
+				return;
+			}
+        } else {
+			System.out.println("Unknown/incorrect alliance setup");
+		}
+
+        swerveDrive.resetOdometry(pose);
+    }
+
+	public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
+		return run(() -> {
+			if (hubAlign) {
+				// overrides velocity on the z axis to align to the hub
+				Pose2d currentPose = swerveDrive.getPose();
+				ChassisSpeeds currentSpeed = swerveDrive.getFieldVelocity();
+				
+				Translation2d robotTranslation = currentPose.getTranslation();
+				Translation2d spitterTranslation = robotTranslation.rotateBy(Rotation2d.k180deg); // our spitter is on the back of the bot
+				
+				Translation2d botVelocity = 
+					new Translation2d(
+						currentSpeed.vxMetersPerSecond,
+						currentSpeed.vyMetersPerSecond
+					);
+				
+				Translation2d tangentialVelocity = 
+					new Translation2d(
+						-currentSpeed.omegaRadiansPerSecond * SPITTER_OFFSET.getY(),
+						currentSpeed.omegaRadiansPerSecond * SPITTER_OFFSET.getX()
+					);
+				
+				Translation2d effectiveShooterVelocity = botVelocity.plus(tangentialVelocity);
+				Translation2d virtualTarget = getTargetTranslation();
+				currentTarget = virtualTarget;
+
+				// measures distance to our target in meters
+				double predictedDistance = spitterTranslation.getDistance(virtualTarget);
+
+				// time of flight, includes mechanical/system latency
+				double timeOfFlight = getToF(predictedDistance) + SpitterSubsystem.SYSTEM_LATENCY_SECONDS;
+
+				// calculate the distance the ball will drift
+				Translation2d predictedOffset = effectiveShooterVelocity.times(timeOfFlight);
+
+				// Shifts aim to be ahead of drift
+				virtualTarget = virtualTarget.minus(predictedOffset);
+
+				// Set distance for use in other commands
+				distanceToTarget = robotTranslation.getDistance(virtualTarget);
+
+				/* Calculate needed angle to target */
+				double targetAngleRad = Math.atan2(
+					virtualTarget.getY() - robotTranslation.getY(),
+					virtualTarget.getX() - robotTranslation.getX()
+				);
+
+				targetAngleRad += Math.PI; // trying to get back of bot to face forwards
+				
+				targetAngleRot = targetAngleRad / (2 * Math.PI);
+
+				double currentAngleRad = currentPose.getRotation().getRadians();
+
+				currentAngleRot = currentAngleRad / (2 * Math.PI);
+
+				double angularSpeedRps = rotationPID.calculate(currentAngleRad, targetAngleRad);
+				
+				// will finish if the bot is correctly facing target
+				isAimed = rotationPID.atSetpoint();	
+				
+				// overrides the drivers Z input with the calculated angle 
+				ChassisSpeeds driverSpeed = velocity.get();
+				ChassisSpeeds newVelocity = new ChassisSpeeds(driverSpeed.vxMetersPerSecond, driverSpeed.vyMetersPerSecond, angularSpeedRps);
+				
+				// running the bot in robot relative with the new calculated angle
+				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(newVelocity, getIMUYaw()));
+			} else if (squareUp) {
+
+				Pose2d currentPose = swerveDrive.getPose();
+
+				double currentAngleRot = currentPose.getRotation().getRotations();
+
+				double targetAngleRot = Math.round(currentAngleRot * 4) / 4;
+
+				double angularSpeedRps = rotationPID.calculate(currentAngleRot * 2 * Math.PI, targetAngleRot * 2 * Math.PI);
+								
+				// overrides the drivers Z input with the calculated angle 
+				ChassisSpeeds driverSpeed = velocity.get();
+				ChassisSpeeds newVelocity = new ChassisSpeeds(driverSpeed.vxMetersPerSecond, driverSpeed.vyMetersPerSecond, angularSpeedRps);
+				
+				// running the bot in robot relative with the new calculated angle
+				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(newVelocity, getIMUYaw()));
+
+			} else if (relativeMode) {
+				distanceToTarget = distanceFromHub();
+				if(DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)) {
+					swerveDrive.drive(velocity.get().times(-1)); // will invert on red
+				} else {
+					swerveDrive.drive(velocity.get());
+				}
+			} else {
+				distanceToTarget = distanceFromHub(); 
+				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(velocity.get(), getIMUYaw()));
+				// swerveDrive.driveFieldOriented(velocity.get()); //Field relative is relying on odemtry instead of IMUYaw
+			}
+		}).ignoringDisable(false);
+	}
+
+
 }
+
