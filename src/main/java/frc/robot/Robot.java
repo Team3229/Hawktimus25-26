@@ -13,11 +13,11 @@ import frc.robot.utilities.Elastic;
 
 public class Robot extends TimedRobot {
 
-  private final RobotContainer m_robotContainer;
+    private final RobotContainer m_robotContainer;
 
-  public Robot() {
-    m_robotContainer = new RobotContainer();
-  }
+    public Robot() {
+        m_robotContainer = new RobotContainer();
+    }
 
   @Override
   public void robotInit() {
@@ -26,66 +26,66 @@ public class Robot extends TimedRobot {
       m_robotContainer.robotInit();
   }
 
-  @Override
-  public void robotPeriodic() {
-    CommandScheduler.getInstance().run();
-  }
+    @Override
+    public void robotPeriodic() {
+        CommandScheduler.getInstance().run(); 
+    }
 
-  @Override
+    @Override
   public void disabledInit() {
     if (m_robotContainer.getAutonomousCommand() != null) {
       m_robotContainer.getAutonomousCommand().cancel();
     }
   }
 
-  @Override
-  public void disabledPeriodic() {}
+    @Override
+    public void disabledPeriodic() {}
 
-  @Override
-  public void disabledExit() {}
+    @Override
+    public void disabledExit() {}
 
-  @Override
-  public void autonomousInit() {
+    @Override
+    public void autonomousInit() {
     if (m_robotContainer.getAutonomousCommand() != null) {
       CommandScheduler.getInstance().schedule(m_robotContainer.getAutonomousCommand());
-    }
+        }
     Elastic.selectTab("Match");
-  }
+    }
 
-  @Override
+    @Override
   public void autonomousPeriodic() {
     m_robotContainer.autoPeriodic();
   }
 
-  @Override
-  public void autonomousExit() {}
+    @Override
+    public void autonomousExit() {}
 
-  @Override
-  public void teleopInit() {
+    @Override
+    public void teleopInit() {
 
     m_robotContainer.teleopInit();
 
     if (m_robotContainer.getAutonomousCommand() != null) {
       m_robotContainer.getAutonomousCommand().cancel();
+        }
     }
-  }
 
-  @Override
-  public void teleopPeriodic() {}
+    @Override
+    public void teleopPeriodic() {}
 
-  @Override
-  public void teleopExit() {}
+    @Override
+    public void teleopExit() {}
 
-  @Override
-  public void testInit() {
-    CommandScheduler.getInstance().cancelAll();
-  }
+    @Override
+    public void testInit() {
+        CommandScheduler.getInstance().cancelAll();
+    }
 
-  @Override
-  public void testPeriodic() {}
+    @Override
+    public void testPeriodic() {}
 
-  @Override
-  public void testExit() {}
+    @Override
+    public void testExit() {}
 
     @Override
     public void simulationPeriodic() {}

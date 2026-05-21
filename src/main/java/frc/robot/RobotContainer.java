@@ -31,7 +31,7 @@ import frc.robot.subsystems.manipSubsystems.PathPlannerCommands;
 import frc.robot.subsystems.LEDSubsystem;
 import swervelib.SwerveInputStream;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
- 
+
 public class RobotContainer {
 
 	FlightStick driverController;
@@ -243,8 +243,8 @@ public class RobotContainer {
 		autoCommand = command;
 	}
 
-	public Command getAutonomousCommand() {
+    public Command getAutonomousCommand() {
 		return autoCommand;
-	}
+    }
 
 }
