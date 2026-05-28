@@ -11,16 +11,27 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
+import com.pathplanner.lib.config.PIDConstants;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
@@ -56,6 +67,49 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
     private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
+    
+    private static final Distance TRANS_ERR_TOL = Meters.of(0.025);
+	private static final LinearVelocity TRANS_VEL_TOL = MetersPerSecond.of(0.1);
+	private static final Angle ROT_ERR_TOL = Degrees.of(0.5);
+	private static final AngularVelocity ROT_VEL_TOL = DegreesPerSecond.of(0.5);
+
+	private static final LinearVelocity TRANS_MAX_VEL = MetersPerSecond.of(3);
+	private static final LinearAcceleration TRANS_MAX_ACCEL = MetersPerSecondPerSecond.of(2);
+
+	private static final AngularVelocity ROT_MAX_VEL = DegreesPerSecond.of(540);
+	private static final AngularAcceleration ROT_MAX_ACCEL = DegreesPerSecondPerSecond.of(540);
+
+    private static final Pose2d startingBluePose = new Pose2d(2, 4, new Rotation2d(0));
+    private static final Pose2d startingRedPose = new Pose2d(2, 4, new Rotation2d(Math.PI));
+
+	public static final Translation2d BLUE_HUB_CENTER = new Translation2d(4.6116, 4.0213);
+	public static final Translation2d BLUE_HUB_BACK = new Translation2d(5.2342, 4.0213);
+
+	public static final Translation2d RED_HUB_CENTER = new Translation2d(11.9014, 4.0213);
+	public static final Translation2d RED_HUB_BACK = new Translation2d(11.3044, 4.0213);
+
+	public static final Translation2d RED_TARGET_LEFT = new Translation2d(16.54048, 5.101844);
+	public static final Translation2d RED_TARGET_RIGHT = new Translation2d(16.54048 ,1.266444);
+	
+	public static final Translation2d BLUE_TARGET_LEFT = new Translation2d(0,5.101844);
+	public static final Translation2d BLUE_TARGET_RIGHT = new Translation2d(0,1.266444);
+	
+    public static final Transform2d SPITTER_OFFSET = new Transform2d(0, Units.inchesToMeters(-10), Rotation2d.k180deg);
+
+	public static final Distance CENTER_FIELD_Y = Meters.of(4.021328);
+
+	public boolean hubAlign = false;
+	public boolean isAimed = false;
+
+	public boolean squareUp = false;
+
+	public boolean relativeMode = false;
+
+	public double distanceToTarget; 
+
+	private Translation2d currentTarget = BLUE_HUB_CENTER;
+	private double targetAngleRot;
+	private double currentAngleRot;
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
@@ -118,6 +172,65 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     /* The SysId routine to test */
     private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
+
+	// Standard PID
+    private static final PIDConstants TRANSLATION_CONSTANTS =
+		new PIDConstants(
+			5.5,
+			0.2,
+			0.1
+		);
+
+	private static final PIDConstants ROTATION_CONSTANTS =
+		new PIDConstants(
+			3.4,
+			0.0,
+			0.3
+		);
+
+    // Pathplanner PID
+	private static final PIDConstants PP_TRANS = 
+		new PIDConstants(
+			5.2,
+			0.0,
+			0.01
+		);
+
+	private static final PIDConstants PP_ROT = 
+		new PIDConstants(
+			3.0,
+			0.0,
+			0.0
+		);
+
+	/**
+	 * Estaablishes PID for X axis
+	 */
+    private ProfiledPIDController xTranslationPID = new ProfiledPIDController(
+        TRANSLATION_CONSTANTS.kP,
+        TRANSLATION_CONSTANTS.kI,
+        TRANSLATION_CONSTANTS.kD,
+		new Constraints(TRANS_MAX_VEL.in(MetersPerSecond), TRANS_MAX_ACCEL.in(MetersPerSecondPerSecond))
+    );
+	/**
+	 * Establishes the PID for the y axis
+	 */
+	private ProfiledPIDController yTranslationPID = new ProfiledPIDController(
+        TRANSLATION_CONSTANTS.kP,
+        TRANSLATION_CONSTANTS.kI,
+        TRANSLATION_CONSTANTS.kD,
+		new Constraints(TRANS_MAX_VEL.in(MetersPerSecond), TRANS_MAX_ACCEL.in(MetersPerSecondPerSecond))
+    );
+
+	/**
+ 	* Establishing PID for the rotational axis
+ 	*/
+    private ProfiledPIDController rotationPID = new ProfiledPIDController(
+		ROTATION_CONSTANTS.kP,
+		ROTATION_CONSTANTS.kI,
+		ROTATION_CONSTANTS.kD,
+		new Constraints(ROT_MAX_VEL.in(RadiansPerSecond), ROT_MAX_ACCEL.in(RadiansPerSecondPerSecond))
+	);
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
@@ -246,6 +359,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 m_hasAppliedOperatorPerspective = true;
             });
         }
+
+        
+		updateOdometry();
     }
 
     private void startSimThread() {
@@ -310,20 +426,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     
 public void setIMUYaw(Rotation2d yaw) {
-		getIMU().setYaw(yaw.getMeasure());
-		swerveDrive.resetOdometry(new Pose2d(getPose().getX(), getPose().getY(), yaw));
-	}
-
-	public Pigeon2 getIMU() {
-		return ((Pigeon2) swerveDrive.getGyro().getIMU());
+		getPigeon2().setYaw(yaw.getMeasure());
+		resetAllianceOdometry(new Pose2d(getPose().getX(), getPose().getY(), yaw));
 	}
 
 	public Rotation2d getIMUYaw() {
-		return getIMU().getRotation2d();
+		return getPigeon2().getRotation2d();
 	}
 
 	public AngularVelocity getIMUYawRate() {
-		return getIMU().getAngularVelocityZWorld().getValue();
+		return getPigeon2().getAngularVelocityZWorld().getValue();
 	}
 
 
@@ -345,7 +457,7 @@ public void setIMUYaw(Rotation2d yaw) {
 
 				if (Math.hypot(aprilTagPosition.getX(), aprilTagPosition.getZ()) <= 3.5) {
 					
-					swerveDrive.addVisionMeasurement(new Pose2d(estimate.pose.getX(), estimate.pose.getY(), getIMUYaw()), estimate.timestampSeconds);
+					addVisionMeasurement(new Pose2d(estimate.pose.getX(), estimate.pose.getY(), getIMUYaw()), estimate.timestampSeconds);
 
 				}
 					
@@ -355,30 +467,31 @@ public void setIMUYaw(Rotation2d yaw) {
 
     }
 
-    public void resetOdometry(Pose2d pose) {
+    public void resetAllianceOdometry(Pose2d pose) {
 		if (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)) {
             if (pose == null) {
-                swerveDrive.resetOdometry(startingRedPose);
+                
+                resetPose(startingRedPose);
                 return;
             }
         } else if (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)) {
             if (pose == null) {
-				swerveDrive.resetOdometry(startingBluePose);
+				resetPose(startingBluePose);
 				return;
 			}
         } else {
 			System.out.println("Unknown/incorrect alliance setup");
 		}
 
-        swerveDrive.resetOdometry(pose);
+        resetPose(pose);
     }
 
 	public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
 		return run(() -> {
 			if (hubAlign) {
 				// overrides velocity on the z axis to align to the hub
-				Pose2d currentPose = swerveDrive.getPose();
-				ChassisSpeeds currentSpeed = swerveDrive.getFieldVelocity();
+				Pose2d currentPose = getPose();
+				ChassisSpeeds currentSpeed = getStateCopy().Speeds;
 				
 				Translation2d robotTranslation = currentPose.getTranslation();
 				Translation2d spitterTranslation = robotTranslation.rotateBy(Rotation2d.k180deg); // our spitter is on the back of the bot
@@ -396,7 +509,7 @@ public void setIMUYaw(Rotation2d yaw) {
 					);
 				
 				Translation2d effectiveShooterVelocity = botVelocity.plus(tangentialVelocity);
-				Translation2d virtualTarget = getTargetTranslation();
+				Translation2d virtualTarget = getStateCopy().Pose.getTranslation();//getTargetTranslation();
 				currentTarget = virtualTarget;
 
 				// measures distance to our target in meters
@@ -438,10 +551,10 @@ public void setIMUYaw(Rotation2d yaw) {
 				ChassisSpeeds newVelocity = new ChassisSpeeds(driverSpeed.vxMetersPerSecond, driverSpeed.vyMetersPerSecond, angularSpeedRps);
 				
 				// running the bot in robot relative with the new calculated angle
-				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(newVelocity, getIMUYaw()));
+				drive(ChassisSpeeds.fromFieldRelativeSpeeds(newVelocity, getIMUYaw()));
 			} else if (squareUp) {
 
-				Pose2d currentPose = swerveDrive.getPose();
+				Pose2d currentPose = getPose();
 
 				double currentAngleRot = currentPose.getRotation().getRotations();
 
@@ -454,21 +567,61 @@ public void setIMUYaw(Rotation2d yaw) {
 				ChassisSpeeds newVelocity = new ChassisSpeeds(driverSpeed.vxMetersPerSecond, driverSpeed.vyMetersPerSecond, angularSpeedRps);
 				
 				// running the bot in robot relative with the new calculated angle
-				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(newVelocity, getIMUYaw()));
+				drive(ChassisSpeeds.fromFieldRelativeSpeeds(newVelocity, getIMUYaw()));
 
 			} else if (relativeMode) {
 				distanceToTarget = distanceFromHub();
 				if(DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)) {
-					swerveDrive.drive(velocity.get().times(-1)); // will invert on red
+					drive(velocity.get().times(-1)); // will invert on red
 				} else {
-					swerveDrive.drive(velocity.get());
+					drive(velocity.get());
 				}
 			} else {
 				distanceToTarget = distanceFromHub(); 
-				swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(velocity.get(), getIMUYaw()));
-				// swerveDrive.driveFieldOriented(velocity.get()); //Field relative is relying on odemtry instead of IMUYaw
+				drive(ChassisSpeeds.fromFieldRelativeSpeeds(velocity.get(), getIMUYaw()));
+				// driveFieldOriented(velocity.get()); //Field relative is relying on odemtry instead of IMUYaw
 			}
 		}).ignoringDisable(false);
+	}
+
+    public double getToF(double distanceMeters) {
+        return SpitterSubsystem.SPITTER_MAP.get(distanceMeters).timeOfFlight();
+    }
+
+    public Pose2d getPose() {
+        return getStateCopy().Pose;
+    }
+
+    public void drive(ChassisSpeeds velocity) {
+        applyRequest(() -> new ApplyFieldSpeeds().withSpeeds(velocity));
+    }
+
+    	public Translation2d getTargetTranslation() {
+		Pose2d robotPose = getPose();
+		if (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)) {
+			if (robotPose.getMeasureX().gt(RED_HUB_CENTER.getMeasureX())) {
+				return RED_HUB_CENTER;
+			}
+
+			if (robotPose.getMeasureY().gt(CENTER_FIELD_Y)) {
+				return RED_TARGET_LEFT;
+			}	
+			return RED_TARGET_RIGHT;
+		}
+
+		if (robotPose.getMeasureX().lt(BLUE_HUB_CENTER.getMeasureX())) {
+			return BLUE_HUB_CENTER;
+		}
+
+		if (robotPose.getMeasureY().gt(CENTER_FIELD_Y)){
+			return BLUE_TARGET_LEFT;
+		}
+		return BLUE_TARGET_RIGHT;
+	}
+
+    //Returns the distance from the robot to the hub 
+	private double distanceFromHub() {
+		return getPose().getTranslation().getDistance(getTargetTranslation());
 	}
 
 
