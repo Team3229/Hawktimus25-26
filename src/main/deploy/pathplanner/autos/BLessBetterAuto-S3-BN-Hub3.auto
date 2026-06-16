@@ -13,7 +13,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "S1-TN"
+            "pathName": "S3-BN"
           }
         },
         {
@@ -23,7 +23,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "TNeutral Grab"
+                  "pathName": "BNeutral Grab"
                 }
               },
               {
@@ -51,70 +51,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "BTB-In"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BTB-Hub1"
-          }
-        },
-        {
-          "type": "sequential",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "Shoot"
-                }
-              },
-              {
-                "type": "parallel",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Stow"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Shoot"
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
+            "pathName": "BNeutralEnd-Hub3"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "ArmOut"
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Hub1-Depot"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake"
-                }
-              }
-            ]
+            "name": "Shoot"
           }
         },
         {

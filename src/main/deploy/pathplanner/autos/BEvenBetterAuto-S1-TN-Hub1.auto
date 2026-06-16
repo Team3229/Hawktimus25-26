@@ -11,9 +11,16 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "S1-TN"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "S1-TN"
+                }
+              }
+            ]
           }
         },
         {
@@ -69,33 +76,8 @@
                 "data": {
                   "name": "Shoot"
                 }
-              },
-              {
-                "type": "parallel",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Stow"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Shoot"
-                      }
-                    }
-                  ]
-                }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ArmOut"
           }
         },
         {
@@ -111,7 +93,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Intake"
+                  "name": "SnowBlow"
                 }
               }
             ]

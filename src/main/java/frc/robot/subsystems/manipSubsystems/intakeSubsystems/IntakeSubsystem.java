@@ -18,9 +18,17 @@ public class IntakeSubsystem extends SubsystemBase{
 	public static final Angle STOW_ANGLE = ArmSubsystem.STOW_ANGLE;
 	public static final Angle COLLECTION_POINT = ArmSubsystem.COLLECTION_POINT;
 
-    public IntakeSubsystem() {
-		rollerSubsystem = new RollerSubsystem();
-        armSubsystem = new ArmSubsystem(rollerSubsystem);
+	public static IntakeSubsystem instance;
+	public static IntakeSubsystem getInstance() {
+		if(instance == null) {
+			instance = new IntakeSubsystem();
+		}
+		return instance;
+	}
+
+    private IntakeSubsystem() {
+		rollerSubsystem = RollerSubsystem.getInstance();
+        armSubsystem = ArmSubsystem.getInstance();
     }
 
     /**
@@ -60,13 +68,22 @@ public class IntakeSubsystem extends SubsystemBase{
 		return armSubsystem.rotateTo(HOME_ANGLE);
 	}
 
-    /**
-	 * creates a command that pushes the intake arm down to the collection point
-	 * and pushes the storage area out.
+	/**
+	 * creates a command that pushes the intake arm down to the collection point.
 	 * 
 	 * @return Command to rotate the arm
 	 */
 	public Command extendIntake() {
+		return armSubsystem.rotateTo(COLLECTION_POINT);
+	}
+
+    /**
+	 * creates a command that pushes the intake arm down to the collection point
+	 * with a velocity voltage in order to ignore deadzones.
+	 * 
+	 * @return Command to rotate the arm
+	 */
+	public Command forceExtendIntake() {
 		return armSubsystem.toCollection();
 	}
 

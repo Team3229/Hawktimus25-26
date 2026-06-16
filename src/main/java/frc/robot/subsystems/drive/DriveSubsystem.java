@@ -41,6 +41,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.manipSubsystems.SpitterSubsystem;
@@ -166,6 +167,14 @@ public class DriveSubsystem extends SubsystemBase {
 		new Constraints(ROT_MAX_VEL.in(RadiansPerSecond), ROT_MAX_ACCEL.in(RadiansPerSecondPerSecond))
 	);
 
+	private static DriveSubsystem instance;
+	public static DriveSubsystem getInstance() {
+		if (instance == null) {
+			instance = new DriveSubsystem(); 
+		}
+		return instance;
+	}
+
     /**
 	 * Swerve drive object.
 	 */
@@ -179,10 +188,7 @@ public class DriveSubsystem extends SubsystemBase {
 	 * @param initialPose        The initial pose of the robot.
 	 * @param verbosity          The verbosity level for telemetry.
 	 */
-	public DriveSubsystem(
-		String path,
-		TelemetryVerbosity verbosity
-	) {
+	private DriveSubsystem() {
 		super();
 		
 		rotationPID.enableContinuousInput(0, 2 * Math.PI);
@@ -191,11 +197,11 @@ public class DriveSubsystem extends SubsystemBase {
 		yTranslationPID.setTolerance(TRANS_ERR_TOL.in(Meters), TRANS_VEL_TOL.in(MetersPerSecond));
 		rotationPID.setTolerance(ROT_ERR_TOL.in(Radians), ROT_VEL_TOL.in(RadiansPerSecond));
 		
-		SwerveDriveTelemetry.verbosity = verbosity;
+		SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
 
 		try { 
 			swerveDrive = new SwerveParser(
-				new File(Filesystem.getDeployDirectory(), path))
+				new File(Filesystem.getDeployDirectory(), "swerve"))
 				.createSwerveDrive(
 					MAX_VELOCITY.in(MetersPerSecond),
 					new Pose2d(2, 4, new Rotation2d())// sets the position to the bottom right (paper view)
@@ -230,6 +236,7 @@ public class DriveSubsystem extends SubsystemBase {
 				builder.addDoubleProperty("TargetY", () -> currentTarget.getY(), null);
 				builder.addDoubleProperty("TargetRot", () -> targetAngleRot, null);
 				builder.addDoubleProperty("CurrentRot", () -> currentAngleRot, null);
+				builder.addBooleanProperty("In range", () -> inRange(), null);
 			}
 		};
 		SmartDashboard.putData("Drive", driveSendable);
@@ -267,7 +274,7 @@ public class DriveSubsystem extends SubsystemBase {
 				() -> DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red),
 				this
             );
-			PathfindingCommand.warmupCommand().schedule();
+			CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -427,7 +434,7 @@ public class DriveSubsystem extends SubsystemBase {
 
 				double currentAngleRot = currentPose.getRotation().getRotations();
 
-				double targetAngleRot = ((double) Math.round(currentAngleRot * 4)) / 4;
+				double targetAngleRot = Math.round(currentAngleRot * 4) / 4;
 
 				double angularSpeedRps = rotationPID.calculate(currentAngleRot * 2 * Math.PI, targetAngleRot * 2 * Math.PI);
 								
@@ -451,6 +458,10 @@ public class DriveSubsystem extends SubsystemBase {
 				// swerveDrive.driveFieldOriented(velocity.get()); //Field relative is relying on odemtry instead of IMUYaw
 			}
 		}).ignoringDisable(false);
+	}
+
+	public boolean inRange() {
+		return Math.abs(distanceToTarget - 2.75) <= 0.25;
 	}
 
 	public double getToF(double distanceMeters) {

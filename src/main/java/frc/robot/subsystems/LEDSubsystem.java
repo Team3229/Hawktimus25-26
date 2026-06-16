@@ -1,14 +1,17 @@
 package frc.robot.subsystems;
 
-
+import static edu.wpi.first.units.Units.Percent;
 import static edu.wpi.first.units.Units.Seconds;
 
 import java.util.Map;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.LEDPattern.GradientType;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -19,14 +22,24 @@ public class LEDSubsystem extends SubsystemBase {
     private AddressableLED led;
     private AddressableLEDBuffer ledBuffer;
     
-    // THE LEDS ARE IN BGR NOT RGB
-    private final Color purple = RGBPacker(255, 0, 255);
+    private final Color purple = RGBPacker(230, 0, 255);
     private final Color yellow = RGBPacker(255, 255, 0);
+    private final Color red = RGBPacker(255, 0, 0);
+    private final Color green = RGBPacker(0, 255, 0);
+    private final Color blue = RGBPacker(0, 0, 225);
 
     private final int LEDPortNumber = 0;
     private final int LEDBuffer = 776;
 
-    public LEDSubsystem() {
+    private SendableChooser<Color> ledChooser;
+
+    private static LEDSubsystem instance;
+    public static LEDSubsystem getInstance() {
+        if (instance == null) instance = new LEDSubsystem();
+        return instance;
+    } 
+
+    private LEDSubsystem() {
         led = new AddressableLED(LEDPortNumber);
 
         ledBuffer = new AddressableLEDBuffer(LEDBuffer);    
@@ -37,9 +50,18 @@ public class LEDSubsystem extends SubsystemBase {
         // led.setColorOrder(ColorOrder.kGRB);
        
         led.start();
-       
+       // new led chooser for the LEDPatterns, command that runs the pattern we choose with the colors we choose
+        ledChooser = new SendableChooser<Color>();
+        ledChooser.setDefaultOption("Purple", purple);
+        ledChooser.addOption("Yellow", yellow);
+        ledChooser.addOption("Blue", blue);
+        ledChooser.addOption("Green", green);
+        ledChooser.addOption("Red", red);
+        ledChooser.addOption("None :(", Color.kBlack);
+        SmartDashboard.putData("LED Chooser", ledChooser);
+        
         this.setDefaultCommand(runPattern(setHawkBreathe()));
-       
+
     }
 
     @Override
@@ -55,11 +77,29 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     public Command hubActive() {
-        if (GameState.isMyHubActive()) {
-            return runPattern(setHawkBlink());
-        } else {
-            return runPattern(setHawkOffset());
-        }
+        return run(() -> {
+            if (GameState.isMyHubActive()) {
+                setGreen().applyTo(ledBuffer);
+            } else {
+                setRed().applyTo(ledBuffer);
+            }  
+        }).ignoringDisable(true);
+        
+    }
+
+    public Command runColorWithSendable() {
+        return run(() -> setColor(ledChooser.getSelected()).applyTo(ledBuffer))
+            .ignoringDisable(true);
+    }
+
+    public Command runWithAlliance() {
+        return run(() -> {
+            if(DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)) {
+                setColor(red).applyTo(ledBuffer);
+            } else {
+                setColor(blue).applyTo(ledBuffer);
+            }
+        }).ignoringDisable(true);
     }
 
     public Command runPattern(LEDPattern pattern) {
@@ -67,11 +107,23 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     public LEDPattern setColor(Color color) {
-        return LEDPattern.solid(color);
+        return LEDPattern.solid(color).atBrightness(Percent.of(50));
     }
 
     public LEDPattern setPurple() {
         return setColor(purple);
+    }
+
+    public LEDPattern setYellow() {
+        return setColor(yellow);
+    }
+
+    public LEDPattern setRed() {
+        return setColor(red);
+    }
+
+    public LEDPattern setGreen() {
+        return setColor(green);
     }
 
     public LEDPattern setColorsContinuous(Color c1, Color c2) {
@@ -123,7 +175,7 @@ public class LEDSubsystem extends SubsystemBase {
     // }
 
     public LEDPattern setColorBreathe(Color colorForBreathe, Color secondColorForBreathe) {
-        return setDiscontGradientHawk().breathe(Seconds.of(3));
+        return setColor(purple).breathe(Seconds.of(3)).atBrightness(Percent.of(50));
     }
 
     public LEDPattern setHawkBreathe() {
