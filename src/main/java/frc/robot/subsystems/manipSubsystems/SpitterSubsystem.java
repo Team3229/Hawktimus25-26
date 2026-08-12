@@ -47,7 +47,6 @@ public class SpitterSubsystem extends SubsystemBase {
     private double fP = 0.25;
     private double fV = 0.71;
     private double fS = 0.012;
-
     private static final int LS_CAN_ID = 10; 
     private TalonFX leftSpitter;
     private TalonFXConfiguration shooterMotorConfig;
