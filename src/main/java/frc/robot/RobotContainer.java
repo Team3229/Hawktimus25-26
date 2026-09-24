@@ -24,7 +24,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.inputs.ButtonBoard;
-import frc.robot.inputs.FlightStick;
+import frc.robot.inputs.Gladiator;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.manipSubsystems.ManipSubsystem;
 import frc.robot.subsystems.manipSubsystems.PathPlannerCommands;
@@ -34,8 +34,8 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
  
 public class RobotContainer {
 
-	FlightStick driverController;
-	FlightStick manipController;
+	Gladiator driverController;
+	Gladiator manipController;
 	ButtonBoard buttonBoard;
 	DriveSubsystem driveSubsystem;
 	ManipSubsystem manipSubsystem;
@@ -49,8 +49,8 @@ public class RobotContainer {
 	public RobotContainer() {
 		CameraServer.startAutomaticCapture("Intake Camera", 0);
 
-		driverController = new FlightStick(0);
-		manipController = new FlightStick(1);
+		driverController = new Gladiator(0);
+		manipController = new Gladiator(1);
 
 		driveSubsystem = DriveSubsystem.getInstance();
 
@@ -125,11 +125,11 @@ public class RobotContainer {
 			)
 		);
 
-		driverController.b_10().onTrue(
+		driverController.b_TopTriggerDown().onTrue(
 			driveSubsystem.zeroGyroWithLimelight()
 		);
 
-		driverController.b_11().onTrue(
+		driverController.b_TopTriggerUp().onTrue(
 			driveSubsystem.zeroGyroWithAllianceCommand()
 		);
 
@@ -137,18 +137,19 @@ public class RobotContainer {
 			driveSubsystem.toggleRelativeMode()
 		);
 
+		//Come back and redo for middle POV 
 		driverController.b_3().whileTrue(
 			driveSubsystem.toggleSquareUp()
 		);
 
-		driverController.b_Hazard().onTrue(
+		driverController.b_3().onTrue(
 			Commands.runOnce(() -> {
 				driveSubsystem.getCurrentCommand().cancel();
 				// cancels ALL DRIVING on driver controller
 			})
 		);
 
-		driverController.b_Trigger().whileTrue(
+		driverController.b_FullTrigger().and(driverController.b_Trigger()).whileTrue(
 			driveSubsystem.toggleHubAlign()
 		);
 
@@ -157,55 +158,55 @@ public class RobotContainer {
 	private void configManipControls() {
 		// CURRENTLY AVAILABLE: 7, 9, 11, slider
 		
-		manipController.b_Trigger().whileTrue(
+		manipController.b_FullTrigger().whileTrue(
 			manipSubsystem.shoot()
 		);
 			
-		manipController.b_Hazard().onTrue(
+		manipController.b_POV0Pushed().onTrue(
 			manipSubsystem.stow()
 		);
 				
-		manipController.b_3().whileTrue(
+		manipController.b_Trigger().whileTrue(
 			manipSubsystem.spinUp()
 		);
 					
-		manipController.b_4().whileTrue(
+		manipController.b_TopTriggerDown().whileTrue(
 			manipSubsystem.intake()
 		);
 
-		manipController.b_Trigger().and(manipController.b_4()).whileTrue(
+		manipController.b_TopTriggerUp().whileTrue(
 			manipSubsystem.intakeAndShoot()
 		);
 
-		manipController.b_5().onTrue(
+		manipController.b_POV1Up().onTrue(
 			manipSubsystem.intakeArmOut()
 		);
 
-		manipController.b_6().onTrue(
+		manipController.b_POV1Down().onTrue(
 			manipSubsystem.forceIntakeArmOut()
 		);
 
-		manipController.b_8().onTrue(
+		manipController.b_5().onTrue(
 			manipSubsystem.resetVelocity()
 		);
 
-		manipController.b_10().whileTrue(
+		manipController.b_3().whileTrue(
 			manipSubsystem.extake()
 		);
 
-		manipController.p_Up().onTrue(
+		manipController.b_POV2Up().onTrue(
 			manipSubsystem.upSRPSCommand()
 		);
 
-		manipController.p_Down().onTrue(
+		manipController.b_POV2Down().onTrue(
 			manipSubsystem.downSRPSCommand()
 		);
 
-		manipController.p_Right().onTrue(
+		manipController.b_POV2Right().onTrue(
 			manipSubsystem.upFRPSCommand()
 		);
 
-		manipController.p_Left().onTrue(
+		manipController.b_POV2Left().onTrue(
 			manipSubsystem.downFRPSCommand()
 		);
 	}
