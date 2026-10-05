@@ -133,16 +133,16 @@ public class RobotContainer {
 			driveSubsystem.zeroGyroWithAllianceCommand()
 		);
 
-		driverController.p_Any().whileTrue(
+		driverController.p_A1_any().whileTrue(
 			driveSubsystem.toggleRelativeMode()
 		);
 
 		//Come back and redo for middle POV 
-		driverController.b_3().whileTrue(
+		driverController.b_A2().whileTrue(
 			driveSubsystem.toggleSquareUp()
 		);
 
-		driverController.b_3().onTrue(
+		driverController.b_A2().onTrue(
 			Commands.runOnce(() -> {
 				driveSubsystem.getCurrentCommand().cancel();
 				// cancels ALL DRIVING on driver controller
@@ -162,7 +162,7 @@ public class RobotContainer {
 			manipSubsystem.shoot()
 		);
 			
-		manipController.b_POV0Pushed().onTrue(
+		manipController.b_A3Pushed().onTrue(
 			manipSubsystem.stow()
 		);
 				
@@ -178,35 +178,35 @@ public class RobotContainer {
 			manipSubsystem.intakeAndShoot()
 		);
 
-		manipController.b_POV1Up().onTrue(
+		manipController.b_A4Up().onTrue(
 			manipSubsystem.intakeArmOut()
 		);
 
-		manipController.b_POV1Down().onTrue(
+		manipController.b_A4Down().onTrue(
 			manipSubsystem.forceIntakeArmOut()
 		);
 
-		manipController.b_5().onTrue(
+		manipController.b_D1().onTrue(
 			manipSubsystem.resetVelocity()
 		);
 
-		manipController.b_3().whileTrue(
+		manipController.b_A2().whileTrue(
 			manipSubsystem.extake()
 		);
 
-		manipController.b_POV2Up().onTrue(
+		manipController.b_C1Up().onTrue(
 			manipSubsystem.upSRPSCommand()
 		);
 
-		manipController.b_POV2Down().onTrue(
+		manipController.b_C1Down().onTrue(
 			manipSubsystem.downSRPSCommand()
 		);
 
-		manipController.b_POV2Right().onTrue(
+		manipController.b_C1Right().onTrue(
 			manipSubsystem.upFRPSCommand()
 		);
 
-		manipController.b_POV2Left().onTrue(
+		manipController.b_C1Left().onTrue(
 			manipSubsystem.downFRPSCommand()
 		);
 	}
