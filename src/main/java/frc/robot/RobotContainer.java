@@ -149,7 +149,7 @@ public class RobotContainer {
 			})
 		);
 
-		driverController.b_FullTrigger().and(driverController.b_Trigger()).whileTrue(
+		driverController.b_FullTrigger().whileTrue(
 			driveSubsystem.toggleHubAlign()
 		);
 
@@ -162,8 +162,8 @@ public class RobotContainer {
 			manipSubsystem.shoot()
 		);
 			
-		manipController.b_A3Pushed().onTrue(
-			manipSubsystem.stow()
+		manipController.b_A2().onTrue(
+			manipSubsystem.intake()
 		);
 				
 		manipController.b_Trigger().whileTrue(
@@ -171,15 +171,15 @@ public class RobotContainer {
 		);
 					
 		manipController.b_TopTriggerDown().whileTrue(
-			manipSubsystem.intake()
+			manipSubsystem.intakeArmOut()
 		);
 
 		manipController.b_TopTriggerUp().whileTrue(
-			manipSubsystem.intakeAndShoot()
+			manipSubsystem.stow()
 		);
 
 		manipController.b_A4Up().onTrue(
-			manipSubsystem.intakeArmOut()
+			manipSubsystem.intakeAndShoot()
 		);
 
 		manipController.b_A4Down().onTrue(
@@ -190,7 +190,7 @@ public class RobotContainer {
 			manipSubsystem.resetVelocity()
 		);
 
-		manipController.b_A2().whileTrue(
+		manipController.b_A3Pushed().whileTrue(
 			manipSubsystem.extake()
 		);
 
