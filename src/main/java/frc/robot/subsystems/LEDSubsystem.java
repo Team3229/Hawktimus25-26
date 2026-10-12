@@ -75,7 +75,7 @@ public class LEDSubsystem extends SubsystemBase {
 
 
         
-        this.setDefaultCommand(runPatternWithSendable());
+        this.setDefaultCommand(runPattern(setColorBreathe(purple)));
 
     }
 
