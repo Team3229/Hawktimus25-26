@@ -162,7 +162,7 @@ public class RobotContainer {
 			manipSubsystem.shoot()
 		);
 			
-		manipController.b_A2().onTrue(
+		manipController.b_A2().whileTrue(
 			manipSubsystem.intake()
 		);
 				
@@ -178,7 +178,7 @@ public class RobotContainer {
 			manipSubsystem.stow()
 		);
 
-		manipController.b_A4Up().onTrue(
+		manipController.b_A4Up().whileTrue(
 			manipSubsystem.intakeAndShoot()
 		);
 
